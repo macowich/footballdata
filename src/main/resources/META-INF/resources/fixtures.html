@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lagkombinationer</title>
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="fixtures.css"/>
+</head>
+<body>
+<div id="app">
+  <div class="wrapper">
+
+    <!-- Header -->
+    <div class="header">
+      <div class="header-top">
+        <div>
+          <div class="title">Fix<span>tures</span></div>
+          <div class="subtitle">Dagens matcher — localhost:8080/lag</div>
+        </div>
+        <div class="count-badge" v-if="!loading">{{ filtered.length }} / {{ items.length }} poster</div>
+      </div>
+    </div>
+
+    <!-- Error -->
+    <div class="error-banner" v-if="error">
+      ⚠ {{ error }}
+      <button class="btn btn-secondary btn-sm" style="margin-left:auto" @click="fetchAll">Försök igen</button>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input v-model="search" placeholder="Sök på namn eller odds…" />
+      </div>
+      <button class="btn btn-secondary" @click="fetchAll" :disabled="loading">
+        {{ loading ? '…' : '↻ Ladda om' }}
+      </button>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap fade-in">
+      <!-- Loading -->
+      <div class="state-box" v-if="loading">
+        <div class="icon">⏳</div>
+        <strong>Hämtar data…</strong>
+        Ansluter till API…
+      </div>
+
+      <!-- Empty -->
+      <div class="state-box" v-else-if="filtered.length === 0 && !error">
+        <div class="icon">📭</div>
+        <strong>Inga resultat</strong>
+        {{ search ? 'Inga poster matchar sökningen.' : 'Det finns inga lagkombinationer ännu.' }}
+      </div>
+
+      <!-- Table -->
+      <table v-else>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>League</th>
+            <th>Date &amp; Time</th>
+            <th>Home</th>
+            <th>Away</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="row-hover" v-for="item in filtered" :key="item.id">
+            <td><div class="id-cell" :title="item.id">{{ item.id }}</div></td>
+            <td>{{ item.league || '—' }}</td>
+            <td>
+              <strong>{{ item.date || '—' }}</strong>
+              <span v-if="item.time" style="color:var(--muted)"> {{ item.time }}</span>
+            </td>
+            <td>
+              <span class="odds-chip green" v-if="item.hometeam">{{ item.hometeam }}</span>
+              <span v-else style="color:var(--muted)">—</span>
+            </td>
+            <td>
+              <span class="odds-chip orange" v-if="item.awayteam">{{ item.awayteam }}</span>
+              <span v-else style="color:var(--muted)">—</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const { createApp, ref, computed, onMounted } = Vue;
+
+createApp({
+  setup() {
+    const API = 'http://localhost:8080/fixtures';
+
+    const items = ref([]);
+    const loading = ref(false);
+    const error = ref('');
+    const search = ref('');
+    const form = ref({ date:'', time:'', hometeam:'', awayteam:'' });
+
+    const filtered = computed(() => {
+      const q = search.value.toLowerCase().trim();
+      if (!q) return items.value;
+      return items.value.filter(i =>
+        (i.date||'').toLowerCase().includes(q) ||
+        (i.time||'').toLowerCase().includes(q) ||
+        (i.league||'').toLowerCase().includes(q) ||
+        (i.hometeam||'').toLowerCase().includes(q) ||
+        (i.awayteam||'').toLowerCase().includes(q)
+      );
+    });
+
+    async function fetchAll() {
+      loading.value = true;
+      error.value = '';
+      try {
+        const res = await fetch(API);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        items.value = await res.json();
+      } catch(e) {
+        error.value = `Kunde inte hämta data: ${e.message}. Kontrollera att API:et körs på ${API}.`;
+      } finally {
+        loading.value = false;
+      }
+    }
+
+    onMounted(fetchAll);
+
+    return { items, loading, error, search, form, filtered, fetchAll };
+  }
+}).mount('#app');
+</script>
+</body>
+</html>
