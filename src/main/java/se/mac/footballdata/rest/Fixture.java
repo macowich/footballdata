@@ -3,8 +3,6 @@ package se.mac.footballdata.rest;
 import io.quarkus.mongodb.panache.PanacheMongoEntity;
 import io.quarkus.mongodb.panache.common.MongoEntity;
 
-import java.security.PublicKey;
-
 @MongoEntity(collection = "fixtures")
 public class Fixture extends PanacheMongoEntity {
 
@@ -21,6 +19,12 @@ public class Fixture extends PanacheMongoEntity {
     public String awayteam;
 
     public String referee;
+
+    public Double b365h;
+
+    public Double b365d;
+
+    public Double b365a;
 
 
     public Fixture() {

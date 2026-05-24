@@ -60,29 +60,26 @@
       <table v-else>
         <thead>
           <tr>
-            <th>ID</th>
             <th>League</th>
             <th>Date &amp; Time</th>
-            <th>Home</th>
-            <th>Away</th>
+            <th>Home / Away</th>
+            <th>Referee</th>
+            <th>B365H</th>
           </tr>
         </thead>
         <tbody>
           <tr class="row-hover" v-for="item in filtered" :key="item.id">
-            <td><div class="id-cell" :title="item.id">{{ item.id }}</div></td>
             <td>{{ item.league || '—' }}</td>
             <td>
               <strong>{{ item.date || '—' }}</strong>
               <span v-if="item.time" style="color:var(--muted)"> {{ item.time }}</span>
             </td>
             <td>
-              <span class="odds-chip green" v-if="item.hometeam">{{ item.hometeam }}</span>
-              <span v-else style="color:var(--muted)">—</span>
+              <div><span class="odds-chip green" v-if="item.hometeam">{{ item.hometeam }}</span><span v-else style="color:var(--muted)">—</span></div>
+              <div><span class="odds-chip orange" v-if="item.awayteam">{{ item.awayteam }}</span><span v-else style="color:var(--muted)">—</span></div>
             </td>
-            <td>
-              <span class="odds-chip orange" v-if="item.awayteam">{{ item.awayteam }}</span>
-              <span v-else style="color:var(--muted)">—</span>
-            </td>
+            <td>{{ item.referee || '—' }}</td>
+            <td>{{ item.b365h || '—' }}</td>
           </tr>
         </tbody>
       </table>
@@ -102,7 +99,7 @@ createApp({
     const loading = ref(false);
     const error = ref('');
     const search = ref('');
-    const form = ref({ date:'', time:'', hometeam:'', awayteam:'' });
+    //const form = ref({ date:'', time:'', hometeam:'', awayteam:'' });
 
     const filtered = computed(() => {
       const q = search.value.toLowerCase().trim();
@@ -113,6 +110,7 @@ createApp({
         (i.league||'').toLowerCase().includes(q) ||
         (i.hometeam||'').toLowerCase().includes(q) ||
         (i.awayteam||'').toLowerCase().includes(q)
+        (i.b365h||'').toLowerCase().includes(q) || (i.b365d||'').toLowerCase().includes(q) || (i.b365a||'').toLowerCase().includes(q)
       );
     });
 
@@ -132,7 +130,7 @@ createApp({
 
     onMounted(fetchAll);
 
-    return { items, loading, error, search, form, filtered, fetchAll };
+    return { items, loading, error, search, filtered, fetchAll };
   }
 }).mount('#app');
 </script>

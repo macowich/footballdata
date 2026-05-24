@@ -66,53 +66,39 @@ If you want to learn more about building native executables, please consult <htt
 
 
 
-
-
-
-
-show dbs
-
-use namndb
-use sportsdb
+db.dropDatabase()
 
 show collections
 
-db.namnlista.find()
+db.fixtures.find()
 
+db.fixtures.createIndex({ key: 1 }, { unique: true })
 
-db.namnlista.updateMany(
-{ odds: { $exists: true } },
-[{ $set: { odds: { $toString: "$odds" } } }]
-)
-
-db.fixtures.updateMany({}, [
+db.tmp_fixtures.aggregate([
 {
-$replaceWith: {
-$arrayToObject: {
-$map: {
-input: { $objectToArray: "$$ROOT" },
-as: "field",
-in: {
-k: "$$field.k",
-v: {
-$cond: [
-{ $eq: ["$$field.k", "_id"] },
-"$$field.v",          // Rör inte _id fältet
-{ $toString: "$$field.v" } // Konvertera allt annat till string
-]
+$addFields: {
+// Kombinera kolumner till key (sträng)
+key: { $concat: [ "$hometeam", ":", "$awayteam" ] }
+}
+},
+{
+$merge: {
+into: "fixtures",
+on: "key",
+whenMatched: "keepExisting", // Hoppa över om ID:t redan finns
+whenNotMatched: "insert"
 }
 }
-}
-}
-}
-}
-]);
+])
 
 
 
-namn1,namn2,odds,odds2
-modo,timrå,2.5,1,5
-giffarna,man city,,
+/c//tools/mongodb-database-tools-windows-x86_64-100.17.0/bin/mongoimport.exe --uri="mongodb://localhost:27017" --db sportsdb --collection tmp_fixtures --type csv --headerline --file "/c/data/csv/fixture_simple.csv"
+
+league,date,time,hometeam,awayteam,referee,b365h,b365d,b365a
+B1,15/05/2026,19:45,Oud-Heverlee Leuven,Antwerp,xxx,2.7,3.2,2.45
+B1,16/05/2026,15:00,Charleroi,Westerlo,yyy,1.95,3.5,3.25
+D1,16/05/2026,14:30,Eintracht Frankfurt,Stuttgart,,2.7,4,2.3,2.63
 
 
 
