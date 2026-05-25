@@ -20,11 +20,15 @@ public class Fixture extends PanacheMongoEntity {
 
     public String referee;
 
-    public Double b365h;
+    public String b365h;
 
-    public Double b365d;
+    public String b365d;
 
-    public Double b365a;
+    public String b365a;
+
+    public String b365_u25;
+
+    public String b365_o25;
 
 
     public Fixture() {

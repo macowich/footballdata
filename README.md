@@ -64,12 +64,9 @@ If you want to learn more about building native executables, please consult <htt
 - REST Jackson ([guide](https://quarkus.io/guides/rest#json-serialisation)): Jackson serialization support for Quarkus
   REST. This extension is not compatible with the quarkus-resteasy extension, or any of the extensions that depend on it
 
-
-
+  
 db.dropDatabase()
-
 show collections
-
 db.fixtures.find()
 
 db.fixtures.createIndex({ key: 1 }, { unique: true })
@@ -91,14 +88,9 @@ whenNotMatched: "insert"
 }
 ])
 
+/c/FKApps/mongodb-database-tools-windows-x86_64-100.17.0/bin/mongoimport.exe --uri="mongodb://localhost:27017" --db sportsdb --collection tmp_fixtures --type csv --headerline --columnsHaveTypes --file /c/FKApps/data/csv/fixtures_converted.csv
 
 
-/c//tools/mongodb-database-tools-windows-x86_64-100.17.0/bin/mongoimport.exe --uri="mongodb://localhost:27017" --db sportsdb --collection tmp_fixtures --type csv --headerline --file "/c/data/csv/fixture_simple.csv"
-
-league,date,time,hometeam,awayteam,referee,b365h,b365d,b365a
-B1,15/05/2026,19:45,Oud-Heverlee Leuven,Antwerp,xxx,2.7,3.2,2.45
-B1,16/05/2026,15:00,Charleroi,Westerlo,yyy,1.95,3.5,3.25
-D1,16/05/2026,14:30,Eintracht Frankfurt,Stuttgart,,2.7,4,2.3,2.63
 
 
 
