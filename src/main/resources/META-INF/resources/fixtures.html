@@ -60,15 +60,15 @@
       <table v-else>
         <thead>
           <tr>
-            <th>League</th>
-            <th>Date &amp; Time</th>
+            <th @click="setSort('league')" style="cursor:pointer;user-select:none">League {{ sortIcon('league') }}</th>
+            <th @click="setSort('date')" style="cursor:pointer;user-select:none">Date &amp; Time {{ sortIcon('date') }}</th>
             <th>Home / Away</th>
-            <th>Referee</th>
-            <th>B365H</th>
-            <th>B365D</th>
-            <th>B365A</th>
-            <th>B365 U2.5</th>
-            <th>B365 O2.5</th>
+            <th @click="setSort('referee')" style="cursor:pointer;user-select:none">Referee {{ sortIcon('referee') }}</th>
+            <th @click="setSort('b365h')" style="cursor:pointer;user-select:none">B365H {{ sortIcon('b365h') }}</th>
+            <th @click="setSort('b365d')" style="cursor:pointer;user-select:none">B365D {{ sortIcon('b365d') }}</th>
+            <th @click="setSort('b365a')" style="cursor:pointer;user-select:none">B365A {{ sortIcon('b365a') }}</th>
+            <th @click="setSort('b365_u25')" style="cursor:pointer;user-select:none">B365 U2.5 {{ sortIcon('b365_u25') }}</th>
+            <th @click="setSort('b365_o25')" style="cursor:pointer;user-select:none">B365 O2.5 {{ sortIcon('b365_o25') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -108,19 +108,42 @@ createApp({
     const error = ref('');
     const search = ref('');
 
+    const sortKey = ref('');
+    const sortDir = ref(1);
+
+    function setSort(key) {
+      if (sortKey.value === key) sortDir.value *= -1;
+      else { sortKey.value = key; sortDir.value = 1; }
+    }
+
+    function sortIcon(key) {
+      if (sortKey.value !== key) return '\u2195';
+      return sortDir.value === 1 ? '\u2191' : '\u2193';
+    }
+
     const filtered = computed(() => {
       const q = search.value.toLowerCase().trim();
-      if (!q) return items.value;
-      return items.value.filter(i =>
-        (i.date||'').toLowerCase().includes(q) ||
-        (i.time||'').toLowerCase().includes(q) ||
-        (i.league||'').toLowerCase().includes(q) ||
-        (i.hometeam||'').toLowerCase().includes(q) ||
-        (i.awayteam||'').toLowerCase().includes(q) ||
-        (i.b365h||'').toLowerCase().includes(q) ||
-              (i.b365d||'').toLowerCase().includes(q) ||
-              (i.b365a||'').toLowerCase().includes(q)
-      );
+      const s = v => String(v ?? '').toLowerCase();
+      let rows = items.value;
+      if (q) {
+        rows = rows.filter(i =>
+          s(i.date).includes(q) || s(i.time).includes(q) ||
+          s(i.league).includes(q) || s(i.hometeam).includes(q) ||
+          s(i.awayteam).includes(q) || s(i.referee).includes(q) ||
+          s(i.b365h).includes(q) || s(i.b365d).includes(q) ||
+          s(i.b365a).includes(q) || s(i.b365_u25).includes(q) ||
+          s(i.b365_o25).includes(q)
+        );
+      }
+      if (!sortKey.value) return rows;
+      const key = sortKey.value;
+      const dir = sortDir.value;
+      return [...rows].sort((a, b) => {
+        const av = a[key] ?? '', bv = b[key] ?? '';
+        const an = parseFloat(av), bn = parseFloat(bv);
+        if (!isNaN(an) && !isNaN(bn)) return (an - bn) * dir;
+        return String(av).localeCompare(String(bv)) * dir;
+      });
     });
 
     async function fetchAll() {
@@ -139,7 +162,7 @@ createApp({
 
     onMounted(fetchAll);
 
-    return { items, loading, error, search, filtered, fetchAll };
+    return { items, loading, error, search, filtered, fetchAll, sortKey, sortDir, setSort, sortIcon };
   }
 }).mount('#app');
 </script>
