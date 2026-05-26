@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Lagkombinationer</title>
+<title>Fixtures</title>
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="fixtures.css"/>
@@ -53,7 +53,7 @@
       <div class="state-box" v-else-if="filtered.length === 0 && !error">
         <div class="icon">📭</div>
         <strong>Inga resultat</strong>
-        {{ search ? 'Inga poster matchar sökningen.' : 'Det finns inga lagkombinationer ännu.' }}
+        {{ search ? 'Inga poster matchar sökningen.' : 'Det finns inga matcher ännu.' }}
       </div>
 
       <!-- Table -->
@@ -63,10 +63,10 @@
             <th @click="setSort('league')" style="cursor:pointer;user-select:none">League {{ sortIcon('league') }}</th>
             <th @click="setSort('date')" style="cursor:pointer;user-select:none">Date &amp; Time {{ sortIcon('date') }}</th>
             <th>Home / Away</th>
-            <th @click="setSort('referee')" style="cursor:pointer;user-select:none">Referee {{ sortIcon('referee') }}</th>
-            <th @click="setSort('b365h')" style="cursor:pointer;user-select:none">B365H {{ sortIcon('b365h') }}</th>
-            <th @click="setSort('b365d')" style="cursor:pointer;user-select:none">B365D {{ sortIcon('b365d') }}</th>
-            <th @click="setSort('b365a')" style="cursor:pointer;user-select:none">B365A {{ sortIcon('b365a') }}</th>
+            <th>Referee</th>
+            <th>B365H</th>
+            <th>B365D</th>
+            <th>B365A</th>
             <th @click="setSort('b365_u25')" style="cursor:pointer;user-select:none">B365 U2.5 {{ sortIcon('b365_u25') }}</th>
             <th @click="setSort('b365_o25')" style="cursor:pointer;user-select:none">B365 O2.5 {{ sortIcon('b365_o25') }}</th>
           </tr>
@@ -101,7 +101,7 @@ const { createApp, ref, computed, onMounted } = Vue;
 
 createApp({
   setup() {
-    const API = 'http://localhost:8080/fixtures';
+    const API = 'http://localhost:8080/fixtures/all';
 
     const items = ref([]);
     const loading = ref(false);

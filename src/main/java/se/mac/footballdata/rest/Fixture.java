@@ -6,8 +6,6 @@ import io.quarkus.mongodb.panache.common.MongoEntity;
 @MongoEntity(collection = "fixtures")
 public class Fixture extends PanacheMongoEntity {
 
-    public String key;
-
     public String league;
 
     public String date;

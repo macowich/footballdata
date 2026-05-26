@@ -69,29 +69,40 @@ db.dropDatabase()
 show collections
 db.fixtures.find()
 
-db.fixtures.createIndex({ key: 1 }, { unique: true })
-
+db.fixtures.createIndex({ fixture_id: 1 }, { unique: true })
 db.tmp_fixtures.aggregate([
 {
 $addFields: {
 // Kombinera kolumner till key (sträng)
-key: { $concat: [ "$hometeam", ":", "$awayteam" ] }
+fixture_id: { $concat: [ "$hometeam", ":", "$awayteam", ":", "$league" ] }
 }
 },
 {
 $merge: {
 into: "fixtures",
-on: "key",
+on: "fixture_id",
 whenMatched: "keepExisting", // Hoppa över om ID:t redan finns
 whenNotMatched: "insert"
 }
 }
 ])
 
-/c/FKApps/mongodb-database-tools-windows-x86_64-100.17.0/bin/mongoimport.exe --uri="mongodb://localhost:27017" --db sportsdb --collection tmp_fixtures --type csv --headerline --columnsHaveTypes --file /c/FKApps/data/csv/fixtures_converted.csv
-
-
-
+db.results.createIndex({ result_id: 1 }, { unique: true })
+db.tmp_results.aggregate([
+{
+$addFields: {
+result_id: { $concat: [ "$hometeam", ":", "$awayteam", ":", "$league" ] }
+}
+},
+{
+$merge: {
+into: "results",
+on: "result_id",
+whenMatched: "keepExisting", // Hoppa över om ID:t redan finns
+whenNotMatched: "insert"
+}
+}
+])
 
 
 
