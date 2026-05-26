@@ -9,18 +9,18 @@ import java.util.List;
 public class FixtureRepository implements PanacheMongoRepository<Fixture> {
 
     public List<Fixture> findByHomeTeam(String homeTeam) {
-        return list("HomeTeam", homeTeam);
+        return list("hometeam", homeTeam);
     }
 
     public List<Fixture> findByAwayTeam(String awayTeam) {
-        return list("AwayTeam", awayTeam);
+        return list("awayteam", awayTeam);
     }
 
-    public List<Fixture> findByDivision(String div) {
-        return list("Div", div);
+    public List<Fixture> findByLeague(String league) {
+        return list("league", league);
     }
 
     public List<Fixture> findByDate(String date) {
-        return list("Date", date);
+        return list("date", date);
     }
 }

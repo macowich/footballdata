@@ -7,9 +7,295 @@
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="fixtures.css"/>
+<style>
+  /* ── Layout shell ───────────────────────────────────────────── */
+  body { margin: 0; }
+  #app { display: flex; min-height: 100vh; }
+
+  /* ── Side menu ──────────────────────────────────────────────── */
+  .sidemenu {
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    width: 220px;
+    background: #0f1117;
+    border-right: 1px solid rgba(255,255,255,.07);
+    display: flex;
+    flex-direction: column;
+    transition: width .25s cubic-bezier(.4,0,.2,1);
+    z-index: 100;
+    overflow: hidden;
+  }
+  .sidemenu.collapsed { width: 56px; }
+
+  .sidemenu-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 20px 16px 16px;
+    border-bottom: 1px solid rgba(255,255,255,.07);
+    white-space: nowrap;
+    overflow: hidden;
+    min-height: 64px;
+  }
+  .sidemenu-logo .logo-icon {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    background: linear-gradient(135deg,#6ee7b7,#3b82f6);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; flex-shrink: 0;
+  }
+  .sidemenu-logo .logo-text {
+    font-family: 'Figtree', sans-serif;
+    font-weight: 900;
+    font-size: 17px;
+    color: #f1f5f9;
+    letter-spacing: -.3px;
+    opacity: 1;
+    transition: opacity .2s;
+  }
+  .sidemenu.collapsed .logo-text { opacity: 0; pointer-events: none; }
+
+  .sidemenu-nav {
+    flex: 1;
+    padding: 12px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    overflow: hidden;
+  }
+
+  .nav-section-label {
+    font-family: 'Figtree', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.3);
+    padding: 8px 8px 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    transition: opacity .2s;
+  }
+  .sidemenu.collapsed .nav-section-label { opacity: 0; }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background .15s;
+    white-space: nowrap;
+    overflow: hidden;
+    position: relative;
+  }
+  .nav-item:hover { background: rgba(255,255,255,.07); }
+  .nav-item.active {
+    background: rgba(99,179,237,.12);
+  }
+  .nav-item.active .nav-icon { color: #63b3ed; }
+  .nav-item.active .nav-label { color: #e2e8f0; }
+  .nav-icon {
+    font-size: 18px;
+    width: 22px;
+    text-align: center;
+    flex-shrink: 0;
+    color: rgba(255,255,255,.45);
+    transition: color .15s;
+  }
+  .nav-label {
+    font-family: 'Figtree', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(255,255,255,.55);
+    transition: color .15s, opacity .2s;
+  }
+  .sidemenu.collapsed .nav-label { opacity: 0; }
+
+  .nav-badge {
+    margin-left: auto;
+    background: #3b82f6;
+    color: #fff;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    padding: 2px 6px;
+    border-radius: 99px;
+    flex-shrink: 0;
+    transition: opacity .2s;
+  }
+  .sidemenu.collapsed .nav-badge { opacity: 0; }
+
+  .sidemenu-footer {
+    padding: 12px 8px;
+    border-top: 1px solid rgba(255,255,255,.07);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  /* Toggle button */
+  .sidemenu-toggle {
+    position: absolute;
+    top: 20px;
+    right: -13px;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: #1e2330;
+    border: 1px solid rgba(255,255,255,.12);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 11px;
+    color: rgba(255,255,255,.5);
+    transition: background .15s, color .15s;
+    z-index: 101;
+    line-height: 1;
+    user-select: none;
+  }
+  .sidemenu-toggle:hover { background: #2a3147; color: #fff; }
+
+  /* Tooltip on collapsed items */
+  .sidemenu.collapsed .nav-item:hover::after {
+    content: attr(data-label);
+    position: absolute;
+    left: 56px;
+    background: #1e2330;
+    color: #e2e8f0;
+    font-family: 'Figtree', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 5px 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,.1);
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 200;
+  }
+
+  /* ── Date dropdown ──────────────────────────────────────────── */
+  .date-select-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .date-select-wrap .cal-icon {
+    position: absolute;
+    left: 11px;
+    font-size: 15px;
+    pointer-events: none;
+    line-height: 1;
+  }
+  .date-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background: var(--surface, #1a1f2e);
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 8px;
+    color: var(--text, #e2e8f0);
+    font-family: 'Figtree', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 8px 32px 8px 34px;
+    cursor: pointer;
+    outline: none;
+    transition: border-color .15s, background .15s;
+    min-width: 160px;
+  }
+  .date-select:hover { border-color: rgba(255,255,255,.22); }
+  .date-select:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59,130,246,.2); }
+  .date-select option { background: #1a1f2e; color: #e2e8f0; }
+  .date-chevron {
+    position: absolute;
+    right: 10px;
+    font-size: 10px;
+    color: rgba(255,255,255,.4);
+    pointer-events: none;
+  }
+  .clear-date {
+    margin-left: 6px;
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 6px;
+    color: rgba(255,255,255,.5);
+    font-size: 13px;
+    padding: 6px 8px;
+    cursor: pointer;
+    transition: background .15s, color .15s;
+    line-height: 1;
+  }
+  .clear-date:hover { background: rgba(255,255,255,.12); color: #fff; }
+
+  /* Push main content right */
+  .main-content {
+    margin-left: 220px;
+    flex: 1;
+    transition: margin-left .25s cubic-bezier(.4,0,.2,1);
+    min-width: 0;
+  }
+  .main-content.shifted { margin-left: 56px; }
+</style>
 </head>
 <body>
 <div id="app">
+
+  <!-- Side Menu -->
+  <aside class="sidemenu" :class="{ collapsed: menuCollapsed }">
+    <div class="sidemenu-logo">
+      <div class="logo-icon">⚽</div>
+      <span class="logo-text">Fixtures</span>
+    </div>
+
+    <div class="sidemenu-toggle" @click="menuCollapsed = !menuCollapsed">
+      {{ menuCollapsed ? '›' : '‹' }}
+    </div>
+
+    <nav class="sidemenu-nav">
+      <div class="nav-section-label">Huvudmeny</div>
+      <a class="nav-item active" data-label="Fixtures" href="#">
+        <span class="nav-icon">📅</span>
+        <span class="nav-label">Fixtures</span>
+        <span class="nav-badge" v-if="!loading">{{ items.length }}</span>
+      </a>
+      <a class="nav-item" data-label="Dashboard" href="#">
+        <span class="nav-icon">📊</span>
+        <span class="nav-label">Dashboard</span>
+      </a>
+      <a class="nav-item" data-label="Ligor" href="#">
+        <span class="nav-icon">🏆</span>
+        <span class="nav-label">Ligor</span>
+      </a>
+      <a class="nav-item" data-label="Lag" href="#">
+        <span class="nav-icon">👕</span>
+        <span class="nav-label">Lag</span>
+      </a>
+
+      <div class="nav-section-label" style="margin-top:8px">Verktyg</div>
+      <a class="nav-item" data-label="Odds-analys" href="#">
+        <span class="nav-icon">📈</span>
+        <span class="nav-label">Odds-analys</span>
+      </a>
+      <a class="nav-item" data-label="Rapporter" href="#">
+        <span class="nav-icon">📋</span>
+        <span class="nav-label">Rapporter</span>
+      </a>
+    </nav>
+
+    <div class="sidemenu-footer">
+      <a class="nav-item" data-label="Inställningar" href="#">
+        <span class="nav-icon">⚙️</span>
+        <span class="nav-label">Inställningar</span>
+      </a>
+      <a class="nav-item" data-label="Hjälp" href="#">
+        <span class="nav-icon">❓</span>
+        <span class="nav-label">Hjälp</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main-content" :class="{ shifted: menuCollapsed }">
   <div class="wrapper">
 
     <!-- Header -->
@@ -35,6 +321,18 @@
         <span class="search-icon">🔍</span>
         <input v-model="search" placeholder="Sök på namn eller odds…" />
       </div>
+
+      <!-- Date dropdown -->
+      <div class="date-select-wrap">
+        <span class="cal-icon">📆</span>
+        <select class="date-select" v-model="selectedDate">
+          <option value="">Alla datum</option>
+          <option v-for="d in availableDates" :key="d" :value="d">{{ d }}</option>
+        </select>
+        <span class="date-chevron">▼</span>
+      </div>
+      <button v-if="selectedDate" class="clear-date" @click="selectedDate = ''" title="Rensa datum">✕</button>
+
       <button class="btn btn-secondary" @click="fetchAll" :disabled="loading">
         {{ loading ? '…' : '↻ Ladda om' }}
       </button>
@@ -94,6 +392,7 @@
     </div>
 
   </div>
+  </div><!-- /main-content -->
 </div>
 
 <script>
@@ -103,10 +402,18 @@ createApp({
   setup() {
     const API = 'http://localhost:8080/fixtures/all';
 
+    const menuCollapsed = ref(false);
+
     const items = ref([]);
     const loading = ref(false);
     const error = ref('');
     const search = ref('');
+    const selectedDate = ref('');
+
+    const availableDates = computed(() => {
+      const dates = [...new Set(items.value.map(i => i.date).filter(Boolean))];
+      return dates.sort((a, b) => new Date(a) - new Date(b));
+    });
 
     const sortKey = ref('');
     const sortDir = ref(1);
@@ -123,8 +430,12 @@ createApp({
 
     const filtered = computed(() => {
       const q = search.value.toLowerCase().trim();
+      const d = selectedDate.value;
       const s = v => String(v ?? '').toLowerCase();
       let rows = items.value;
+      if (d) {
+        rows = rows.filter(i => i.date === d);
+      }
       if (q) {
         rows = rows.filter(i =>
           s(i.date).includes(q) || s(i.time).includes(q) ||
@@ -162,7 +473,7 @@ createApp({
 
     onMounted(fetchAll);
 
-    return { items, loading, error, search, filtered, fetchAll, sortKey, sortDir, setSort, sortIcon };
+    return { items, loading, error, search, selectedDate, availableDates, filtered, fetchAll, sortKey, sortDir, setSort, sortIcon, menuCollapsed };
   }
 }).mount('#app');
 </script>
