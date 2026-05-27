@@ -1,5 +1,6 @@
 package se.mac.footballdata.rest;
 
+import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -12,9 +13,18 @@ import java.util.List;
 @Consumes(MediaType.APPLICATION_JSON)
 public class ResultResource {
 
+    @Inject
+    ResultRepository resultRepository;
+
     @GET
     public List<Result> results() {
         return Result.listAll();
+    }
+
+    @GET
+    @Path("/{team}")
+    public List<Result> team(@PathParam("team") String team) {
+        return resultRepository.findByTeam(team);
     }
 
     // Hämta en specifik via ID
