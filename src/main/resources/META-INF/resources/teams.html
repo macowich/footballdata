@@ -3,16 +3,15 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Fixtures</title>
+<title>Teams</title>
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="fixtures.css"/>
 <style>
-  /* ── Layout shell ───────────────────────────────────────────── */
   body { margin: 0; }
   #app { display: flex; min-height: 100vh; }
 
-  /* ── Side menu ──────────────────────────────────────────────── */
+  /* Side menu */
   .sidemenu {
     position: fixed;
     top: 0; left: 0; bottom: 0;
@@ -92,9 +91,7 @@
     position: relative;
   }
   .nav-item:hover { background: rgba(255,255,255,.07); }
-  .nav-item.active {
-    background: rgba(99,179,237,.12);
-  }
+  .nav-item.active { background: rgba(99,179,237,.12); }
   .nav-item.active .nav-icon { color: #63b3ed; }
   .nav-item.active .nav-label { color: #e2e8f0; }
   .nav-icon {
@@ -136,11 +133,9 @@
     gap: 2px;
   }
 
-  /* Toggle button */
   .sidemenu-toggle {
     position: absolute;
-    top: 20px;
-    right: -13px;
+    top: 20px; right: -13px;
     width: 26px; height: 26px;
     border-radius: 50%;
     background: #1e2330;
@@ -156,7 +151,6 @@
   }
   .sidemenu-toggle:hover { background: #2a3147; color: #fff; }
 
-  /* Tooltip on collapsed items */
   .sidemenu.collapsed .nav-item:hover::after {
     content: attr(data-label);
     position: absolute;
@@ -174,60 +168,7 @@
     z-index: 200;
   }
 
-  /* ── Date dropdown ──────────────────────────────────────────── */
-  .date-select-wrap {
-    position: relative;
-    display: flex;
-    align-items: center;
-  }
-  .date-select-wrap .cal-icon {
-    position: absolute;
-    left: 11px;
-    font-size: 15px;
-    pointer-events: none;
-    line-height: 1;
-  }
-  .date-select {
-    appearance: none;
-    -webkit-appearance: none;
-    background: var(--surface, #1a1f2e);
-    border: 1px solid rgba(255,255,255,.1);
-    border-radius: 8px;
-    color: var(--text, #e2e8f0);
-    font-family: 'Figtree', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    padding: 8px 32px 8px 34px;
-    cursor: pointer;
-    outline: none;
-    transition: border-color .15s, background .15s;
-    min-width: 160px;
-  }
-  .date-select:hover { border-color: rgba(255,255,255,.22); }
-  .date-select:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59,130,246,.2); }
-  .date-select option { background: #1a1f2e; color: #e2e8f0; }
-  .date-chevron {
-    position: absolute;
-    right: 10px;
-    font-size: 10px;
-    color: rgba(255,255,255,.4);
-    pointer-events: none;
-  }
-  .clear-date {
-    margin-left: 6px;
-    background: rgba(255,255,255,.06);
-    border: 1px solid rgba(255,255,255,.1);
-    border-radius: 6px;
-    color: rgba(255,255,255,.5);
-    font-size: 13px;
-    padding: 6px 8px;
-    cursor: pointer;
-    transition: background .15s, color .15s;
-    line-height: 1;
-  }
-  .clear-date:hover { background: rgba(255,255,255,.12); color: #fff; }
-
-  /* Push main content right */
+  /* Main */
   .main-content {
     margin-left: 220px;
     flex: 1;
@@ -235,6 +176,72 @@
     min-width: 0;
   }
   .main-content.shifted { margin-left: 56px; }
+
+  /* League tabs inside toolbar */
+  .league-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+  .league-tab {
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    transition: all .15s;
+    white-space: nowrap;
+  }
+  .league-tab:hover { border-color: var(--border2); background: var(--surface2); color: var(--text); }
+  .league-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  /* Goal pill variants */
+  .goal-pill {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    font-weight: 500;
+  }
+  .goal-pill.high { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+  .goal-pill.mid  { background: var(--accent-light); color: var(--accent); border: 1px solid #e8c0a8; }
+  .goal-pill.low  { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+
+  /* Over 2.5 bar */
+  .over-cell { display: flex; align-items: center; gap: 8px; }
+  .over-track {
+    flex: 1; max-width: 72px; height: 5px;
+    background: var(--border); border-radius: 99px;
+    overflow: hidden; position: relative;
+  }
+  .over-fill {
+    position: absolute; left: 0; top: 0; height: 100%;
+    background: linear-gradient(90deg, #3b82f6, var(--accent));
+    border-radius: 99px; transition: width .5s ease;
+  }
+  .over-num { font-family: var(--mono); font-size: 12.5px; font-weight: 500; color: var(--text); }
+
+  /* Rank badge */
+  .rank-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 24px; height: 24px; border-radius: 6px;
+    font-family: var(--mono); font-size: 11px; font-weight: 500;
+    background: var(--surface2); color: var(--muted);
+  }
+  .rank-badge.gold   { background: #fef9e7; color: #b7791f; border: 1px solid #f6e05e; }
+  .rank-badge.silver { background: #f7fafc; color: #718096; border: 1px solid #cbd5e0; }
+  .rank-badge.bronze { background: #fff5f0; color: #c05621; border: 1px solid #fbd38d; }
+
+  /* Team initial avatar */
+  .team-cell { display: flex; align-items: center; gap: 10px; }
+  .team-avatar {
+    width: 28px; height: 28px; border-radius: 7px;
+    background: var(--surface2); border: 1.5px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 12px; font-weight: 500;
+    color: var(--accent); flex-shrink: 0;
+  }
 </style>
 </head>
 <body>
@@ -253,10 +260,9 @@
 
     <nav class="sidemenu-nav">
       <div class="nav-section-label">Huvudmeny</div>
-      <a class="nav-item active" data-label="Fixtures" href="#">
+      <a class="nav-item" data-label="Fixtures" href="fixtures.html">
         <span class="nav-icon">📅</span>
         <span class="nav-label">Fixtures</span>
-        <span class="nav-badge" v-if="!loading">{{ items.length }}</span>
       </a>
       <a class="nav-item" data-label="Dashboard" href="#">
         <span class="nav-icon">📊</span>
@@ -266,9 +272,10 @@
         <span class="nav-icon">🏆</span>
         <span class="nav-label">Ligor</span>
       </a>
-      <a class="nav-item" data-label="Lag" href="teams.html">
+      <a class="nav-item active" data-label="Lag" href="#">
         <span class="nav-icon">👕</span>
         <span class="nav-label">Lag</span>
+        <span class="nav-badge" v-if="!loading">{{ teams.length }}</span>
       </a>
 
       <div class="nav-section-label" style="margin-top:8px">Verktyg</div>
@@ -302,97 +309,103 @@
     <div class="header">
       <div class="header-top">
         <div>
-          <div class="title">Fix<span>tures</span></div>
-          <div class="subtitle">Dagens matcher — localhost:8080/lag</div>
+          <div class="title">La<span>g</span></div>
+          <div class="subtitle">Säsongsstatistik — localhost:8080/teams</div>
         </div>
-        <div class="count-badge" v-if="!loading">{{ filtered.length }} / {{ items.length }} poster</div>
+        <div class="count-badge" v-if="!loading">{{ sorted.length }} lag</div>
       </div>
     </div>
 
     <!-- Error -->
     <div class="error-banner" v-if="error">
       ⚠ {{ error }}
-      <button class="btn btn-secondary btn-sm" style="margin-left:auto" @click="fetchAll">Försök igen</button>
+      <button class="btn btn-secondary btn-sm" style="margin-left:auto" @click="fetchTeams">Försök igen</button>
     </div>
 
     <!-- Toolbar -->
     <div class="toolbar">
       <div class="search-wrap">
         <span class="search-icon">🔍</span>
-        <input v-model="search" placeholder="Sök på namn eller odds…" />
+        <input v-model="search" placeholder="Sök lag…" />
       </div>
 
-      <!-- Date dropdown -->
-      <div class="date-select-wrap">
-        <span class="cal-icon">📆</span>
-        <select class="date-select" v-model="selectedDate">
-          <option value="">Alla datum</option>
-          <option v-for="d in availableDates" :key="d" :value="d">{{ d }}</option>
-        </select>
-        <span class="date-chevron">▼</span>
+      <div class="league-tabs">
+        <button
+          v-for="l in leagues" :key="l.code"
+          class="league-tab"
+          :class="{ active: selectedLeague === l.code }"
+          @click="selectLeague(l.code)"
+        >{{ l.label }}</button>
       </div>
-      <button v-if="selectedDate" class="clear-date" @click="selectedDate = ''" title="Rensa datum">✕</button>
 
-      <button class="btn btn-secondary" @click="fetchAll" :disabled="loading">
+      <button class="btn btn-secondary" @click="fetchTeams" :disabled="loading">
         {{ loading ? '…' : '↻ Ladda om' }}
       </button>
     </div>
 
     <!-- Table -->
     <div class="table-wrap fade-in">
-      <!-- Loading -->
+
       <div class="state-box" v-if="loading">
         <div class="icon">⏳</div>
         <strong>Hämtar data…</strong>
         Ansluter till API…
       </div>
 
-      <!-- Empty -->
-      <div class="state-box" v-else-if="filtered.length === 0 && !error">
+      <div class="state-box" v-else-if="sorted.length === 0 && !error">
         <div class="icon">📭</div>
-        <strong>Inga resultat</strong>
-        {{ search ? 'Inga poster matchar sökningen.' : 'Det finns inga matcher ännu.' }}
+        <strong>Inga lag hittades</strong>
+        {{ search ? 'Inga lag matchar sökningen.' : 'Inga lag hittades för denna liga.' }}
       </div>
 
-      <!-- Table -->
       <table v-else>
         <thead>
           <tr>
-            <th @click="setSort('league')" style="cursor:pointer;user-select:none">League {{ sortIcon('league') }}</th>
-            <th @click="setSort('date')" style="cursor:pointer;user-select:none">Date &amp; Time {{ sortIcon('date') }}</th>
-            <th>Home / Away</th>
-            <th>Referee</th>
-            <th>B365H</th>
-            <th>B365D</th>
-            <th>B365A</th>
-            <th @click="setSort('b365_u25')" style="cursor:pointer;user-select:none">B365 U2.5 {{ sortIcon('b365_u25') }}</th>
-            <th @click="setSort('b365_o25')" style="cursor:pointer;user-select:none">B365 O2.5 {{ sortIcon('b365_o25') }}</th>
+            <th style="width:48px">#</th>
+            <th @click="setSort('name')" style="cursor:pointer;user-select:none">Lag {{ sortIcon('name') }}</th>
+            <th @click="setSort('matcher')" style="cursor:pointer;user-select:none;text-align:right">Matcher {{ sortIcon('matcher') }}</th>
+            <th @click="setSort('avgGoals')" style="cursor:pointer;user-select:none;text-align:right">Avg mål {{ sortIcon('avgGoals') }}</th>
+            <th @click="setSort('avgHomeGoals')" style="cursor:pointer;user-select:none;text-align:right">Hemma {{ sortIcon('avgHomeGoals') }}</th>
+            <th @click="setSort('avgAwayGoals')" style="cursor:pointer;user-select:none;text-align:right">Borta {{ sortIcon('avgAwayGoals') }}</th>
+            <th @click="setSort('over2')" style="cursor:pointer;user-select:none;text-align:right">Över 2.5 {{ sortIcon('over2') }}</th>
           </tr>
         </thead>
         <tbody>
-          <tr class="row-hover" v-for="item in filtered" :key="item.id">
-            <td>{{ item.league || '—' }}</td>
+          <tr class="row-hover" v-for="(team, i) in sorted" :key="team.name">
             <td>
-              <strong>{{ item.date || '—' }}</strong>
-              <span v-if="item.time" style="color:var(--muted)"> {{ item.time }}</span>
+              <span class="rank-badge" :class="i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : ''">
+                {{ i + 1 }}
+              </span>
             </td>
             <td>
-              <div><span class="odds-chip green" v-if="item.hometeam">{{ item.hometeam }}</span><span v-else style="color:var(--muted)">—</span></div>
-              <div><span class="odds-chip orange" v-if="item.awayteam">{{ item.awayteam }}</span><span v-else style="color:var(--muted)">—</span></div>
+              <div class="team-cell">
+                <div class="team-avatar">{{ team.name[0] }}</div>
+                <strong>{{ team.name }}</strong>
+              </div>
             </td>
-            <td>{{ item.referee || '—' }}</td>
-            <td>{{ item.b365h || '—' }}</td>
-            <td>{{ item.b365d || '—' }}</td>
-            <td>{{ item.b365a || '—' }}</td>
-            <td>{{ item.b365_u25 || '—' }}</td>
-            <td>{{ item.b365_o25 || '—' }}</td>
+            <td style="text-align:right;font-family:var(--mono);font-size:13px">{{ team.matcher }}</td>
+            <td style="text-align:right">
+              <span class="goal-pill" :class="team.avgGoals >= 3 ? 'high' : team.avgGoals >= 2 ? 'mid' : 'low'">
+                {{ team.avgGoals.toFixed(2) }}
+              </span>
+            </td>
+            <td style="text-align:right;font-family:var(--mono);font-size:13px">{{ team.avgHomeGoals.toFixed(2) }}</td>
+            <td style="text-align:right;font-family:var(--mono);font-size:13px">{{ team.avgAwayGoals.toFixed(2) }}</td>
+            <td style="text-align:right">
+              <div class="over-cell" style="justify-content:flex-end">
+                <div class="over-track">
+                  <div class="over-fill" :style="{ width: Math.min(100, Math.round((team.over2 / team.matcher) * 100)) + '%' }"></div>
+                </div>
+                <span class="over-num">{{ team.over2 }}</span>
+              </div>
+            </td>
           </tr>
         </tbody>
       </table>
     </div>
 
   </div>
-  </div><!-- /main-content -->
+  </div>
 </div>
 
 <script>
@@ -400,80 +413,71 @@ const { createApp, ref, computed, onMounted } = Vue;
 
 createApp({
   setup() {
-    const API = 'http://localhost:8080/fixtures/all';
+    const BASE = 'http://localhost:8080/teams';
 
     const menuCollapsed = ref(false);
+    const leagues = [
+      { code: 'E0',  label: 'Premier League' },
+      { code: 'SP1', label: 'La Liga' },
+      { code: 'D1',  label: 'Bundesliga' },
+      { code: 'I1',  label: 'Serie A' },
+      { code: 'F1',  label: 'Ligue 1' },
+    ];
 
-    const items = ref([]);
+    const teams = ref([]);
     const loading = ref(false);
     const error = ref('');
     const search = ref('');
-    const selectedDate = ref('');
-
-    const availableDates = computed(() => {
-      const dates = [...new Set(items.value.map(i => i.date).filter(Boolean))];
-      return dates.sort((a, b) => new Date(a) - new Date(b));
-    });
-
-    const sortKey = ref('');
-    const sortDir = ref(1);
+    const selectedLeague = ref('E0');
+    const sortKey = ref('avgGoals');
+    const sortDir = ref(-1);
 
     function setSort(key) {
       if (sortKey.value === key) sortDir.value *= -1;
-      else { sortKey.value = key; sortDir.value = 1; }
+      else { sortKey.value = key; sortDir.value = -1; }
     }
 
     function sortIcon(key) {
       if (sortKey.value !== key) return '\u2195';
-      return sortDir.value === 1 ? '\u2191' : '\u2193';
+      return sortDir.value === -1 ? '\u2193' : '\u2191';
     }
 
-    const filtered = computed(() => {
+    const sorted = computed(() => {
       const q = search.value.toLowerCase().trim();
-      const d = selectedDate.value;
-      const s = v => String(v ?? '').toLowerCase();
-      let rows = items.value;
-      if (d) {
-        rows = rows.filter(i => i.date === d);
-      }
-      if (q) {
-        rows = rows.filter(i =>
-          s(i.date).includes(q) || s(i.time).includes(q) ||
-          s(i.league).includes(q) || s(i.hometeam).includes(q) ||
-          s(i.awayteam).includes(q) || s(i.referee).includes(q) ||
-          s(i.b365h).includes(q) || s(i.b365d).includes(q) ||
-          s(i.b365a).includes(q) || s(i.b365_u25).includes(q) ||
-          s(i.b365_o25).includes(q)
-        );
-      }
-      if (!sortKey.value) return rows;
+      let rows = teams.value;
+      if (q) rows = rows.filter(t => t.name.toLowerCase().includes(q));
       const key = sortKey.value;
       const dir = sortDir.value;
       return [...rows].sort((a, b) => {
-        const av = a[key] ?? '', bv = b[key] ?? '';
-        const an = parseFloat(av), bn = parseFloat(bv);
-        if (!isNaN(an) && !isNaN(bn)) return (an - bn) * dir;
-        return String(av).localeCompare(String(bv)) * dir;
+        const av = a[key], bv = b[key];
+        if (typeof av === 'string') return av.localeCompare(bv) * dir;
+        return (av - bv) * dir;
       });
     });
 
-    async function fetchAll() {
+    async function fetchTeams() {
       loading.value = true;
       error.value = '';
+      teams.value = [];
       try {
-        const res = await fetch(API);
+        const res = await fetch(`${BASE}/${selectedLeague.value}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        items.value = await res.json();
-      } catch(e) {
-        error.value = `Kunde inte hämta data: ${e.message}. Kontrollera att API:et körs på ${API}.`;
+        teams.value = await res.json();
+      } catch (e) {
+        error.value = `Kunde inte hämta data: ${e.message}. Kontrollera att API:et körs på ${BASE}.`;
       } finally {
         loading.value = false;
       }
     }
 
-    onMounted(fetchAll);
+    function selectLeague(code) {
+      selectedLeague.value = code;
+      fetchTeams();
+    }
 
-    return { items, loading, error, search, selectedDate, availableDates, filtered, fetchAll, sortKey, sortDir, setSort, sortIcon, menuCollapsed };
+    onMounted(fetchTeams);
+
+    return { menuCollapsed, leagues, teams, loading, error, search, selectedLeague, sorted, fetchTeams, selectLeague, setSort, sortIcon };
   }
 }).mount('#app');
 </script>

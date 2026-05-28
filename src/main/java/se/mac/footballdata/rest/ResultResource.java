@@ -11,30 +11,41 @@ import java.util.List;
 @Path("/results")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class ResultResource {
+public class ResultResource
+{
+   @Inject
+   ResultRepository resultRepository;
 
-    @Inject
-    ResultRepository resultRepository;
+   @GET
+   public List<Result> results()
+   {
+      return Result.listAll();
+   }
 
-    @GET
-    public List<Result> results() {
-        return Result.listAll();
-    }
+   @GET
+   @Path("/{team}")
+   public List<Result> team(@PathParam("team") String team)
+   {
+      return resultRepository.findByTeam(team);
+   }
 
-    @GET
-    @Path("/{team}")
-    public List<Result> team(@PathParam("team") String team) {
-        return resultRepository.findByTeam(team);
-    }
+   @GET
+   @Path("/{league}")
+   public List<Result> league(@PathParam("league") String league)
+   {
+      return resultRepository.findByLeague(league);
+   }
 
-    // Hämta en specifik via ID
-    @GET
-    @Path("/{id}")
-    public Result getById(@PathParam("id") String id) {
-        Result result = Result.findById(new ObjectId(id));
-        if (result == null) {
-            throw new WebApplicationException("Hittades inte", Response.Status.NOT_FOUND);
-        }
-        return result;
-    }
+   // Hämta en specifik via ID
+   @GET
+   @Path("/{id}")
+   public Result getById(@PathParam("id") String id)
+   {
+      Result result = Result.findById(new ObjectId(id));
+      if (result == null)
+      {
+         throw new WebApplicationException("Hittades inte", Response.Status.NOT_FOUND);
+      }
+      return result;
+   }
 }
