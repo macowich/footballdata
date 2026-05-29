@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Resultat</title>
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="fixtures.css"/>
+<link rel="stylesheet" href="sidemenu.css"/>
+<style>
+  /* ── Layout shell ───────────────────────────────────────────── */
+  body { margin: 0; }
+  #app { display: flex; min-height: 100vh; }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background .15s;
+    white-space: nowrap;
+    overflow: hidden;
+    position: relative;
+  }
+  .nav-item:hover { background: rgba(255,255,255,.07); }
+  .nav-item.active { background: rgba(99,179,237,.12); }
+  .nav-item.active .nav-icon { color: #63b3ed; }
+  .nav-item.active .nav-label { color: #e2e8f0; }
+  .nav-icon {
+    font-size: 18px;
+    width: 22px;
+    text-align: center;
+    flex-shrink: 0;
+    color: rgba(255,255,255,.45);
+    transition: color .15s;
+  }
+  .nav-label {
+    font-family: 'Figtree', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(255,255,255,.55);
+    transition: color .15s, opacity .2s;
+  }
+
+  .nav-badge {
+    margin-left: auto;
+    background: #3b82f6;
+    color: #fff;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    padding: 2px 6px;
+    border-radius: 99px;
+    flex-shrink: 0;
+    transition: opacity .2s;
+  }
+
+  /* Push main content right */
+  .main-content {
+    margin-left: 220px;
+    flex: 1;
+    transition: margin-left .25s cubic-bezier(.4,0,.2,1);
+    min-width: 0;
+  }
+  .main-content.shifted { margin-left: 56px; }
+
+  /* League tabs inside toolbar */
+  .league-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+  .league-tab {
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    transition: all .15s;
+    white-space: nowrap;
+  }
+  .league-tab:hover { border-color: var(--border2); background: var(--surface2); color: var(--text); }
+  .league-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- Side Menu -->
+  <aside class="sidemenu" :class="{ collapsed: menuCollapsed }">
+    <div class="sidemenu-logo">
+      <div class="logo-icon">⚽</div>
+      <span class="logo-text">Fixtures</span>
+    </div>
+
+    <div class="sidemenu-toggle" @click="menuCollapsed = !menuCollapsed">
+      {{ menuCollapsed ? '›' : '‹' }}
+    </div>
+
+    <nav class="sidemenu-nav">
+      <div class="nav-section-label">Huvudmeny</div>
+      <a class="nav-item" data-label="Fixtures" href="fixtures.html">
+        <span class="nav-icon">📅</span>
+        <span class="nav-label">Fixtures</span>
+      </a>
+      <a class="nav-item active" data-label="Dashboard" href="#">
+        <span class="nav-icon">📊</span>
+        <span class="nav-label">Matcher</span>
+        <span class="nav-badge" v-if="!loading">{{ matches.length }}</span>
+      </a>
+      <a class="nav-item" data-label="Ligor" href="#">
+        <span class="nav-icon">🏆</span>
+        <span class="nav-label">Ligor</span>
+      </a>
+      <a class="nav-item" data-label="Lag" href="teams.html">
+        <span class="nav-icon">👕</span>
+        <span class="nav-label">Lag</span>
+      </a>
+
+      <div class="nav-section-label" style="margin-top:8px">Verktyg</div>
+      <a class="nav-item" data-label="Odds-analys" href="#">
+        <span class="nav-icon">📈</span>
+        <span class="nav-label">Odds-analys</span>
+      </a>
+      <a class="nav-item" data-label="Rapporter" href="#">
+        <span class="nav-icon">📋</span>
+        <span class="nav-label">Rapporter</span>
+      </a>
+    </nav>
+
+    <div class="sidemenu-footer">
+      <a class="nav-item" data-label="Inställningar" href="#">
+        <span class="nav-icon">⚙️</span>
+        <span class="nav-label">Inställningar</span>
+      </a>
+      <a class="nav-item" data-label="Hjälp" href="#">
+        <span class="nav-icon">❓</span>
+        <span class="nav-label">Hjälp</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main-content" :class="{ shifted: menuCollapsed }">
+  <div class="wrapper">
+
+    <!-- Header -->
+    <div class="header">
+      <div class="header-top">
+        <div>
+          <div class="title">Result<span>at</span></div>
+          <div class="subtitle">Senaste överst</div>
+        </div>
+        <div class="count-badge">resultat</div>
+      </div>
+    </div>
+
+    <!-- Error -->
+    <div class="error-banner" v-if="error">
+      ⚠ {{ error }}
+      <button class="btn btn-secondary btn-sm" style="margin-left:auto" @click="fetchMatches">Försök igen</button>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input v-model="search" placeholder="Sök resultat…" />
+      </div>
+
+      <div class="league-tabs">
+        <button
+          v-for="l in leagues" :key="l"
+          class="league-tab"
+          :class="{ active: selectedLeague === l }"
+          @click="selectLeague(l)"
+        >{{ l }}</button>
+      </div>
+
+      <button class="btn btn-secondary" @click="fetchMatches" :disabled="loading">
+        {{ loading ? '…' : '↻ Ladda om' }}
+      </button>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap fade-in">
+
+      <div class="state-box" v-if="loading">
+        <div class="icon">⏳</div>
+        <strong>Hämtar data…</strong>
+        Ansluter till API…
+      </div>
+
+      <div class="state-box" v-else-if="matches.length === 0 && !error">
+        <div class="icon">📭</div>
+        <strong>Inga resultat hittades</strong>
+        {{ search ? 'Inga resultat matchar sökningen.' : 'Inga resultgat hittades för denna liga.' }}
+      </div>
+
+      <table v-else>
+        <thead>
+          <tr>
+            <th style="width:48px">Datum</th>
+            <th style="cursor:pointer;user-select:none">Match</th>
+            <th style="cursor:pointer;user-select:none">Resultat</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="row-hover" v-for="(item, i) in matches" :key="item.id">
+            <td style="white-space: nowrap;">
+              <strong>{{ item.date }}</strong>
+              <span style="color:var(--muted)">{{ item.time }}</span>
+            </td>
+            <td style="text-align:right;font-family:var(--mono);font-size:13px">{{ item.homeTeam }} - {{ item.awayTeam }}</td>
+            <td style="text-align:right;font-family:var(--mono);font-size:13px">{{ item.fullTimeHomeGoals }} - {{ item.fullTimeAwayGoals }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+  </div>
+</div>
+
+<script>
+const { createApp, ref, computed, onMounted } = Vue;
+
+createApp({
+  setup() {
+    const BASE = 'http://localhost:8080/results';
+
+    const menuCollapsed = ref(false);
+    const leagues = ['Premier League', 'La Liga', 'Bundesliga', 'Serie A', 'Ligue 1'];
+    const matches = ref([]);
+    const loading = ref(false);
+    const error = ref('');
+    const search = ref('');
+    const selectedLeague = ref('Premier League');
+
+    async function fetchMatches() {
+      loading.value = true;
+      error.value = '';
+      matches.value = [];
+      try {
+        const res = await fetch(`${BASE}/league/${selectedLeague.value}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        matches.value = await res.json();
+        console.log(matches.value);
+      } catch (e) {
+        error.value = `Kunde inte hämta data: ${e.message}. Kontrollera att API:et körs på ${BASE}.`;
+      } finally {
+        loading.value = false;
+      }
+    }
+
+    function selectLeague(code) {
+      selectedLeague.value = code;
+      fetchMatches();
+    }
+
+    onMounted(fetchMatches);
+
+    return { menuCollapsed, leagues, matches, loading, error, search, selectedLeague, fetchMatches, selectLeague };
+  }
+}).mount('#app');
+</script>
+</body>
+</html>

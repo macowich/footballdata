@@ -23,14 +23,14 @@ public class ResultResource
    }
 
    @GET
-   @Path("/{team}")
+   @Path("/team/{team}")
    public List<Result> team(@PathParam("team") String team)
    {
       return resultRepository.findByTeam(team);
    }
 
    @GET
-   @Path("/{league}")
+   @Path("/league/{league}")
    public List<Result> league(@PathParam("league") String league)
    {
       return resultRepository.findByLeague(league);

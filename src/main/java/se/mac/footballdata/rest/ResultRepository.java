@@ -1,6 +1,7 @@
 package se.mac.footballdata.rest;
 
 import io.quarkus.mongodb.panache.PanacheMongoRepository;
+import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;
 
 import java.util.List;
@@ -18,8 +19,11 @@ public class ResultRepository implements PanacheMongoRepository<Result>
       return resultList;
    }
 
-   public List<Result> findByLeague(String league)
-   {
-      return list("league", league);
+   public List<Result> findByLeague(String league) {
+      return find(
+            "league",
+            Sort.by("date").descending(),
+            league
+      ).list();
    }
 }

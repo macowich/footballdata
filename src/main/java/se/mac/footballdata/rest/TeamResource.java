@@ -5,12 +5,14 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import se.mac.footballdata.Util;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 @Path("/teams")
@@ -21,7 +23,7 @@ public class TeamResource {
 
     @GET
     @Path("/{league}")
-    public List<Team> teamsByLeague(@PathParam("league") String league) {
+    public List<Team> teamsByLeague(@PathParam("league") String league, @QueryParam("filter") String filter) {
         List<Result> results = resultRepository.findByLeague(league);
 
         List<String> uniqueTeams = results.stream()
@@ -32,13 +34,13 @@ public class TeamResource {
 
         List<Team> teamList = new ArrayList<>();
         for (String t : uniqueTeams) {
-            teamList.add(createTeamFromResult(t, results));
+            teamList.add(createTeamFromResult(t, results, filter));
         }
 
         return teamList;
     }
 
-    private Team createTeamFromResult(String name, List<Result> matches) {
+    private Team createTeamFromResult(String name, List<Result> matches, String filter) {
         Team t = new Team();
         t.name = name;
 
@@ -51,19 +53,50 @@ public class TeamResource {
         int over2Counter = 0;
 
         for (Result match : matches) {
-            if (name.equals(match.homeTeam)) {
-                homeGoals += match.fullTimeHomeGoals;
-                homeGoalsConceeded += match.fullTimeAwayGoals;
-                homeMatches++;
-                if (match.fullTimeHomeGoals + match.fullTimeAwayGoals > 2) {
-                    over2Counter++;
+
+            if (filter != null && filter.equalsIgnoreCase("home")) {
+                if (name.equals(match.homeTeam))
+                {
+                    homeGoals += match.fullTimeHomeGoals;
+                    homeGoalsConceeded += match.fullTimeAwayGoals;
+                    homeMatches++;
+                    if (match.fullTimeHomeGoals + match.fullTimeAwayGoals > 2)
+                    {
+                        over2Counter++;
+                    }
                 }
-            } else if (name.equals(match.awayTeam)) {
-                awayGoals += match.fullTimeAwayGoals;
-                awayGoalsConceeded += match.fullTimeHomeGoals;
-                awayMatches++;
-                if (match.fullTimeHomeGoals + match.fullTimeAwayGoals > 2) {
-                    over2Counter++;
+            } else if (filter != null && filter.equalsIgnoreCase("away")) {
+                if (name.equals(match.awayTeam))
+                {
+                    awayGoals += match.fullTimeAwayGoals;
+                    awayGoalsConceeded += match.fullTimeHomeGoals;
+                    awayMatches++;
+                    if (match.fullTimeHomeGoals + match.fullTimeAwayGoals > 2)
+                    {
+                        over2Counter++;
+                    }
+                }
+            } else
+            {
+                if (name.equals(match.homeTeam))
+                {
+                    homeGoals += match.fullTimeHomeGoals;
+                    homeGoalsConceeded += match.fullTimeAwayGoals;
+                    homeMatches++;
+                    if (match.fullTimeHomeGoals + match.fullTimeAwayGoals > 2)
+                    {
+                        over2Counter++;
+                    }
+                }
+                else if (name.equals(match.awayTeam))
+                {
+                    awayGoals += match.fullTimeAwayGoals;
+                    awayGoalsConceeded += match.fullTimeHomeGoals;
+                    awayMatches++;
+                    if (match.fullTimeHomeGoals + match.fullTimeAwayGoals > 2)
+                    {
+                        over2Counter++;
+                    }
                 }
             }
         }
@@ -86,6 +119,8 @@ public class TeamResource {
                         : (double) (awayGoals + awayGoalsConceeded) / awayMatches;
 
         t.matcher = homeMatches + awayMatches;
+        t.goals = homeGoals + awayGoals;
+        t.goalsconceeded = homeGoalsConceeded + awayGoalsConceeded;
         t.avgGoals = Util.round(avgGoals, 2);
         t.avgHomeGoals = Util.round(avgHomeGoals, 2);
         t.avgAwayGoals = Util.round(avgAwayGoals, 2);

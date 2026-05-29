@@ -9,130 +9,150 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CsvConverter {
-    static String rootDir = "C:\\data\\csv\\";
+import static se.mac.footballdata.Util.getLeagueName;
+import static se.mac.footballdata.Util.toIso;
 
-    public static void main(String[] args) {
-        if (args.length > 0) {
-            rootDir = args[0];
-        }
+public class CsvConverter
+{
+   static String rootDir = "C:\\data\\csv\\";
 
-        convertFixtures();
-        convertResults("E0.csv", "results_converted.csv");
-    }
+   public static void main(String[] args)
+   {
+      if (args.length > 0)
+      {
+         rootDir = args[0];
+      }
 
-    private static void convertFixtures()
-    {
-        System.out.println("Fixture conversion started...");
+      convertFixtures();
+      convertResults("E0.csv", "results_converted.csv", true);
+      convertResults("D1.csv", "results_converted.csv", false);
+   }
 
-        Path inputFile = Path.of(rootDir, "fixtures.csv");
-        Path outputFile = Path.of(rootDir, "fixtures_converted.csv");
+   private static void convertFixtures()
+   {
+      System.out.println("Fixture conversion started...");
 
-        try (
-                CSVReader reader = new CSVReader(new FileReader(inputFile.toFile()));
-                CSVWriter writer = new CSVWriter(new FileWriter(outputFile.toFile()))
-        ) {
+      Path inputFile = Path.of(rootDir, "fixtures.csv");
+      Path outputFile = Path.of(rootDir, "fixtures_converted.csv");
 
-            String[] header = reader.readNext();
-            if (header == null) {
-                System.out.println("Empty input file");
-                return;
-            }
+      try (
+            CSVReader reader = new CSVReader(new FileReader(inputFile.toFile()));
+            CSVWriter writer = new CSVWriter(new FileWriter(outputFile.toFile()))
+      )
+      {
 
-            // FIX BOM if it exists in first column
-            if (header.length > 0) {
-                header[0] = header[0].replace("\uFEFF", "");
-            }
+         String[] header = reader.readNext();
+         if (header == null)
+         {
+            System.out.println("Empty input file");
+            return;
+         }
 
-            // Build column index map
-            Map<String, Integer> columns = new HashMap<>();
-            for (int i = 0; i < header.length; i++) {
-                columns.put(header[i].trim().toLowerCase(), i);
-            }
+         // FIX BOM if it exists in first column
+         if (header.length > 0)
+         {
+            header[0] = header[0].replace("\uFEFF", "");
+         }
 
-            // Output header
-            writer.writeNext(new String[]{
-                    "league.string()",
-                    "date.string()",
-                    "time.string()",
-                    "hometeam.string()",
-                    "awayteam.string()",
-                    "referee.string()",
-                    "b365h.string()",
-                    "b365d.string()",
-                    "b365a.string()",
-                    "b365_u25.string()",
-                    "b365_o25.string()"
+         // Build column index map
+         Map<String, Integer> columns = new HashMap<>();
+         for (int i = 0; i < header.length; i++)
+         {
+            columns.put(header[i].trim().toLowerCase(), i);
+         }
+
+         // Output header
+         writer.writeNext(new String[] {
+               "league.string()",
+               "date.string()",
+               "time.string()",
+               "hometeam.string()",
+               "awayteam.string()",
+               "referee.string()",
+               "b365h.string()",
+               "b365d.string()",
+               "b365a.string()",
+               "b365_u25.string()",
+               "b365_o25.string()"
+         });
+
+         String[] row;
+
+         while ((row = reader.readNext()) != null)
+         {
+            String league = getValue(row, columns, "Div");
+            String date = getValue(row, columns, "date");
+            String time = getValue(row, columns, "time");
+            String homeTeam = getValue(row, columns, "hometeam");
+            String awayTeam = getValue(row, columns, "awayteam");
+            String referee = getValue(row, columns, "referee");
+            String b365h = getValue(row, columns, "b365h");
+            String b365d = getValue(row, columns, "b365d");
+            String b365a = getValue(row, columns, "b365a");
+            String b365_u25 = getValue(row, columns, "B365<2.5");
+            String b365_o25 = getValue(row, columns, "B365>2.5");
+
+            writer.writeNext(new String[] {
+                  getLeagueName(league),
+                  toIso(date),
+                  time,
+                  homeTeam,
+                  awayTeam,
+                  referee,
+                  b365h,
+                  b365d,
+                  b365a,
+                  b365_u25,
+                  b365_o25
             });
+         }
 
-            String[] row;
+         System.out.println("...done");
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
+   }
 
-            while ((row = reader.readNext()) != null) {
-                String league = getValue(row, columns, "Div");
-                String date = getValue(row, columns, "date");
-                String time = getValue(row, columns, "time");
-                String homeTeam = getValue(row, columns, "hometeam");
-                String awayTeam = getValue(row, columns, "awayteam");
-                String referee = getValue(row, columns, "referee");
-                String b365h = getValue(row, columns, "b365h");
-                String b365d = getValue(row, columns, "b365d");
-                String b365a = getValue(row, columns, "b365a");
-                String b365_u25 = getValue(row, columns, "B365<2.5");
-                String b365_o25 = getValue(row, columns, "B365>2.5");
+   private static void convertResults(String inputFileName, String outputFileName, boolean writeHeader)
+   {
+      System.out.println("Results conversion for: " + inputFileName + " started...");
 
+      Path inputFile = Path.of(rootDir, inputFileName);
+      Path outputFile = Path.of(rootDir, outputFileName);
 
-                writer.writeNext(new String[]{
-                        league,
-                        date,
-                        time,
-                        homeTeam,
-                        awayTeam,
-                        referee,
-                        b365h,
-                        b365d,
-                        b365a,
-                        b365_u25,
-                        b365_o25
-                });
-            }
+      try (
+            CSVReader reader = new CSVReader(new FileReader(inputFile.toFile()));
+            CSVWriter writer = new CSVWriter(new FileWriter(outputFile.toFile(), true))
+      )
+      {
 
-            System.out.println("...done");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+         String[] header = reader.readNext();
+         if (header == null)
+         {
+            System.out.println("Empty input file");
+            return;
+         }
 
-    private static void convertResults(String inputFileName, String outputFileName)
-    {
-        System.out.println("Results conversion started...");
+         // FIX BOM if it exists in first column
+         if (header.length > 0)
+         {
+            header[0] = header[0].replace("\uFEFF", "");
+         }
 
-        Path inputFile = Path.of(rootDir, inputFileName);
-        Path outputFile = Path.of(rootDir, outputFileName);
+         // Build column index map
+         Map<String, Integer> columns = new HashMap<>();
+         for (int i = 0; i < header.length; i++)
+         {
+            columns.put(header[i].trim().toLowerCase(), i);
+         }
 
-        try (
-              CSVReader reader = new CSVReader(new FileReader(inputFile.toFile()));
-              CSVWriter writer = new CSVWriter(new FileWriter(outputFile.toFile()))
-        ) {
+         // Output header
 
-            String[] header = reader.readNext();
-            if (header == null) {
-                System.out.println("Empty input file");
-                return;
-            }
-
-            // FIX BOM if it exists in first column
-            if (header.length > 0) {
-                header[0] = header[0].replace("\uFEFF", "");
-            }
-
-            // Build column index map
-            Map<String, Integer> columns = new HashMap<>();
-            for (int i = 0; i < header.length; i++) {
-                columns.put(header[i].trim().toLowerCase(), i);
-            }
-
-            // Output header
-            writer.writeNext(new String[]{
+         if (writeHeader)
+         {
+            writer.writeNext(new String[] {
                   "league.string()",
                   "date.string()",
                   "time.string()",
@@ -152,64 +172,70 @@ public class CsvConverter {
                   "hc.int32()",
                   "ac.int32()"
             });
+         }
 
-            String[] row;
+         String[] row;
 
-            while ((row = reader.readNext()) != null) {
-                String league = getValue(row, columns, "Div");
-                String date = getValue(row, columns, "date");
-                String time = getValue(row, columns, "time");
-                String homeTeam = getValue(row, columns, "hometeam");
-                String awayTeam = getValue(row, columns, "awayteam");
-                String referee = getValue(row, columns, "referee");
-                String fthg = getValue(row, columns, "fthg");
-                String ftag = getValue(row, columns, "ftag");
-                String ftr = getValue(row, columns, "ftr");
-                String hthg = getValue(row, columns, "hthg");
-                String htag = getValue(row, columns, "htag");
-                String htr = getValue(row, columns, "htr");
-                String hs = getValue(row, columns, "hs");
-                String as = getValue(row, columns, "as");
-                String hst = getValue(row, columns, "hst");
-                String ast = getValue(row, columns, "ast");
-                String hc = getValue(row, columns, "hc");
-                String ac = getValue(row, columns, "ac");
+         while ((row = reader.readNext()) != null)
+         {
+            String league = getValue(row, columns, "Div");
+            String date = getValue(row, columns, "date");
+            String time = getValue(row, columns, "time");
+            String homeTeam = getValue(row, columns, "hometeam");
+            String awayTeam = getValue(row, columns, "awayteam");
+            String referee = getValue(row, columns, "referee");
+            String fthg = getValue(row, columns, "fthg");
+            String ftag = getValue(row, columns, "ftag");
+            String ftr = getValue(row, columns, "ftr");
+            String hthg = getValue(row, columns, "hthg");
+            String htag = getValue(row, columns, "htag");
+            String htr = getValue(row, columns, "htr");
+            String hs = getValue(row, columns, "hs");
+            String as = getValue(row, columns, "as");
+            String hst = getValue(row, columns, "hst");
+            String ast = getValue(row, columns, "ast");
+            String hc = getValue(row, columns, "hc");
+            String ac = getValue(row, columns, "ac");
 
-                writer.writeNext(new String[]{
-                      league,
-                      date,
-                      time,
-                      homeTeam,
-                      awayTeam,
-                      referee,
-                      fthg,
-                      ftag,
-                      ftr,
-                      hthg,
-                      htag,
-                      htr,
-                      hs,
-                      as,
-                      hst,
-                      ast,
-                      hc,
-                      ac
-                });
-            }
+            writer.writeNext(new String[] {
+                  getLeagueName(league),
+                  toIso(date),
+                  time,
+                  homeTeam,
+                  awayTeam,
+                  referee,
+                  fthg,
+                  ftag,
+                  ftr,
+                  hthg,
+                  htag,
+                  htr,
+                  hs,
+                  as,
+                  hst,
+                  ast,
+                  hc,
+                  ac
+            });
+         }
 
-            System.out.println("...done");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+         System.out.println("...done");
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
+   }
 
-    private static String getValue(String[] row,
-                                   Map<String, Integer> columns,
-                                   String columnName) {
-        Integer index = columns.get(columnName.toLowerCase());
-        if (index == null || index >= row.length) {
-            return "";
-        }
-        return row[index];
-    }
+   private static String getValue(String[] row,
+         Map<String, Integer> columns,
+         String columnName)
+   {
+      Integer index = columns.get(columnName.toLowerCase());
+      if (index == null || index >= row.length)
+      {
+         return "";
+      }
+      return row[index];
+   }
 }

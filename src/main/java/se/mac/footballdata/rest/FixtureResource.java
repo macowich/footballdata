@@ -22,14 +22,7 @@ public class FixtureResource {
     @GET
     @Path("/all")
     public List<Fixture> all() {
-
-        List<Fixture> fixtures = repository.listAll();
-
-        fixtures.forEach(f ->
-                f.league = getLeagueName(f.league)
-        );
-
-        return fixtures;
+        return repository.listAll();
     }
 
     @GET
@@ -44,19 +37,6 @@ public class FixtureResource {
         }
 
         return repository.findByDate(searchDate);
-    }
-
-    private String getLeagueName(String code) {
-        return switch (code) {
-            case "B1" -> "Belgium First Division";
-            case "E0" -> "Premier League";
-            case "SP1" -> "La Liga";
-            case "SP2" -> "Secunda divison";
-            case "D1" -> "Bundesliga";
-            case "I1" -> "Serie A";
-            case "F1" -> "Ligue 1";
-            default -> code;
-        };
     }
 
 }

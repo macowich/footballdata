@@ -7,75 +7,11 @@
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="fixtures.css"/>
+<link rel="stylesheet" href="sidemenu.css"/>
 <style>
+  /* ── Layout shell ───────────────────────────────────────────── */
   body { margin: 0; }
   #app { display: flex; min-height: 100vh; }
-
-  /* Side menu */
-  .sidemenu {
-    position: fixed;
-    top: 0; left: 0; bottom: 0;
-    width: 220px;
-    background: #0f1117;
-    border-right: 1px solid rgba(255,255,255,.07);
-    display: flex;
-    flex-direction: column;
-    transition: width .25s cubic-bezier(.4,0,.2,1);
-    z-index: 100;
-    overflow: hidden;
-  }
-  .sidemenu.collapsed { width: 56px; }
-
-  .sidemenu-logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 20px 16px 16px;
-    border-bottom: 1px solid rgba(255,255,255,.07);
-    white-space: nowrap;
-    overflow: hidden;
-    min-height: 64px;
-  }
-  .sidemenu-logo .logo-icon {
-    width: 28px; height: 28px;
-    border-radius: 8px;
-    background: linear-gradient(135deg,#6ee7b7,#3b82f6);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 15px; flex-shrink: 0;
-  }
-  .sidemenu-logo .logo-text {
-    font-family: 'Figtree', sans-serif;
-    font-weight: 900;
-    font-size: 17px;
-    color: #f1f5f9;
-    letter-spacing: -.3px;
-    opacity: 1;
-    transition: opacity .2s;
-  }
-  .sidemenu.collapsed .logo-text { opacity: 0; pointer-events: none; }
-
-  .sidemenu-nav {
-    flex: 1;
-    padding: 12px 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    overflow: hidden;
-  }
-
-  .nav-section-label {
-    font-family: 'Figtree', sans-serif;
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    color: rgba(255,255,255,.3);
-    padding: 8px 8px 4px;
-    white-space: nowrap;
-    overflow: hidden;
-    transition: opacity .2s;
-  }
-  .sidemenu.collapsed .nav-section-label { opacity: 0; }
 
   .nav-item {
     display: flex;
@@ -109,7 +45,6 @@
     color: rgba(255,255,255,.55);
     transition: color .15s, opacity .2s;
   }
-  .sidemenu.collapsed .nav-label { opacity: 0; }
 
   .nav-badge {
     margin-left: auto;
@@ -123,52 +58,8 @@
     flex-shrink: 0;
     transition: opacity .2s;
   }
-  .sidemenu.collapsed .nav-badge { opacity: 0; }
 
-  .sidemenu-footer {
-    padding: 12px 8px;
-    border-top: 1px solid rgba(255,255,255,.07);
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-
-  .sidemenu-toggle {
-    position: absolute;
-    top: 20px; right: -13px;
-    width: 26px; height: 26px;
-    border-radius: 50%;
-    background: #1e2330;
-    border: 1px solid rgba(255,255,255,.12);
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer;
-    font-size: 11px;
-    color: rgba(255,255,255,.5);
-    transition: background .15s, color .15s;
-    z-index: 101;
-    line-height: 1;
-    user-select: none;
-  }
-  .sidemenu-toggle:hover { background: #2a3147; color: #fff; }
-
-  .sidemenu.collapsed .nav-item:hover::after {
-    content: attr(data-label);
-    position: absolute;
-    left: 56px;
-    background: #1e2330;
-    color: #e2e8f0;
-    font-family: 'Figtree', sans-serif;
-    font-size: 13px;
-    font-weight: 500;
-    padding: 5px 10px;
-    border-radius: 6px;
-    border: 1px solid rgba(255,255,255,.1);
-    white-space: nowrap;
-    pointer-events: none;
-    z-index: 200;
-  }
-
-  /* Main */
+  /* Push main content right */
   .main-content {
     margin-left: 220px;
     flex: 1;
@@ -264,9 +155,9 @@
         <span class="nav-icon">📅</span>
         <span class="nav-label">Fixtures</span>
       </a>
-      <a class="nav-item" data-label="Dashboard" href="#">
+      <a class="nav-item" data-label="Dashboard" href="matches.html">
         <span class="nav-icon">📊</span>
-        <span class="nav-label">Dashboard</span>
+        <span class="nav-label">Matcher</span>
       </a>
       <a class="nav-item" data-label="Ligor" href="#">
         <span class="nav-icon">🏆</span>
@@ -310,7 +201,7 @@
       <div class="header-top">
         <div>
           <div class="title">La<span>g</span></div>
-          <div class="subtitle">Säsongsstatistik — localhost:8080/teams</div>
+          <div class="subtitle">Säsongsstatistik</div>
         </div>
         <div class="count-badge" v-if="!loading">{{ sorted.length }} lag</div>
       </div>
@@ -331,11 +222,11 @@
 
       <div class="league-tabs">
         <button
-          v-for="l in leagues" :key="l.code"
+          v-for="l in leagues" :key="l"
           class="league-tab"
-          :class="{ active: selectedLeague === l.code }"
-          @click="selectLeague(l.code)"
-        >{{ l.label }}</button>
+          :class="{ active: selectedLeague === l }"
+          @click="selectLeague(l)"
+        >{{ l }}</button>
       </div>
 
       <button class="btn btn-secondary" @click="fetchTeams" :disabled="loading">
@@ -364,6 +255,7 @@
             <th style="width:48px">#</th>
             <th @click="setSort('name')" style="cursor:pointer;user-select:none">Lag {{ sortIcon('name') }}</th>
             <th @click="setSort('matcher')" style="cursor:pointer;user-select:none;text-align:right">Matcher {{ sortIcon('matcher') }}</th>
+            <th @click="setSort('goals')" style="cursor:pointer;user-select:none;text-align:right">Mål {{ sortIcon('goals') }}</th>
             <th @click="setSort('avgGoals')" style="cursor:pointer;user-select:none;text-align:right">Avg mål {{ sortIcon('avgGoals') }}</th>
             <th @click="setSort('avgHomeGoals')" style="cursor:pointer;user-select:none;text-align:right">Hemma {{ sortIcon('avgHomeGoals') }}</th>
             <th @click="setSort('avgAwayGoals')" style="cursor:pointer;user-select:none;text-align:right">Borta {{ sortIcon('avgAwayGoals') }}</th>
@@ -384,6 +276,7 @@
               </div>
             </td>
             <td style="text-align:right;font-family:var(--mono);font-size:13px">{{ team.matcher }}</td>
+            <td style="text-align:right;font-family:var(--mono);font-size:13px">{{ team.goals }}-{{ team.goalsconceeded }}</td>
             <td style="text-align:right">
               <span class="goal-pill" :class="team.avgGoals >= 3 ? 'high' : team.avgGoals >= 2 ? 'mid' : 'low'">
                 {{ team.avgGoals.toFixed(2) }}
@@ -416,19 +309,13 @@ createApp({
     const BASE = 'http://localhost:8080/teams';
 
     const menuCollapsed = ref(false);
-    const leagues = [
-      { code: 'E0',  label: 'Premier League' },
-      { code: 'SP1', label: 'La Liga' },
-      { code: 'D1',  label: 'Bundesliga' },
-      { code: 'I1',  label: 'Serie A' },
-      { code: 'F1',  label: 'Ligue 1' },
-    ];
+    const leagues = ['Premier League', 'La Liga', 'Bundesliga', 'Serie A', 'Ligue 1'];
 
     const teams = ref([]);
     const loading = ref(false);
     const error = ref('');
     const search = ref('');
-    const selectedLeague = ref('E0');
+    const selectedLeague = ref('Premier League');
     const sortKey = ref('avgGoals');
     const sortDir = ref(-1);
 
