@@ -55,4 +55,16 @@ public class Result extends PanacheMongoEntity
 
    @BsonProperty("ac")
    public Integer awayCorners;
+
+   @BsonProperty("hy")
+   public Integer homeYellowcards;
+
+   @BsonProperty("ay")
+   public Integer awayYellowcards;
+
+   @BsonProperty("hr")
+   public Integer homeRedcards;
+
+   @BsonProperty("ar")
+   public Integer awayRedcards;
 }
