@@ -9,5 +9,9 @@ public class Team
    public double avgGoals;
    public double avgHomeGoals;
    public double avgAwayGoals;
+   public double avgHomeGoalsConceeded;
+   public double avgAwayGoalsConceeded;
+   public double avgHomeGoalsTotal;
+   public double avgAwayGoalsTotal;
    public int over2;
 }
