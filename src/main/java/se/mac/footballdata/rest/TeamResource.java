@@ -30,7 +30,7 @@ public class TeamResource {
 
         List<Team> teamList = new ArrayList<>();
         for (String t : uniqueTeams) {
-            teamList.add(createTeamFromResult(t, results, filter));
+            teamList.add(createTeamFromResult(t, results));
         }
 
         return teamList;
