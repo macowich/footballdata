@@ -7,6 +7,14 @@ public class Prediction {
 
     public String fixture_id;
 
+    public String date;
+
+    public String time;
+
+    public String hometeam;
+
+    public String awayteam;
+
     public String homewin;
 
     public String draw;

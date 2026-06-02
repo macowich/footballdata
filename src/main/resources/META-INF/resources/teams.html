@@ -280,8 +280,6 @@
             <th @click="setSort('matcher')" style="cursor:pointer;user-select:none;text-align:right">Matcher {{ sortIcon('matcher') }}</th>
             <th @click="setSort('goals')" style="cursor:pointer;user-select:none;text-align:right">Mål {{ sortIcon('goals') }}</th>
             <th @click="setSort('avgGoals')" style="cursor:pointer;user-select:none;text-align:right">Avg mål {{ sortIcon('avgGoals') }}</th>
-            <th @click="setSort('avgHomeGoals')" style="cursor:pointer;user-select:none;text-align:right">Hemma {{ sortIcon('avgHomeGoals') }}</th>
-            <th @click="setSort('avgAwayGoals')" style="cursor:pointer;user-select:none;text-align:right">Borta {{ sortIcon('avgAwayGoals') }}</th>
             <th @click="setSort('over2')" style="cursor:pointer;user-select:none;text-align:right">Över 2.5 {{ sortIcon('over2') }}</th>
           </tr>
         </thead>
@@ -298,21 +296,39 @@
                 <strong>{{ team.name }}</strong>
               </div>
             </td>
-            <td style="text-align:right;font-family:var(--mono);font-size:13px">{{team.matcher }}</td>
             <td style="text-align:right;font-family:var(--mono);font-size:13px">
-              {{ team.goals }}-{{ team.goalsconceeded }}
+              {{
+                viewMode === 'home'
+                        ? `${team.homeMatches}`
+                        : viewMode === 'away'
+                                ? `${team.awayMatches}`
+                                : `${team.matches}`
+              }}
+            </td>
+            <td style="text-align:right;font-family:var(--mono);font-size:13px">
+              {{
+                viewMode === 'home'
+                        ? `${team.goalshome}-${team.conceededhome}`
+                        : viewMode === 'away'
+                                ? `${team.goalsaway}-${team.conceededaway}`
+                                : `${team.goals}-${team.conceeded}`
+              }}
             </td>
             <td style="text-align:right">
-              <span class="goal-pill" :class="team.avgGoals >= 3 ? 'high' : team.avgGoals >= 2 ? 'mid' : 'low'">
-                {{ team.avgGoals.toFixed(2) }}
+              <span class="goal-pill" :class="goalPillClass(team)">
+                {{
+                  viewMode === 'home'
+                          ? `${team.avgGoalsHome}`
+                          : viewMode === 'away'
+                                  ? `${team.avgGoalsAway}`
+                                  : `${team.avgGoals}`
+                }}
               </span>
             </td>
-            <td style="text-align:right;font-family:var(--mono);font-size:13px">{{ team.avgHomeGoals.toFixed(2) }}</td>
-            <td style="text-align:right;font-family:var(--mono);font-size:13px">{{ team.avgAwayGoals.toFixed(2) }}</td>
             <td style="text-align:right">
               <div class="over-cell" style="justify-content:flex-end">
                 <div class="over-track">
-                  <div class="over-fill" :style="{ width: Math.min(100, Math.round((team.over2 / team.matcher) * 100)) + '%' }"></div>
+                  <div class="over-fill" :style="{ width: Math.min(100, Math.round((team.over2 / team.matches) * 100)) + '%' }"></div>
                 </div>
                 <span class="over-num">{{ team.over2 }}</span>
               </div>
@@ -355,14 +371,24 @@ createApp({
       return sortDir.value === -1 ? '\u2193' : '\u2191';
     }
 
+    const goalPillClass = (t) => {
+      let avg = t.avgGoals;
+      if (viewMode.value === 'home') {
+        avg = t.avgGoalsHome;
+      } else if (viewMode.value === 'away') {
+        avg = t.avgGoalsAway;
+      }
+      return avg >= 3 ? 'high' : avg >= 2 ? 'mid' : 'low';
+    };
+
     const sorted = computed(() => {
       const q = search.value.toLowerCase().trim();
       let rows = teams.value;
       if (q) rows = rows.filter(t => t.name.toLowerCase().includes(q));
       let key = sortKey.value;
       if (key === 'avgGoals') {
-        if (viewMode.value === 'home') key = 'avgHomeGoals';
-        else if (viewMode.value === 'away') key = 'avgAwayGoals';
+        if (viewMode.value === 'home') key = 'avgGoalsHome';
+        else if (viewMode.value === 'away') key = 'avgGoalsAway';
       }
       const dir = sortDir.value;
       return [...rows].sort((a, b) => {
@@ -373,25 +399,14 @@ createApp({
     });
 
     async function fetchTeams(view) {
-
-      console.log(view);
-      if (view !== undefined) {
+      if (viewMode !== undefined) {
         viewMode.value = view;
-      } else {
-        viewMode.value = 'all';
       }
-
       loading.value = true;
       error.value = '';
       teams.value = [];
       try {
-
-        let query = "";
-        if (viewMode.value) {
-          query = '?' + encodeURIComponent(viewMode.value);
-        }
-
-        const res = await fetch(`${BASE}/${selectedLeague.value}` + query);
+        const res = await fetch(`${BASE}/${selectedLeague.value}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         teams.value = await res.json();
       } catch (e) {
@@ -408,7 +423,7 @@ createApp({
 
     onMounted(fetchTeams);
 
-    return { menuCollapsed, leagues, teams, loading, error, search, selectedLeague, sorted, fetchTeams, selectLeague, setSort, sortIcon, viewMode };
+    return { menuCollapsed, leagues, teams, loading, error, search, selectedLeague, sorted, fetchTeams, selectLeague, setSort, sortIcon, viewMode, goalPillClass };
   }
 }).mount('#app');
 </script>

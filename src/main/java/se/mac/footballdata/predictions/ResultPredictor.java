@@ -9,26 +9,29 @@ public class ResultPredictor {
 
     private HashMap<String, Float> homeResultMap;
     private HashMap<String, Float> awayResultMap;
-    private List<Result> resultList = new ArrayList<Result>();
+    private List<Result> resultList = new ArrayList<>();
 
-    private Map<String, Float> oddsInfoMap = new HashMap<String, Float>();
+    private Map<String, Float> oddsInfoMap = new HashMap<>();
 
     public static void main(String[] args) throws Exception {
         System.out.println("ResultPredictor started");
 
         ResultPredictor resultPredictor = new ResultPredictor();
-        resultPredictor.calculateOutcomeProbability(1.84, 0.79, 1.49, 1.21, 1.26, 1.32, 1.21, 1.49);
+        // goalsHomeTeam, concededHomeTeam, goalsHomeLeague, concededHomeLeague,
+        // goalsAwayTeam, concededAwayTeam, concededHomeLeague, goalsHomeLeague
+        resultPredictor.calculateOutcomeProbability(1.58, 1.05, 1.53, 1.22,
+              1.68, 1.11, 1.22, 1.53);
 
         printResults(0, 0, resultPredictor.getResultList(), resultPredictor.getHomeResultMap(),
-                resultPredictor.getAwayResultMap(), resultPredictor.getOddsInfoMap());
+            resultPredictor.getAwayResultMap(), resultPredictor.getOddsInfoMap());
 
         System.out.println("\n");
-		/*resultPredictor = new ResultPredictor();
-		// Hometeam avg goals, awayteam avg goals
-		resultPredictor.calculateOverUnderProbability(calculateMean(0.89, 1.33), calculateMean(0.56, 2.56));
+		  resultPredictor = new ResultPredictor();
+		  // Hometeam avg goals (goalsHomeTeam, concededHomeTeam)  awayteam avg goals (goalsAwayTeam, concededAwayTeam)
+		  resultPredictor.calculateOverUnderProbability(calculateMean(1.58, 1.05), calculateMean(1.68, 1.11));
 		
-		printResults(calculateMean(0.89, 1.33), calculateMean(0.56, 2.56), resultPredictor.getResultList(), resultPredictor.getHomeResultMap(),
-				resultPredictor.getAwayResultMap(), resultPredictor.getOddsInfoMap());*/
+		  printResults(calculateMean(1.58, 1.05), calculateMean(1.68, 1.11), resultPredictor.getResultList(), resultPredictor.getHomeResultMap(),
+		      resultPredictor.getAwayResultMap(), resultPredictor.getOddsInfoMap());
     }
 
     public HashMap<String, Float> getHomeResultMap() {
@@ -347,7 +350,7 @@ public class ResultPredictor {
     }
 
     private static HashMap<String, Float> calculateScoreProbability(double mean) {
-        HashMap<String, Integer> score = new HashMap<String, Integer>();
+        HashMap<String, Integer> score = new HashMap<>();
 
         for (int i = 0; i < noOfSamples; i++) {
             int res = getPoissonRandom(mean);
@@ -365,7 +368,7 @@ public class ResultPredictor {
         }
 
         // System.out.println("\n" + score.toString());
-        HashMap<String, Float> resultMap = new HashMap<String, Float>();
+        HashMap<String, Float> resultMap = new HashMap<>();
 
         for (String key : score.keySet()) {
             Integer no = score.get(key);
@@ -410,8 +413,7 @@ public class ResultPredictor {
     }
 
     public static double calculateMean(double d1, double d2) {
-        double tmp = (d1 + d2) / 2;
-        return tmp;
+        return (d1 + d2) / 2;
     }
 
     public static void printResults(double hAvg, double bAvg, List<Result> resultList,
@@ -460,9 +462,9 @@ public class ResultPredictor {
         System.out.println("x: " + oddsInfoMap.get("x"));
         System.out.println("2: " + oddsInfoMap.get("2"));
         System.out.println("o2.5: " + oddsInfoMap.get("o2.5"));
-        System.out.println("o2.5: " + oddsInfoMap.get("u2.5"));
+        System.out.println("u2.5: " + oddsInfoMap.get("u2.5"));
         System.out.println("o3.5: " + oddsInfoMap.get("o3.5"));
-        System.out.println("o3.5: " + oddsInfoMap.get("u3.5"));
+        System.out.println("u3.5: " + oddsInfoMap.get("u3.5"));
     }
 
     static class Result {

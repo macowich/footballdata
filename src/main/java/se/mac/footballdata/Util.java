@@ -37,117 +37,122 @@ public class Util {
         return date.format(isoFormat);
     }
 
-    public static Team createTeamFromResult(String name, List<Result> matches, String filter) {
+    public static Team createTeamFromResult(String name, List<Result> matches) {
         Team t = new Team();
         t.name = name;
 
         int homeGoalsTotal = 0;
         int awayGoalsTotal = 0;
+        int homeConcededTotal = 0;
+        int awayConcededTotal = 0;
         int homeMatchesTotal = 0;
         int awayMatchesTotal = 0;
+
         int homeGoals = 0;
         int homeGoalsConceeded = 0;
         int awayGoals = 0;
         int awayGoalsConceeded = 0;
+
         int homeMatches = 0;
         int awayMatches = 0;
+
         int over2Counter = 0;
 
         for (Result match : matches) {
+            //TODO
+            homeGoalsTotal += match.fullTimeHomeGoals;
+            awayGoalsTotal += match.fullTimeAwayGoals;
+            homeConcededTotal += match.fullTimeAwayGoals;
+            awayConcededTotal += match.fullTimeHomeGoals;
+            homeMatchesTotal++;
+            awayMatchesTotal++;
 
-            if (filter != null && filter.equalsIgnoreCase("home")) {
-                homeGoalsTotal += match.fullTimeHomeGoals;
-
-                if (name.equals(match.homeTeam)) {
-                    homeGoals += match.fullTimeHomeGoals;
-                    homeGoalsConceeded += match.fullTimeAwayGoals;
-                    homeMatches++;
-                    if (match.fullTimeHomeGoals + match.fullTimeAwayGoals > 2) {
-                        over2Counter++;
-                    }
+            if (name.equals(match.homeTeam)) {
+                homeGoals += match.fullTimeHomeGoals;
+                homeGoalsConceeded += match.fullTimeAwayGoals;
+                homeMatches++;
+                if (match.fullTimeHomeGoals + match.fullTimeAwayGoals > 2) {
+                    over2Counter++;
                 }
-            } else if (filter != null && filter.equalsIgnoreCase("away")) {
-                awayGoalsTotal += match.fullTimeAwayGoals;
-
-                if (name.equals(match.awayTeam)) {
-                    awayGoals += match.fullTimeAwayGoals;
-                    awayGoalsConceeded += match.fullTimeHomeGoals;
-                    awayMatches++;
-                    if (match.fullTimeHomeGoals + match.fullTimeAwayGoals > 2) {
-                        over2Counter++;
-                    }
-                }
-            } else {
-                homeGoalsTotal += match.fullTimeHomeGoals;
-                awayGoalsTotal += match.fullTimeAwayGoals;
-                homeMatchesTotal++;
-                awayMatchesTotal++;
-
-                if (name.equals(match.homeTeam)) {
-                    homeGoals += match.fullTimeHomeGoals;
-                    homeGoalsConceeded += match.fullTimeAwayGoals;
-                    homeMatches++;
-                    if (match.fullTimeHomeGoals + match.fullTimeAwayGoals > 2) {
-                        over2Counter++;
-                    }
-                } else if (name.equals(match.awayTeam)) {
-                    awayGoals += match.fullTimeAwayGoals;
-                    awayGoalsConceeded += match.fullTimeHomeGoals;
-                    awayMatches++;
-                    if (match.fullTimeHomeGoals + match.fullTimeAwayGoals > 2) {
-                        over2Counter++;
-                    }
+            } else if (name.equals(match.awayTeam)) {
+                awayGoals += match.fullTimeAwayGoals;
+                awayGoalsConceeded += match.fullTimeHomeGoals;
+                awayMatches++;
+                if (match.fullTimeHomeGoals + match.fullTimeAwayGoals > 2) {
+                    over2Counter++;
                 }
             }
         }
 
         int totalGoals = homeGoals + awayGoals + homeGoalsConceeded + awayGoalsConceeded;
 
-        double avgHomeGoalsTotal =
-                matches.isEmpty()
-                        ? 0
-                        : (double) homeGoalsTotal / (homeMatchesTotal/2);
-
-        double avgAwayGoalsTotal =
-                matches.isEmpty()
-                        ? 0
-                        : (double) awayGoalsTotal / (awayMatchesTotal/2);
-
         double avgGoals =
                 matches.isEmpty()
                         ? 0
                         : (double) totalGoals / (homeMatches + awayMatches);
 
-        double avgHomeGoals =
+        double avgGoalsHome =
                 homeMatches == 0
                         ? 0
                         : (double) (homeGoals + homeGoalsConceeded) / homeMatches;
 
-        double avgAwayGoals =
+        double avgGoalsAway =
                 awayMatches == 0
                         ? 0
                         : (double) (awayGoals + awayGoalsConceeded) / awayMatches;
 
-        double avgHomeGoalsConceeded =
-                homeMatches == 0
-                        ? 0
-                        : (double) (homeGoalsConceeded) / homeMatches;
-
-        double avgAwayGoalsConceeded =
-                awayMatches == 0
-                        ? 0
-                        : (double) (awayGoalsConceeded) / awayMatches;
-
-        t.matcher = homeMatches + awayMatches;
+        t.matches = homeMatches + awayMatches;
         t.goals = homeGoals + awayGoals;
-        t.avgHomeGoalsTotal = Util.round(avgHomeGoalsTotal, 2);
-        t.avgAwayGoalsTotal = Util.round(avgAwayGoalsTotal, 2);
-        t.goalsconceeded = homeGoalsConceeded + awayGoalsConceeded;
+        t.conceeded = homeGoalsConceeded + awayGoalsConceeded;
         t.avgGoals = Util.round(avgGoals, 2);
-        t.avgHomeGoals = Util.round(avgHomeGoals, 2);
-        t.avgHomeGoalsConceeded = Util.round(avgHomeGoalsConceeded, 2);
-        t.avgAwayGoalsConceeded = Util.round(avgAwayGoalsConceeded, 2);
-        t.avgAwayGoals = Util.round(avgAwayGoals, 2);
+
+        t.homeMatches = homeMatches;
+        t.awayMatches = awayMatches;
+
+        t.goalshome = homeGoals;
+        t.goalsaway = awayGoals;
+        t.conceededhome = homeGoalsConceeded;
+        t.conceededaway = awayGoalsConceeded;
+        t.avgGoalsHome = Util.round(avgGoalsHome, 2);
+        t.avgGoalsAway = Util.round(avgGoalsAway, 2);
+
+        t.goalsHomeTeam =
+              homeMatches == 0
+                    ? 0
+                    : (double) homeGoals / homeMatches;
+        t.goalsHomeTeam = Util.round(t.goalsHomeTeam, 2);
+
+        t.concededHomeTeam =
+            homeMatches == 0
+                ? 0
+                : (double) homeGoalsConceeded / homeMatches;
+        t.concededHomeTeam = Util.round(t.concededHomeTeam, 2);
+
+        t.goalsAwayTeam =
+              awayMatches == 0
+                    ? 0
+                    : (double) awayGoals / awayMatches;
+        t.goalsAwayTeam = Util.round(t.goalsAwayTeam, 2);
+
+        t.concededAwayTeam =
+              awayMatches == 0
+                    ? 0
+                    : (double) awayGoalsConceeded / awayMatches;
+        t.concededAwayTeam = Util.round(t.concededAwayTeam, 2);
+
+        t.goalsHomeLeague =
+              homeMatchesTotal == 0
+                    ? 0
+                    : (double) homeGoalsTotal / homeMatchesTotal;
+        t.goalsHomeLeague = Util.round(t.goalsHomeLeague, 2);
+
+        t.concededHomeLeague =
+              homeMatchesTotal == 0
+                    ? 0
+                    : (double) homeConcededTotal / homeMatchesTotal;
+        t.concededHomeLeague = Util.round(t.concededHomeLeague, 2);
+
+        // TODO
         t.over2 = over2Counter;
         return t;
     }
