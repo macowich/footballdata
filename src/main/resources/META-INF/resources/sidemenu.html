@@ -1,0 +1,60 @@
+<!--
+  sidemenu.html — shared side navigation fragment
+  Loaded dynamically by sidemenu-loader.js into #sidemenu-root.
+  The loader passes a `data-page` attribute to highlight the active item.
+-->
+<aside class="sidemenu" id="sidemenu">
+  <div class="sidemenu-logo">
+    <div class="logo-icon">⚽</div>
+    <span class="logo-text">Fixtures</span>
+  </div>
+
+  <div class="sidemenu-toggle" id="sidemenu-toggle">‹</div>
+
+  <nav class="sidemenu-nav">
+    <div class="nav-section-label">Huvudmeny</div>
+
+    <a class="nav-item" data-page="fixtures" href="fixtures.html">
+      <span class="nav-icon">📅</span>
+      <span class="nav-label">Fixtures</span>
+    </a>
+    <a class="nav-item" data-page="matches" href="matches.html">
+      <span class="nav-icon">📊</span>
+      <span class="nav-label">Matcher</span>
+    </a>
+    <a class="nav-item" data-page="leagues" href="#">
+      <span class="nav-icon">🏆</span>
+      <span class="nav-label">Ligor</span>
+    </a>
+    <a class="nav-item" data-page="teams" href="teams.html">
+      <span class="nav-icon">👕</span>
+      <span class="nav-label">Lag</span>
+    </a>
+
+    <div class="nav-section-label" style="margin-top:8px">Verktyg</div>
+
+    <a class="nav-item" data-page="predictions" href="predictions.html">
+      <span class="nav-icon">🔮</span>
+      <span class="nav-label">Predictions</span>
+    </a>
+    <a class="nav-item" data-page="odds" href="#">
+      <span class="nav-icon">📈</span>
+      <span class="nav-label">Odds-analys</span>
+    </a>
+    <a class="nav-item" data-page="reports" href="#">
+      <span class="nav-icon">📋</span>
+      <span class="nav-label">Rapporter</span>
+    </a>
+  </nav>
+
+  <div class="sidemenu-footer">
+    <a class="nav-item" data-page="settings" href="#">
+      <span class="nav-icon">⚙️</span>
+      <span class="nav-label">Inställningar</span>
+    </a>
+    <a class="nav-item" data-page="help" href="#">
+      <span class="nav-icon">❓</span>
+      <span class="nav-label">Hjälp</span>
+    </a>
+  </div>
+</aside>

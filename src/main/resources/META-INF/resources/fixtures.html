@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Fixtures</title>
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="sidemenu-loader.js" data-page="fixtures" defer></script>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="fixtures.css"/>
 <link rel="stylesheet" href="sidemenu.css"/>
@@ -80,46 +81,7 @@
 <div id="app">
 
   <!-- Side Menu -->
-  <aside class="sidemenu" :class="{ collapsed: menuCollapsed }">
-    <div class="sidemenu-logo">
-      <div class="logo-icon">⚽</div>
-      <span class="logo-text">Fixtures</span>
-    </div>
-
-    <div class="sidemenu-toggle" @click="menuCollapsed = !menuCollapsed">
-      {{ menuCollapsed ? '›' : '‹' }}
-    </div>
-
-    <nav class="sidemenu-nav">
-      <div class="nav-section-label">Huvudmeny</div>
-      <a class="nav-item active" data-label="Fixtures" href="#">
-        <span class="nav-icon">📅</span>
-        <span class="nav-label">Fixtures</span>
-        <span class="nav-badge" v-if="!loading">{{ items.length }}</span>
-      </a>
-      <a class="nav-item" data-label="Dashboard" href="matches.html">
-        <span class="nav-icon">📊</span>
-        <span class="nav-label">Matcher</span>
-      </a>
-      <a class="nav-item" data-label="Ligor" href="#">
-        <span class="nav-icon">🏆</span>
-        <span class="nav-label">Ligor</span>
-      </a>
-      <a class="nav-item" data-label="Lag" href="teams.html">
-        <span class="nav-icon">👕</span>
-        <span class="nav-label">Lag</span>
-      </a>
-
-      <div class="nav-section-label" style="margin-top:8px">Verktyg</div>
-      <a class="nav-item" data-label="Odds-analys" href="#">
-        <span class="nav-icon">📈</span>
-        <span class="nav-label">Odds-analys</span>
-      </a>
-      <a class="nav-item" data-label="Rapporter" href="#">
-        <span class="nav-icon">📋</span>
-        <span class="nav-label">Rapporter</span>
-      </a>
-    </nav>
+  <div id="sidemenu-root"></div>
 
     <div class="sidemenu-footer">
       <a class="nav-item" data-label="Inställningar" href="#">

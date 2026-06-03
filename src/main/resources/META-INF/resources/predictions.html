@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Predictions</title>
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="sidemenu-loader.js" data-page="predictions" defer></script>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="fixtures.css"/>
+<link rel="stylesheet" href="sidemenu.css"/>
+<style>
+  body { margin: 0; }
+  #app { display: flex; min-height: 100vh; }
+
+  /* Date dropdown */
+  .date-select-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .date-select-wrap .cal-icon {
+    position: absolute;
+    left: 11px;
+    font-size: 15px;
+    pointer-events: none;
+    line-height: 1;
+  }
+  .date-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background: var(--surface, #1a1f2e);
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 8px;
+    color: var(--text, #e2e8f0);
+    font-family: 'Figtree', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 8px 32px 8px 34px;
+    cursor: pointer;
+    outline: none;
+    transition: border-color .15s, background .15s;
+    min-width: 160px;
+  }
+  .date-select:hover { border-color: rgba(255,255,255,.22); }
+  .date-select:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59,130,246,.2); }
+  .date-select option { background: #1a1f2e; color: #e2e8f0; }
+  .date-chevron {
+    position: absolute;
+    right: 10px;
+    font-size: 10px;
+    color: rgba(255,255,255,.4);
+    pointer-events: none;
+  }
+  .clear-date {
+    margin-left: 6px;
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 6px;
+    color: rgba(255,255,255,.5);
+    font-size: 13px;
+    padding: 6px 8px;
+    cursor: pointer;
+    transition: background .15s, color .15s;
+    line-height: 1;
+  }
+  .clear-date:hover { background: rgba(255,255,255,.12); color: #fff; }
+
+  .main-content {
+    margin-left: 220px;
+    flex: 1;
+    transition: margin-left .25s cubic-bezier(.4,0,.2,1);
+    min-width: 0;
+  }
+  .main-content.shifted { margin-left: 56px; }
+
+  /* Probability bar for odds */
+  .prob-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 120px;
+  }
+  .prob-bar-track {
+    flex: 1;
+    height: 6px;
+    background: rgba(255,255,255,.08);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .prob-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width .4s ease;
+  }
+  .fill-home { background: #3b82f6; }
+  .fill-draw { background: #94a3b8; }
+  .fill-away { background: #f97316; }
+  .fill-under { background: #22c55e; }
+  .fill-over  { background: #a855f7; }
+
+  .prob-pct {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted, #64748b);
+    min-width: 30px;
+    text-align: right;
+  }
+
+  /* Outcome chips */
+  .outcome-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .outcome-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid transparent;
+    white-space: nowrap;
+  }
+  .chip-home  { background: rgba(59,130,246,.12); color: #60a5fa; border-color: rgba(59,130,246,.2); }
+  .chip-draw  { background: rgba(148,163,184,.10); color: #94a3b8; border-color: rgba(148,163,184,.2); }
+  .chip-away  { background: rgba(249,115,22,.12);  color: #fb923c; border-color: rgba(249,115,22,.2); }
+  .chip-under { background: rgba(34,197,94,.10);   color: #4ade80; border-color: rgba(34,197,94,.2); }
+  .chip-over  { background: rgba(168,85,247,.12);  color: #c084fc; border-color: rgba(168,85,247,.2); }
+
+  /* Best-value highlight */
+  .best-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .best-home  { color: #60a5fa; }
+  .best-draw  { color: #94a3b8; }
+  .best-away  { color: #fb923c; }
+
+  /* Sort icon */
+  th.sortable { cursor: pointer; user-select: none; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- Side Menu -->
+  <div id="sidemenu-root"></div>
+
+  <!-- Main Content -->
+  <div class="main-content" :class="{ shifted: menuCollapsed }">
+  <div class="wrapper">
+
+    <!-- Header -->
+    <div class="header">
+      <div class="header-top">
+        <div>
+          <div class="title">Pre<span>dictions</span></div>
+          <div class="subtitle">Kommande matcher med oddsprognoser</div>
+        </div>
+        <div class="count-badge" v-if="!loading">{{ filtered.length }} / {{ items.length }} poster</div>
+      </div>
+    </div>
+
+    <!-- Error -->
+    <div class="error-banner" v-if="error">
+      ⚠ {{ error }}
+      <button class="btn btn-secondary btn-sm" style="margin-left:auto" @click="fetchAll">Försök igen</button>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input v-model="search" placeholder="Sök på lag eller liga…" />
+      </div>
+
+      <!-- Date dropdown -->
+      <div class="date-select-wrap">
+        <span class="cal-icon">📆</span>
+        <select class="date-select" v-model="selectedDate">
+          <option value="">Alla datum</option>
+          <option v-for="d in availableDates" :key="d" :value="d">{{ d }}</option>
+        </select>
+        <span class="date-chevron">▼</span>
+      </div>
+      <button v-if="selectedDate" class="clear-date" @click="selectedDate = ''" title="Rensa datum">✕</button>
+
+      <button class="btn btn-secondary" @click="fetchAll" :disabled="loading">
+        {{ loading ? '…' : '↻ Ladda om' }}
+      </button>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap fade-in">
+
+      <!-- Loading -->
+      <div class="state-box" v-if="loading">
+        <div class="icon">⏳</div>
+        <strong>Hämtar data…</strong>
+        Ansluter till API…
+      </div>
+
+      <!-- Empty -->
+      <div class="state-box" v-else-if="filtered.length === 0 && !error">
+        <div class="icon">🔮</div>
+        <strong>Inga prognoser</strong>
+        {{ search ? 'Inga poster matchar sökningen.' : 'Det finns inga predictions ännu.' }}
+      </div>
+
+      <!-- Table -->
+      <table v-else>
+        <thead>
+          <tr>
+            <th class="sortable" @click="setSort('date')">Datum &amp; Tid {{ sortIcon('date') }}</th>
+            <th>Hemma / Borta</th>
+            <th class="sortable" @click="setSort('homewin')">Hemmaseger {{ sortIcon('homewin') }}</th>
+            <th class="sortable" @click="setSort('draw')">Oavgjort {{ sortIcon('draw') }}</th>
+            <th class="sortable" @click="setSort('awaywin')">Bortaseger {{ sortIcon('awaywin') }}</th>
+            <th class="sortable" @click="setSort('u25')">U 2.5 {{ sortIcon('u25') }}</th>
+            <th class="sortable" @click="setSort('o25')">Ö 2.5 {{ sortIcon('o25') }}</th>
+            <th>Favorit</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="row-hover" v-for="item in filtered" :key="item.fixture_id">
+            <td style="white-space:nowrap">
+              <strong>{{ item.date || '—' }}</strong>
+              <span style="color:var(--muted)"> {{ item.time }}</span>
+            </td>
+            <td>
+              <div><span class="odds-chip green">{{ item.hometeam }}</span></div>
+              <div style="margin-top:3px"><span class="odds-chip orange">{{ item.awayteam }}</span></div>
+            </td>
+            <!-- Home win -->
+            <td>
+              <div class="prob-bar-wrap">
+                <div class="prob-bar-track">
+                  <div class="prob-bar-fill fill-home" :style="{width: impliedPct(item.homewin)+'%'}"></div>
+                </div>
+                <span class="prob-pct">{{ impliedPct(item.homewin) }}%</span>
+              </div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:13px;margin-top:2px;color:var(--text)">{{ item.homewin }}</div>
+            </td>
+            <!-- Draw -->
+            <td>
+              <div class="prob-bar-wrap">
+                <div class="prob-bar-track">
+                  <div class="prob-bar-fill fill-draw" :style="{width: impliedPct(item.draw)+'%'}"></div>
+                </div>
+                <span class="prob-pct">{{ impliedPct(item.draw) }}%</span>
+              </div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:13px;margin-top:2px;color:var(--text)">{{ item.draw }}</div>
+            </td>
+            <!-- Away win -->
+            <td>
+              <div class="prob-bar-wrap">
+                <div class="prob-bar-track">
+                  <div class="prob-bar-fill fill-away" :style="{width: impliedPct(item.awaywin)+'%'}"></div>
+                </div>
+                <span class="prob-pct">{{ impliedPct(item.awaywin) }}%</span>
+              </div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:13px;margin-top:2px;color:var(--text)">{{ item.awaywin }}</div>
+            </td>
+            <!-- U2.5 -->
+            <td>
+              <div class="prob-bar-wrap">
+                <div class="prob-bar-track">
+                  <div class="prob-bar-fill fill-under" :style="{width: impliedPct(item.u25)+'%'}"></div>
+                </div>
+                <span class="prob-pct">{{ impliedPct(item.u25) }}%</span>
+              </div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:13px;margin-top:2px;color:var(--text)">{{ item.u25 }}</div>
+            </td>
+            <!-- O2.5 -->
+            <td>
+              <div class="prob-bar-wrap">
+                <div class="prob-bar-track">
+                  <div class="prob-bar-fill fill-over" :style="{width: impliedPct(item.o25)+'%'}"></div>
+                </div>
+                <span class="prob-pct">{{ impliedPct(item.o25) }}%</span>
+              </div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:13px;margin-top:2px;color:var(--text)">{{ item.o25 }}</div>
+            </td>
+            <!-- Favourite -->
+            <td>
+              <span class="outcome-chip" :class="favoriteClass(item)">
+                {{ favoriteLabel(item) }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+  </div>
+</div>
+
+<script>
+const { createApp, ref, computed, onMounted } = Vue;
+
+createApp({
+  setup() {
+    const API = 'http://localhost:8080/predictions/all';
+
+    const menuCollapsed = ref(false);
+    const items = ref([]);
+    const loading = ref(false);
+    const error = ref('');
+    const search = ref('');
+    const selectedDate = ref('');
+    const sortKey = ref('');
+    const sortDir = ref(1);
+
+    const availableDates = computed(() => {
+      const dates = [...new Set(items.value.map(i => i.date).filter(Boolean))];
+      return dates.sort((a, b) => new Date(a) - new Date(b));
+    });
+
+    // Convert decimal odds to implied probability percentage
+    function impliedPct(odds) {
+      const o = parseFloat(odds);
+      if (!o || o <= 0) return 0;
+      return Math.round((1 / o) * 100);
+    }
+
+    function favoriteLabel(item) {
+      const h = parseFloat(item.homewin), d = parseFloat(item.draw), a = parseFloat(item.awaywin);
+      const min = Math.min(h, d, a);
+      if (min === h) return item.hometeam;
+      if (min === a) return item.awayteam;
+      return 'Oavgjort';
+    }
+
+    function favoriteClass(item) {
+      const h = parseFloat(item.homewin), d = parseFloat(item.draw), a = parseFloat(item.awaywin);
+      const min = Math.min(h, d, a);
+      if (min === h) return 'chip-home';
+      if (min === a) return 'chip-away';
+      return 'chip-draw';
+    }
+
+    function setSort(key) {
+      if (sortKey.value === key) sortDir.value *= -1;
+      else { sortKey.value = key; sortDir.value = 1; }
+    }
+
+    function sortIcon(key) {
+      if (sortKey.value !== key) return '\u2195';
+      return sortDir.value === 1 ? '\u2191' : '\u2193';
+    }
+
+    const filtered = computed(() => {
+      const q = search.value.toLowerCase().trim();
+      const d = selectedDate.value;
+      const s = v => String(v ?? '').toLowerCase();
+      let rows = items.value;
+      if (d) rows = rows.filter(i => i.date === d);
+      if (q) rows = rows.filter(i =>
+        s(i.date).includes(q) || s(i.time).includes(q) ||
+        s(i.hometeam).includes(q) || s(i.awayteam).includes(q) ||
+        s(i.fixture_id).includes(q)
+      );
+      if (!sortKey.value) return rows;
+      const key = sortKey.value;
+      const dir = sortDir.value;
+      return [...rows].sort((a, b) => {
+        const av = a[key] ?? '', bv = b[key] ?? '';
+        const an = parseFloat(av), bn = parseFloat(bv);
+        if (!isNaN(an) && !isNaN(bn)) return (an - bn) * dir;
+        return String(av).localeCompare(String(bv)) * dir;
+      });
+    });
+
+    async function fetchAll() {
+      loading.value = true;
+      error.value = '';
+      try {
+        const res = await fetch(API);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        items.value = await res.json();
+      } catch(e) {
+        error.value = `Kunde inte hämta data: ${e.message}. Kontrollera att API:et körs på ${API}.`;
+      } finally {
+        loading.value = false;
+      }
+    }
+
+    onMounted(fetchAll);
+
+    return {
+      menuCollapsed, items, loading, error, search, selectedDate,
+      availableDates, filtered, fetchAll, sortKey, sortDir,
+      setSort, sortIcon, impliedPct, favoriteLabel, favoriteClass
+    };
+  }
+}).mount('#app');
+</script>
+</body>
+</html>
