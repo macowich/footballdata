@@ -74,6 +74,9 @@
   }
   .main-content.shifted { margin-left: 56px; }
 
+  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table { min-width: 960px; }
+
   /* Probability bar for odds */
   .prob-bar-wrap {
     display: flex;
@@ -152,7 +155,7 @@
   <div id="sidemenu-root"></div>
 
   <!-- Main Content -->
-  <div class="main-content" :class="{ shifted: menuCollapsed }">
+  <div class="main-content">
   <div class="wrapper">
 
     <!-- Header -->
@@ -287,11 +290,11 @@
               <div style="font-family:'JetBrains Mono',monospace;font-size:13px;margin-top:2px;color:var(--text)">{{ item.o25 }}</div>
             </td>
             <!-- Favourite -->
-            <td>
+            <!--<td>
               <span class="outcome-chip" :class="favoriteClass(item)">
                 {{ favoriteLabel(item) }}
               </span>
-            </td>
+            </td>-->
           </tr>
         </tbody>
       </table>
@@ -308,7 +311,6 @@ createApp({
   setup() {
     const API = 'http://localhost:8080/predictions/all';
 
-    const menuCollapsed = ref(false);
     const items = ref([]);
     const loading = ref(false);
     const error = ref('');
@@ -394,7 +396,7 @@ createApp({
     onMounted(fetchAll);
 
     return {
-      menuCollapsed, items, loading, error, search, selectedDate,
+      items, loading, error, search, selectedDate,
       availableDates, filtered, fetchAll, sortKey, sortDir,
       setSort, sortIcon, impliedPct, favoriteLabel, favoriteClass
     };

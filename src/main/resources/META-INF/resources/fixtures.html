@@ -83,20 +83,8 @@
   <!-- Side Menu -->
   <div id="sidemenu-root"></div>
 
-    <div class="sidemenu-footer">
-      <a class="nav-item" data-label="Inställningar" href="#">
-        <span class="nav-icon">⚙️</span>
-        <span class="nav-label">Inställningar</span>
-      </a>
-      <a class="nav-item" data-label="Hjälp" href="#">
-        <span class="nav-icon">❓</span>
-        <span class="nav-label">Hjälp</span>
-      </a>
-    </div>
-  </aside>
-
   <!-- Main Content -->
-  <div class="main-content" :class="{ shifted: menuCollapsed }">
+  <div class="main-content">
   <div class="wrapper">
 
     <!-- Header -->
@@ -202,9 +190,6 @@ const { createApp, ref, computed, onMounted } = Vue;
 createApp({
   setup() {
     const API = 'http://localhost:8080/fixtures/all';
-
-    const menuCollapsed = ref(false);
-
     const items = ref([]);
     const loading = ref(false);
     const error = ref('');
@@ -274,7 +259,7 @@ createApp({
 
     onMounted(fetchAll);
 
-    return { items, loading, error, search, selectedDate, availableDates, filtered, fetchAll, sortKey, sortDir, setSort, sortIcon, menuCollapsed };
+    return { items, loading, error, search, selectedDate, availableDates, filtered, fetchAll, sortKey, sortDir, setSort, sortIcon };
   }
 }).mount('#app');
 </script>
