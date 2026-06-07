@@ -5,6 +5,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.bson.types.ObjectId;
+import se.mac.footballdata.rest.model.Result;
 
 import java.util.List;
 

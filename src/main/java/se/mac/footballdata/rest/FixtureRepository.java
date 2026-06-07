@@ -2,6 +2,7 @@ package se.mac.footballdata.rest;
 
 import io.quarkus.mongodb.panache.PanacheMongoRepository;
 import jakarta.enterprise.context.ApplicationScoped;
+import se.mac.footballdata.rest.model.Fixture;
 
 import java.util.List;
 

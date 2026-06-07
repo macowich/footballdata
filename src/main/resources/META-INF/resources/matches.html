@@ -210,11 +210,11 @@
 
       <div class="league-tabs">
         <button
-          v-for="l in leagues" :key="l"
+          v-for="l in leagues" :key="l.id"
           class="league-tab"
-          :class="{ active: selectedLeague === l }"
+          :class="{ active: selectedLeague.name === l.name }"
           @click="selectLeague(l)"
-        >{{ l }}</button>
+        >{{ l.name }}</button>
       </div>
 
       <button class="btn btn-secondary" @click="fetchMatches" :disabled="loading">
@@ -315,6 +315,7 @@
           <div class="stat-val">{{ detail.awayShots }}</div>
         </div>
 
+        <!--
         <div class="stat-row">
           <div class="stat-val">{{ detail.homeShotsTarget }}</div>
           <div>
@@ -325,7 +326,7 @@
             </div>
           </div>
           <div class="stat-val">{{ detail.awayShotsTarget }}</div>
-        </div>
+        </div> -->
 
         <div class="stat-row">
           <div class="stat-val">{{ detail.homeCorners }}</div>
@@ -363,6 +364,30 @@
           <div class="stat-val">{{ detail.awayRedcards }}</div>
         </div>
 
+        <div class="stat-row">
+          <div class="stat-val">{{ detail.homeXg }}</div>
+          <div>
+            <div class="stat-label" style="margin-bottom:4px">xG</div>
+            <div class="stat-bars">
+              <div class="stat-bar-home" :style="{width: pct(detail.homeXg, detail.awayXg)+'%'}"></div>
+              <div class="stat-bar-away" :style="{width: pct(detail.awayXg, detail.homeXg)+'%'}"></div>
+            </div>
+          </div>
+          <div class="stat-val">{{ detail.awayXg }}</div>
+        </div>
+
+        <div class="stat-row">
+          <div class="stat-val">{{ detail.homePossesion }}</div>
+          <div>
+            <div class="stat-label" style="margin-bottom:4px">Bollinnehav</div>
+            <div class="stat-bars">
+              <div class="stat-bar-home" :style="{width: pct(detail.homePossesion, detail.awayPossesion)+'%'}"></div>
+              <div class="stat-bar-away" :style="{width: pct(detail.awayPossesion, detail.homePossesion)+'%'}"></div>
+            </div>
+          </div>
+          <div class="stat-val">{{ detail.awayPossesion }}</div>
+        </div>
+
       </div>
 
       <div class="modal-divider"></div>
@@ -384,17 +409,18 @@
 
 </div>
 <script>
-const { createApp, ref, computed, onMounted } = Vue;
+const { createApp, ref, computed, onBeforeMount, onMounted } = Vue;
 
 createApp({
   setup() {
-    const BASE = 'http://localhost:8080/results';
-    const leagues = ['Premier League', 'La Liga', 'Bundesliga', 'Serie A', 'Ligue 1'];
+    const BASE = 'http://localhost:8080/events';
+    let leagues = [{ "id": 1, "name": "Premier League" },
+            { "id": 26, "name": "Allsvenskan" }];
     const matches = ref([]);
     const loading = ref(false);
     const error = ref('');
     const search = ref('');
-    const selectedLeague = ref('Premier League');
+    const selectedLeague = ref(leagues[0]);
 
     const modalOpen = ref(false);
     const modalLoading = ref(false);
@@ -431,7 +457,7 @@ createApp({
       detail.value = null;
       halfView.value = 'full';
       try {
-        const res = await fetch(`${BASE}/${id}`);
+        let res = await fetch(`${BASE}/${id}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         detail.value = await res.json();
       } catch (e) {
@@ -446,15 +472,28 @@ createApp({
       detail.value = null;
     }
 
+    async function fetchLeagues() {
+      loading.value = true;
+      error.value = '';
+      try {
+        let res = await fetch(`${BASE}/league/all`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        leagues = await res.json();
+      } catch (e) {
+        error.value = `Kunde inte hämta data: ${e.message}. Kontrollera att API:et körs på ${BASE}.`;
+      } finally {
+        loading.value = false;
+      }
+    }
+
     async function fetchMatches() {
       loading.value = true;
       error.value = '';
       matches.value = [];
       try {
-        const res = await fetch(`${BASE}/league/${selectedLeague.value}`);
+        let res = await fetch(`${BASE}/league/${selectedLeague.value.id}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         matches.value = await res.json();
-        console.log(matches.value);
       } catch (e) {
         error.value = `Kunde inte hämta data: ${e.message}. Kontrollera att API:et körs på ${BASE}.`;
       } finally {
@@ -467,9 +506,10 @@ createApp({
       fetchMatches();
     }
 
+    //onBeforeMount(fetchLeagues);
     onMounted(fetchMatches);
 
-    return { leagues, matches, loading, error, search, selectedLeague, fetchMatches, selectLeague, modalOpen, modalLoading, detail, openModal, closeModal, pct, halfView, scoreHome, scoreAway, currentResult };
+    return { leagues, matches, loading, error, search, selectedLeague, fetchLeagues, fetchMatches, selectLeague, modalOpen, modalLoading, detail, openModal, closeModal, pct, halfView, scoreHome, scoreAway, currentResult };
   }
 }).mount('#app');
 </script>

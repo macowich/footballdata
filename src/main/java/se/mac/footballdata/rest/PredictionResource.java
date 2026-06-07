@@ -9,6 +9,9 @@ import jakarta.ws.rs.core.Response;
 import se.mac.footballdata.predictions.PredictionRepository;
 import se.mac.footballdata.predictions.ResultPredictor;
 import se.mac.footballdata.predictions.model.Prediction;
+import se.mac.footballdata.rest.model.Fixture;
+import se.mac.footballdata.rest.model.Result;
+import se.mac.footballdata.rest.model.Team;
 
 import java.util.List;
 import java.util.Map;

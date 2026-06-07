@@ -3,6 +3,7 @@ package se.mac.footballdata.rest;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
+import se.mac.footballdata.rest.model.Fixture;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;

@@ -1,7 +1,7 @@
 package se.mac.footballdata;
 
-import se.mac.footballdata.rest.Result;
-import se.mac.footballdata.rest.Team;
+import se.mac.footballdata.rest.model.Result;
+import se.mac.footballdata.rest.model.Team;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

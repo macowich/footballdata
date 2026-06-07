@@ -9,12 +9,14 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.List;
 
 public class SportsApiClient {
 
     private static final String BASE_URL = "https://sports.bzzoiro.com/api/v2/events/";
+    private static final String BASE_URL_REFEREES = "https://sports.bzzoiro.com/api/v2/referees/";
     private static final String API_TOKEN = "bb387466704c69d4660a51d47153ce12f6a1c433";
 
     // ──────────────────────────────────────────────
@@ -32,39 +34,67 @@ public class SportsApiClient {
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Event {
         public int id;
-        @JsonProperty("league_id")   public int leagueId;
-        @JsonProperty("season_id")   public int seasonId;
-        @JsonProperty("home_team_id") public int homeTeamId;
-        @JsonProperty("home_team")   public String homeTeam;
-        @JsonProperty("away_team_id") public int awayTeamId;
-        @JsonProperty("away_team")   public String awayTeam;
-        @JsonProperty("home_coach_id") public Integer homeCoachId;
-        @JsonProperty("away_coach_id") public Integer awayCoachId;
-        @JsonProperty("referee_id")  public Integer refereeId;
-        @JsonProperty("venue_id")    public Integer venueId;
-        @JsonProperty("event_date")  public OffsetDateTime eventDate;
+        @JsonProperty("league_id")
+        public int leagueId;
+        @JsonProperty("season_id")
+        public int seasonId;
+        @JsonProperty("home_team_id")
+        public int homeTeamId;
+        @JsonProperty("home_team")
+        public String homeTeam;
+        @JsonProperty("away_team_id")
+        public int awayTeamId;
+        @JsonProperty("away_team")
+        public String awayTeam;
+        @JsonProperty("home_coach_id")
+        public Integer homeCoachId;
+        @JsonProperty("away_coach_id")
+        public Integer awayCoachId;
+        @JsonProperty("referee_id")
+        public Integer refereeId;
+        @JsonProperty("venue_id")
+        public Integer venueId;
+        @JsonProperty("event_date")
+        public OffsetDateTime eventDate;
         public String status;
-        @JsonProperty("replaced_by") public Integer replacedBy;
-        @JsonProperty("round_number") public int roundNumber;
-        @JsonProperty("round_name")  public String roundName;
-        @JsonProperty("group_name")  public String groupName;
+        @JsonProperty("replaced_by")
+        public Integer replacedBy;
+        @JsonProperty("round_number")
+        public int roundNumber;
+        @JsonProperty("round_name")
+        public String roundName;
+        @JsonProperty("group_name")
+        public String groupName;
         public String period;
-        @JsonProperty("current_minute") public int currentMinute;
-        @JsonProperty("home_score")  public int homeScore;
-        @JsonProperty("away_score")  public int awayScore;
-        @JsonProperty("home_score_ht") public int homeScoreHt;
-        @JsonProperty("away_score_ht") public int awayScoreHt;
-        @JsonProperty("penalty_shootout") public Object penaltyShootout;
-        @JsonProperty("extra_time_score") public Object extraTimeScore;
-        @JsonProperty("is_local_derby") public boolean isLocalDerby;
-        @JsonProperty("is_neutral_ground") public boolean isNeutralGround;
-        @JsonProperty("travel_distance_km") public double travelDistanceKm;
+        @JsonProperty("current_minute")
+        public int currentMinute;
+        @JsonProperty("home_score")
+        public int homeScore;
+        @JsonProperty("away_score")
+        public int awayScore;
+        @JsonProperty("home_score_ht")
+        public int homeScoreHt;
+        @JsonProperty("away_score_ht")
+        public int awayScoreHt;
+        @JsonProperty("penalty_shootout")
+        public Object penaltyShootout;
+        @JsonProperty("extra_time_score")
+        public Object extraTimeScore;
+        @JsonProperty("is_local_derby")
+        public boolean isLocalDerby;
+        @JsonProperty("is_neutral_ground")
+        public boolean isNeutralGround;
+        @JsonProperty("travel_distance_km")
+        public double travelDistanceKm;
         public Weather weather;
-        @JsonProperty("pitch_condition") public int pitchCondition;
+        @JsonProperty("pitch_condition")
+        public int pitchCondition;
         public Integer attendance;
-        @JsonProperty("live_websocket") public boolean liveWebsocket;
+        @JsonProperty("live_websocket")
+        public boolean liveWebsocket;
         public List<Highlight> highlights;
-        @JsonProperty("head_to_head") public HeadToHead headToHead;
+        @JsonProperty("head_to_head")
+        public HeadToHead headToHead;
 
         @Override
         public String toString() {
@@ -77,8 +107,10 @@ public class SportsApiClient {
     public static class Weather {
         public int code;
         public String description;
-        @JsonProperty("wind_speed") public double windSpeed;
-        @JsonProperty("temperature_c") public double temperatureC;
+        @JsonProperty("wind_speed")
+        public double windSpeed;
+        @JsonProperty("temperature_c")
+        public double temperatureC;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -87,21 +119,31 @@ public class SportsApiClient {
         public String title;
         public String url;
         public String thumbnail;
-        @JsonProperty("published_at") public OffsetDateTime publishedAt;
+        @JsonProperty("published_at")
+        public OffsetDateTime publishedAt;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class HeadToHead {
-        @JsonProperty("total_matches")  public int totalMatches;
-        @JsonProperty("home_wins")      public int homeWins;
+        @JsonProperty("total_matches")
+        public int totalMatches;
+        @JsonProperty("home_wins")
+        public int homeWins;
         public int draws;
-        @JsonProperty("away_wins")      public int awayWins;
-        @JsonProperty("home_goals")     public int homeGoals;
-        @JsonProperty("away_goals")     public int awayGoals;
-        @JsonProperty("avg_total_goals") public double avgTotalGoals;
-        @JsonProperty("home_win_rate")  public double homeWinRate;
-        @JsonProperty("away_win_rate")  public double awayWinRate;
-        @JsonProperty("recent_matches") public List<RecentMatch> recentMatches;
+        @JsonProperty("away_wins")
+        public int awayWins;
+        @JsonProperty("home_goals")
+        public int homeGoals;
+        @JsonProperty("away_goals")
+        public int awayGoals;
+        @JsonProperty("avg_total_goals")
+        public double avgTotalGoals;
+        @JsonProperty("home_win_rate")
+        public double homeWinRate;
+        @JsonProperty("away_win_rate")
+        public double awayWinRate;
+        @JsonProperty("recent_matches")
+        public List<RecentMatch> recentMatches;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -111,6 +153,61 @@ public class SportsApiClient {
         public String score;
         public OffsetDateTime date;
     }
+
+
+    // ──────────────────────────────────────────────
+    // Referee model classes
+    // ──────────────────────────────────────────────
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class RefereesResponse {
+        public int count;
+        public String next;
+        public String previous;
+        public List<Referee> results;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Referee {
+        public int id;
+        public String name;
+        public String country;
+        @JsonProperty("nationality_a3")
+        public String nationalityA3;
+        public String birthdate;
+        /**
+         * Matches refereed in the queried league/season.
+         */
+        public int matches;
+        @JsonProperty("total_yellow_cards")
+        public int totalYellowCards;
+        @JsonProperty("total_red_cards")
+        public int totalRedCards;
+        @JsonProperty("avg_yellow_per_match")
+        public double avgYellowPerMatch;
+        @JsonProperty("avg_red_per_match")
+        public double avgRedPerMatch;
+        @JsonProperty("avg_goals_per_match")
+        public double avgGoalsPerMatch;
+        @JsonProperty("avg_fouls_per_match")
+        public double avgFoulsPerMatch;
+        /**
+         * All-time career statistics.
+         */
+        @JsonProperty("career_games")
+        public int careerGames;
+        @JsonProperty("career_yellow_cards")
+        public int careerYellowCards;
+        @JsonProperty("career_red_cards")
+        public int careerRedCards;
+
+        @Override
+        public String toString() {
+            return String.format("%-22s | matches %2d | Y/game %.2f | R/game %.2f | goals/game %.2f",
+                    name, matches, avgYellowPerMatch, avgRedPerMatch, avgGoalsPerMatch);
+        }
+    }
+
 
     // ──────────────────────────────────────────────
     // HTTP client
@@ -122,6 +219,53 @@ public class SportsApiClient {
      */
     public Event fetchEvent(int eventId) throws Exception {
         String url = BASE_URL + eventId + "/";
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Authorization", "Token " + API_TOKEN)
+                .header("Accept", "application/json")
+                .GET()
+                .build();
+
+        HttpResponse<String> response = createHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 200) {
+            throw new RuntimeException("API error " + response.statusCode() + ": " + response.body());
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        return mapper.readValue(response.body(), Event.class);
+    }
+
+    /**
+     * Fetch a list of events filtered by league and date range.
+     * Calls: GET /api/v2/events/?league_id=&date_from=&date_to=
+     */
+    public EventsResponse fetchEvents(String dateFrom, String dateTo, int leagueId) throws Exception {
+        String url = String.format("%s?league_id=%d&date_from=%s&date_to=%s", BASE_URL, leagueId, dateFrom, dateTo);
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Authorization", "Token " + API_TOKEN)
+                .header("Accept", "application/json")
+                .GET()
+                .build();
+
+        HttpResponse<String> response = createHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() != 200) {
+            throw new RuntimeException("API error " + response.statusCode() + ": " + response.body());
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        return mapper.readValue(response.body(), EventsResponse.class);
+    }
+
+    /**
+     * Fetch referees for a given league.
+     * Calls: GET /api/v2/referees/?league_id={leagueId}
+     */
+    public RefereesResponse fetchReferees(int leagueId) throws Exception {
+        String url = BASE_URL_REFEREES + "?league_id=" + leagueId;
 
         HttpClient client = HttpClient.newBuilder().build();
 
@@ -140,39 +284,18 @@ public class SportsApiClient {
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
-        return mapper.readValue(response.body(), Event.class);
+        return mapper.readValue(response.body(), RefereesResponse.class);
     }
 
-    /**
-     * Fetch a list of events filtered by league and date range.
-     * Calls: GET /api/v2/events/?league_id=&date_from=&date_to=
-     */
-    public EventsResponse fetchEvents(String dateFrom, String dateTo, int leagueId) throws Exception {
-        String url = String.format("%s?league_id=%d&date_from=%s&date_to=%s",
-                BASE_URL, leagueId, dateFrom, dateTo);
-
+    private HttpClient createHttpClient() {
         HttpClient client = HttpClient.newBuilder()
-                // Uncomment the line below to disable SSL verification (equivalent to curl -k).
-                // In production, use a proper trust store instead.
-                // .sslContext(insecureSslContext())
+                //.proxy(ProxySelector.of(new InetSocketAddress("proxy.sfa.se", 8080)))
+                .connectTimeout(Duration.ofSeconds(1000))
                 .build();
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .header("Authorization", "Token " + API_TOKEN)
-                .header("Accept", "application/json")
-                .GET()
-                .build();
-
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-        if (response.statusCode() != 200) {
-            throw new RuntimeException("API error " + response.statusCode() + ": " + response.body());
-        }
-
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
-        return mapper.readValue(response.body(), EventsResponse.class);
+        // Uncomment the line below to disable SSL verification (equivalent to curl -k).
+        // In production, use a proper trust store instead.
+        // .sslContext(insecureSslContext())
+        return client;
     }
 
     // ──────────────────────────────────────────────
@@ -183,13 +306,13 @@ public class SportsApiClient {
         SportsApiClient client = new SportsApiClient();
 
         // ── Single event ──────────────────────────────
-        Event single = client.fetchEvent(46375);
+        /*Event single = client.fetchEvent(46375);
         System.out.println("Single event fetch:");
         System.out.println(single);
-        System.out.println();
+        System.out.println();*/
 
         // ── Event list ────────────────────────────────
-        EventsResponse response = client.fetchEvents("2026-05-24", "2026-05-25", 26);
+       /* EventsResponse response = client.fetchEvents("2026-04-04", "2026-05-25", 1);
         System.out.printf("Total events: %d%n%n", response.count);
 
         for (Event event : response.results) {
@@ -214,6 +337,16 @@ public class SportsApiClient {
             }
 
             System.out.println();
+        }
+
+        */
+
+        // ── Referees ──────────────────────────────────
+        System.out.println("\n=== Referees (league 26) ===");
+        RefereesResponse refs = client.fetchReferees(26);
+        System.out.printf("Total referees: %d%n%n", refs.count);
+        for (Referee ref : refs.results) {
+            System.out.println(ref);
         }
     }
 }

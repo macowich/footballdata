@@ -3,6 +3,8 @@ package se.mac.footballdata.rest;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
+import se.mac.footballdata.rest.model.Result;
+import se.mac.footballdata.rest.model.Team;
 
 import java.util.ArrayList;
 import java.util.List;

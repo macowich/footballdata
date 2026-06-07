@@ -1,4 +1,4 @@
-package se.mac.footballdata.rest;
+package se.mac.footballdata.rest.model;
 
 public class Team
 {

@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import se.mac.footballdata.sportsapi.stats.EventStats;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.ProxySelector;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -22,17 +24,17 @@ import java.time.Duration;
 public class EventStatsClient {
 
     private static final String BASE_URL = "https://sports.bzzoiro.com/api/v2";
+    private static final String API_TOKEN = "bb387466704c69d4660a51d47153ce12f6a1c433";
 
-    private final String token;
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
 
-    public EventStatsClient(String token) {
-        this.token = token;
+    public EventStatsClient() {
         this.httpClient = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(10))
+                //.proxy(ProxySelector.of(new InetSocketAddress("proxy.sfa.se", 8080)))
+                .connectTimeout(Duration.ofSeconds(1000))
                 // Disable SSL verification for self-signed certs (matches curl -k)
-                .sslContext(createTrustAllSslContext())
+                //.sslContext(createTrustAllSslContext())
                 .build();
         this.objectMapper = new ObjectMapper();
     }
@@ -50,7 +52,7 @@ public class EventStatsClient {
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
-                .header("Authorization", "Token " + token)
+                .header("Authorization", "Token " + API_TOKEN)
                 .header("Accept", "application/json")
                 .GET()
                 .timeout(Duration.ofSeconds(30))

@@ -8,14 +8,8 @@ import se.mac.footballdata.sportsapi.stats.ShotMapEntry;
 public class Main {
 
     public static void main(String[] args) throws Exception {
-        //String token = System.getenv("SPORTS_API_TOKEN"); // or hard-code for testing
-        String token = "bb387466704c69d4660a51d47153ce12f6a1c433";
-        if (token == null || token.isBlank()) {
-            throw new IllegalStateException("Set SPORTS_API_TOKEN environment variable");
-        }
-
-        EventStatsClient client = new EventStatsClient(token);
-        EventStats event = client.fetchEventStats(46375);
+        EventStatsClient client = new EventStatsClient();
+        EventStats event = client.fetchEventStats(382);
 
         System.out.println("Event ID: " + event.eventId);
         System.out.println();

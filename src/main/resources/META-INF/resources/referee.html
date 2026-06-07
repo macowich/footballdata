@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Domare</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="sidemenu-loader.js" data-page="referees" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="fixtures.css"/>
+    <link rel="stylesheet" href="sidemenu.css"/>
+    <style>
+        body { margin: 0; }
+        #app { display: flex; min-height: 100vh; }
+
+        .main-content {
+            margin-left: 220px;
+            flex: 1;
+            transition: margin-left .25s cubic-bezier(.4,0,.2,1);
+            min-width: 0;
+        }
+        .main-content.shifted { margin-left: 56px; }
+
+        .league-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+        .league-tab {
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-family: var(--font);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1.5px solid var(--border);
+            background: var(--surface);
+            color: var(--muted);
+            transition: all .15s;
+            white-space: nowrap;
+        }
+        .league-tab:hover { border-color: var(--border2); background: var(--surface2); color: var(--text); }
+        .league-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+        .referee-avatar {
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            background: var(--surface2);
+            border: 1.5px solid var(--border2);
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px; font-weight: 700;
+            color: var(--accent);
+            flex-shrink: 0;
+        }
+        .referee-name-cell { display: flex; align-items: center; gap: 12px; }
+        .referee-name { font-family: var(--font); font-size: 14px; font-weight: 600; color: var(--text); }
+        .referee-id-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px; color: var(--muted);
+            background: var(--surface2); border: 1px solid var(--border);
+            border-radius: 5px; padding: 2px 6px;
+        }
+        .mono { font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+        .card-pip {
+            display: inline-flex; align-items: center; gap: 4px;
+            font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600;
+            padding: 2px 7px; border-radius: 5px;
+        }
+        .card-yellow { background: rgba(234,179,8,.15); color: #ca8a04; border: 1px solid rgba(234,179,8,.25); }
+        .card-red    { background: rgba(239,68,68,.12);  color: #ef4444; border: 1px solid rgba(239,68,68,.25); }
+        .avg-bar-wrap { display: flex; align-items: center; gap: 6px; }
+        .avg-bar-track {
+            flex: 1; height: 5px;
+            background: rgba(255,255,255,.07);
+            border-radius: 99px; overflow: hidden;
+            min-width: 60px;
+        }
+        .avg-bar-fill { height: 100%; border-radius: 99px; transition: width .5s ease; }
+        .fill-yellow { background: #ca8a04; }
+        .fill-red    { background: #ef4444; }
+        .avg-val {
+            font-family: 'JetBrains Mono', monospace; font-size: 12px;
+            color: var(--muted); min-width: 28px; text-align: right;
+        }
+        th.sortable { cursor: pointer; user-select: none; }
+        tr.row-hover { cursor: pointer; }
+
+        /* ── Modal ───────────────────────────────────────────────────── */
+        .modal-backdrop {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,.65);
+            backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 1000;
+            padding: 24px;
+            animation: backdropIn .18s ease;
+        }
+        @keyframes backdropIn { from { opacity: 0 } to { opacity: 1 } }
+
+        .modal {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 20px;
+            width: 100%; max-width: 480px;
+            overflow: hidden;
+            animation: modalIn .22s cubic-bezier(.34,1.56,.64,1);
+            position: relative;
+        }
+        @keyframes modalIn { from { opacity:0; transform:scale(.9) translateY(8px) } to { opacity:1; transform:scale(1) translateY(0) } }
+
+        .modal-header {
+            padding: 24px 24px 0;
+            display: flex; align-items: flex-start; justify-content: space-between;
+        }
+        .modal-close {
+            width: 32px; height: 32px; border-radius: 8px;
+            background: var(--surface2); border: 1px solid var(--border);
+            color: var(--muted); font-size: 18px; line-height: 1;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: all .15s; flex-shrink: 0;
+        }
+        .modal-close:hover { background: var(--border); color: var(--text); }
+
+        /* Hero section */
+        .modal-hero {
+            padding: 28px 24px 24px;
+            display: flex; align-items: center; gap: 20px;
+        }
+        .modal-avatar {
+            width: 72px; height: 72px;
+            border-radius: 18px;
+            background: var(--surface2);
+            border: 2px solid var(--border2);
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 28px; font-weight: 700;
+            color: var(--accent);
+            flex-shrink: 0;
+        }
+        .modal-hero-info { flex: 1; min-width: 0; }
+        .modal-name {
+            font-family: var(--font); font-size: 20px; font-weight: 700;
+            color: var(--text); margin-bottom: 6px;
+        }
+        .modal-meta {
+            display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+        }
+        .modal-meta-chip {
+            font-family: 'JetBrains Mono', monospace; font-size: 11px;
+            color: var(--muted); background: var(--surface2);
+            border: 1px solid var(--border); border-radius: 6px;
+            padding: 3px 8px;
+        }
+
+        .modal-divider { height: 1px; background: var(--border); margin: 0 24px; }
+
+        /* Stat grid */
+        .modal-stats-grid {
+            padding: 24px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .stat-card {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+        }
+        .stat-card-label {
+            font-family: var(--font); font-size: 11px; font-weight: 600;
+            letter-spacing: .06em; text-transform: uppercase;
+            color: var(--muted); margin-bottom: 8px;
+        }
+        .stat-card-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 28px; font-weight: 700;
+            color: var(--text); line-height: 1;
+        }
+        .stat-card-sub {
+            font-family: var(--font); font-size: 12px;
+            color: var(--muted); margin-top: 4px;
+        }
+        .stat-card.yellow .stat-card-value { color: #ca8a04; }
+        .stat-card.red    .stat-card-value { color: #ef4444; }
+        .stat-card.blue   .stat-card-value { color: var(--accent); }
+
+        /* Avg bars inside modal */
+        .modal-avg-section { padding: 0 24px 24px; display: flex; flex-direction: column; gap: 14px; }
+        .modal-avg-row { display: flex; flex-direction: column; gap: 6px; }
+        .modal-avg-label {
+            display: flex; justify-content: space-between;
+            font-family: var(--font); font-size: 12px; color: var(--muted);
+        }
+        .modal-avg-label span:last-child {
+            font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--text);
+        }
+        .modal-avg-track {
+            height: 8px; background: rgba(255,255,255,.07);
+            border-radius: 99px; overflow: hidden;
+        }
+        .modal-avg-fill { height: 100%; border-radius: 99px; transition: width .6s ease; }
+
+        .modal-footer {
+            padding: 12px 24px 20px;
+            display: flex; justify-content: flex-end;
+        }
+
+        .state-box-inline {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 8px; padding: 48px 24px;
+            color: var(--muted); font-family: var(--font); font-size: 14px;
+            text-align: center;
+        }
+        .state-box-inline .icon { font-size: 32px; }
+    </style>
+</head>
+<body>
+<div id="app">
+    <div id="sidemenu-root"></div>
+
+    <div class="main-content">
+        <div class="wrapper">
+
+            <div class="header">
+                <div class="header-top">
+                    <div>
+                        <div class="title">Dom<span>are</span></div>
+                        <div class="subtitle">Statistik per domare och liga</div>
+                    </div>
+                    <div class="count-badge" v-if="!loading">{{ filtered.length }} / {{ referees.length }} domare</div>
+                </div>
+            </div>
+
+            <div class="error-banner" v-if="error">
+                ⚠ {{ error }}
+                <button class="btn btn-secondary btn-sm" style="margin-left:auto" @click="fetchReferees">Försök igen</button>
+            </div>
+
+            <div class="toolbar">
+                <div class="search-wrap">
+                    <span class="search-icon">🔍</span>
+                    <input v-model="search" placeholder="Sök domare…" />
+                </div>
+                <div class="league-tabs">
+                    <button
+                            v-for="l in leagues" :key="l.id"
+                            class="league-tab"
+                            :class="{ active: selectedLeague.id === l.id }"
+                            @click="selectLeague(l)"
+                    >{{ l.name }}</button>
+                </div>
+                <button class="btn btn-secondary" @click="fetchReferees" :disabled="loading">
+                    {{ loading ? '…' : '↻ Ladda om' }}
+                </button>
+            </div>
+
+            <div class="table-wrap fade-in">
+                <div class="state-box" v-if="loading">
+                    <div class="icon">⏳</div>
+                    <strong>Hämtar data…</strong>
+                    Ansluter till API…
+                </div>
+                <div class="state-box" v-else-if="filtered.length === 0 && !error">
+                    <div class="icon">🏁</div>
+                    <strong>Inga domare hittades</strong>
+                    {{ search ? 'Inga domare matchar sökningen.' : 'Inga domare hittades för denna liga.' }}
+                </div>
+                <table v-else>
+                    <thead>
+                    <tr>
+                        <th style="width:40px">#</th>
+                        <th>Domare</th>
+                        <th class="sortable" @click="setSort('matches')">Matcher {{ sortIcon('matches') }}</th>
+                        <th class="sortable" @click="setSort('totalYellowCards')">🟨 Totalt {{ sortIcon('totalYellowCards') }}</th>
+                        <th class="sortable" @click="setSort('totalRedCards')">🟥 Totalt {{ sortIcon('totalRedCards') }}</th>
+                        <th class="sortable" @click="setSort('avgYellowPerMatch')">🟨 / match {{ sortIcon('avgYellowPerMatch') }}</th>
+                        <th class="sortable" @click="setSort('avgRedPerMatch')">🟥 / match {{ sortIcon('avgRedPerMatch') }}</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr class="row-hover" v-for="(ref, i) in filtered" :key="ref.id" @click="openModal(ref.id)">
+                        <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted)">{{ i + 1 }}</td>
+                        <td>
+                            <div class="referee-name-cell">
+                                <div class="referee-avatar">{{ ref.name?.[0] }}</div>
+                                <div>
+                                    <div class="referee-name">{{ ref.name }}</div>
+                                    <span class="referee-id-badge">ID {{ ref.refereeId }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="mono">{{ ref.matches }}</td>
+                        <td><span class="card-pip card-yellow">{{ ref.totalYellowCards }}</span></td>
+                        <td>
+                            <span class="card-pip card-red" v-if="ref.totalRedCards > 0">{{ ref.totalRedCards }}</span>
+                            <span style="color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:12px" v-else>—</span>
+                        </td>
+                        <td>
+                            <div class="avg-bar-wrap">
+                                <div class="avg-bar-track">
+                                    <div class="avg-bar-fill fill-yellow" :style="{ width: avgBarPct(ref.avgYellowPerMatch, maxAvgYellow) + '%' }"></div>
+                                </div>
+                                <span class="avg-val">{{ ref.avgYellowPerMatch.toFixed(2) }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="avg-bar-wrap" v-if="ref.avgRedPerMatch > 0">
+                                <div class="avg-bar-track">
+                                    <div class="avg-bar-fill fill-red" :style="{ width: avgBarPct(ref.avgRedPerMatch, maxAvgRed) + '%' }"></div>
+                                </div>
+                                <span class="avg-val">{{ ref.avgRedPerMatch.toFixed(2) }}</span>
+                            </div>
+                            <span style="color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:12px" v-else>—</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ── Referee Detail Modal ───────────────────────────────────── -->
+    <div class="modal-backdrop" v-if="modalOpen" @click.self="closeModal">
+        <div class="modal">
+
+            <!-- Loading state -->
+            <div class="state-box-inline" v-if="modalLoading">
+                <div class="icon">⏳</div>
+                <strong>Hämtar domare…</strong>
+            </div>
+
+            <template v-else-if="detail">
+                <div class="modal-header">
+                    <div>
+                        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;color:var(--accent);text-transform:uppercase;margin-bottom:3px">
+                            {{ selectedLeague.name }}
+                        </div>
+                        <div style="font-family:var(--font);font-size:13px;color:var(--muted)">Domarprofil</div>
+                    </div>
+                    <button class="modal-close" @click="closeModal">✕</button>
+                </div>
+
+                <div class="modal-hero">
+                    <div class="modal-avatar">{{ detail.name?.[0] }}</div>
+                    <div class="modal-hero-info">
+                        <div class="modal-name">{{ detail.name }}</div>
+                        <div class="modal-meta">
+                            <span class="modal-meta-chip">Referee ID {{ detail.refereeId }}</span>
+                            <span class="modal-meta-chip">{{ detail.matches }} matcher</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-divider"></div>
+
+                <!-- Stat cards 2×2 -->
+                <div class="modal-stats-grid">
+                    <div class="stat-card blue">
+                        <div class="stat-card-label">Matcher</div>
+                        <div class="stat-card-value">{{ detail.matches }}</div>
+                        <div class="stat-card-sub">totalt officierade</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-label">Kort totalt</div>
+                        <div class="stat-card-value">{{ detail.totalYellowCards + detail.totalRedCards }}</div>
+                        <div class="stat-card-sub">🟨 {{ detail.totalYellowCards }} &nbsp;🟥 {{ detail.totalRedCards }}</div>
+                    </div>
+                    <div class="stat-card yellow">
+                        <div class="stat-card-label">Gula / match</div>
+                        <div class="stat-card-value">{{ detail.avgYellowPerMatch.toFixed(2) }}</div>
+                        <div class="stat-card-sub">genomsnitt</div>
+                    </div>
+                    <div class="stat-card" :class="detail.avgRedPerMatch > 0 ? 'red' : ''">
+                        <div class="stat-card-label">Röda / match</div>
+                        <div class="stat-card-value">{{ detail.avgRedPerMatch > 0 ? detail.avgRedPerMatch.toFixed(2) : '—' }}</div>
+                        <div class="stat-card-sub">genomsnitt</div>
+                    </div>
+                </div>
+
+                <div class="modal-divider"></div>
+
+                <!-- Avg visual bars -->
+                <div class="modal-avg-section">
+                    <div class="modal-avg-row">
+                        <div class="modal-avg-label">
+                            <span>🟨 Gula kort per match</span>
+                            <span>{{ detail.avgYellowPerMatch.toFixed(2) }}</span>
+                        </div>
+                        <div class="modal-avg-track">
+                            <div class="modal-avg-fill fill-yellow" :style="{ width: avgBarPct(detail.avgYellowPerMatch, maxAvgYellow) + '%' }"></div>
+                        </div>
+                    </div>
+                    <div class="modal-avg-row" v-if="detail.avgRedPerMatch > 0">
+                        <div class="modal-avg-label">
+                            <span>🟥 Röda kort per match</span>
+                            <span>{{ detail.avgRedPerMatch.toFixed(2) }}</span>
+                        </div>
+                        <div class="modal-avg-track">
+                            <div class="modal-avg-fill fill-red" :style="{ width: avgBarPct(detail.avgRedPerMatch, maxAvgRed) + '%' }"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-divider"></div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @click="closeModal">Stäng</button>
+                </div>
+            </template>
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const { createApp, ref, computed, onMounted } = Vue;
+
+    createApp({
+        setup() {
+            const BASE = 'http://localhost:8080/referees';
+            const leagues = [
+                { id: 1,  name: 'Premier League' },
+                { id: 26, name: 'Allsvenskan'    },
+            ];
+
+            const referees       = ref([]);
+            const loading        = ref(false);
+            const error          = ref('');
+            const search         = ref('');
+            const selectedLeague = ref(leagues.find(l => l.id === 26));
+            const sortKey        = ref('avgYellowPerMatch');
+            const sortDir        = ref(-1);
+
+            const modalOpen    = ref(false);
+            const modalLoading = ref(false);
+            const detail       = ref(null);
+
+            const maxAvgYellow = computed(() => Math.max(...referees.value.map(r => r.avgYellowPerMatch ?? 0), 1));
+            const maxAvgRed    = computed(() => Math.max(...referees.value.map(r => r.avgRedPerMatch    ?? 0), 1));
+
+            function avgBarPct(val, max) {
+                if (!max) return 0;
+                return Math.round((val / max) * 100);
+            }
+
+            function setSort(key) {
+                if (sortKey.value === key) sortDir.value *= -1;
+                else { sortKey.value = key; sortDir.value = -1; }
+            }
+            function sortIcon(key) {
+                if (sortKey.value !== key) return '\u2195';
+                return sortDir.value === 1 ? '\u2191' : '\u2193';
+            }
+
+            const filtered = computed(() => {
+                const q = search.value.toLowerCase().trim();
+                let rows = referees.value;
+                if (q) rows = rows.filter(r =>
+                    r.name?.toLowerCase().includes(q) ||
+                    String(r.refereeId).includes(q)
+                );
+                if (!sortKey.value) return rows;
+                const key = sortKey.value, dir = sortDir.value;
+                return [...rows].sort((a, b) => ((a[key] ?? 0) - (b[key] ?? 0)) * dir);
+            });
+
+            async function fetchReferees() {
+                loading.value = true; error.value = ''; referees.value = [];
+                try {
+                    const res = await fetch(`${BASE}/league/${selectedLeague.value.id}`);
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    referees.value = await res.json();
+                } catch (e) {
+                    error.value = `Kunde inte hämta data: ${e.message}. Kontrollera att API:et körs på ${BASE}.`;
+                } finally {
+                    loading.value = false;
+                }
+            }
+
+            async function openModal(id) {
+                modalOpen.value    = true;
+                modalLoading.value = true;
+                detail.value       = null;
+                try {
+                    const res = await fetch(`${BASE}/${id}`);
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    detail.value = await res.json();
+                } catch (e) {
+                    modalOpen.value = false;
+                } finally {
+                    modalLoading.value = false;
+                }
+            }
+
+            function closeModal() { modalOpen.value = false; detail.value = null; }
+
+            function selectLeague(l) { selectedLeague.value = l; fetchReferees(); }
+
+            onMounted(fetchReferees);
+
+            return {
+                leagues, referees, loading, error, search, selectedLeague,
+                filtered, fetchReferees, selectLeague,
+                sortKey, sortDir, setSort, sortIcon,
+                maxAvgYellow, maxAvgRed, avgBarPct,
+                modalOpen, modalLoading, detail, openModal, closeModal,
+            };
+        }
+    }).mount('#app');
+</script>
+</body>
+</html>
