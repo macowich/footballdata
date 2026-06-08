@@ -45,7 +45,7 @@ public class SportsApiLoader {
                     .getDatabase("sportsdb")
                     .withCodecRegistry(pojoCodecRegistry);
 
-            //handleEventsData(database);
+            handleEventsData(database);
             handleRefereeData(database);
 
         } catch (Exception e) {
@@ -60,10 +60,10 @@ public class SportsApiLoader {
         collection.createIndex(new Document("eventId", 1), new IndexOptions().unique(true));
 
         List<SportsApiClient.Event> eventList = new ArrayList<>();
-        loadEvents("2026-04-04", "2026-04-18", 1, eventList);
+        loadEvents("2026-04-04", "2026-04-18", 26, eventList);
         loadEvents("2026-04-19", "2026-05-04", 26, eventList);
-        //loadEvents("2026-05-05", "2026-05-19", 26, eventList);
-        //loadEvents("2026-05-20", "2026-05-31", 26, eventList);
+        loadEvents("2026-05-05", "2026-05-19", 26, eventList);
+        loadEvents("2026-05-20", "2026-05-31", 26, eventList);
         List<EventDB> eventDBList = createEventDB(eventList);
         for (EventDB db : eventDBList) {
             loadEventStats(db);
@@ -101,7 +101,8 @@ public class SportsApiLoader {
         eventDB.awayScore = event.awayScore;
         eventDB.homeScoreHt = event.homeScoreHt;
         eventDB.awayScoreHt = event.awayScoreHt;
-        eventDB.refereeId = event.refereeId;
+        if (event.refereeId != null)
+            eventDB.refereeId = event.refereeId;
         return eventDB;
     }
 

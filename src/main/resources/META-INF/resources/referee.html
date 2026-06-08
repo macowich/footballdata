@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Domare</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <script src="sidemenu-loader.js" data-page="referees" defer></script>
+    <script src="sidemenu-loader.js" data-page="referee" defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
     <link rel="stylesheet" href="fixtures.css"/>
     <link rel="stylesheet" href="sidemenu.css"/>
@@ -187,7 +187,7 @@
         .modal-avg-row { display: flex; flex-direction: column; gap: 6px; }
         .modal-avg-label {
             display: flex; justify-content: space-between;
-            font-family: var(--font); font-size: 12px; color: var(--muted);
+            font-family: var(--font),serif; font-size: 12px; color: var(--muted);
         }
         .modal-avg-label span:last-child {
             font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--text);
@@ -206,7 +206,7 @@
         .state-box-inline {
             display: flex; flex-direction: column; align-items: center;
             gap: 8px; padding: 48px 24px;
-            color: var(--muted); font-family: var(--font); font-size: 14px;
+            color: var(--muted); font-family: var(--font),serif; font-size: 14px;
             text-align: center;
         }
         .state-box-inline .icon { font-size: 32px; }
@@ -493,7 +493,6 @@
             }
 
             function closeModal() { modalOpen.value = false; detail.value = null; }
-
             function selectLeague(l) { selectedLeague.value = l; fetchReferees(); }
 
             onMounted(fetchReferees);

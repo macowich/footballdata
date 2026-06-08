@@ -17,6 +17,7 @@ public class SportsApiClient {
 
     private static final String BASE_URL = "https://sports.bzzoiro.com/api/v2/events/";
     private static final String BASE_URL_REFEREES = "https://sports.bzzoiro.com/api/v2/referees/";
+    private static final String BASE_URL_PLAYERS = "https://sports.bzzoiro.com/api/v2/players/";
     private static final String API_TOKEN = "bb387466704c69d4660a51d47153ce12f6a1c433";
 
     // ──────────────────────────────────────────────
@@ -208,6 +209,122 @@ public class SportsApiClient {
         }
     }
 
+    // ──────────────────────────────────────────────
+    // Player model classes
+    // ──────────────────────────────────────────────
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class PlayersResponse {
+        public int count;
+        public String next;
+        public String previous;
+        public List<Player> results;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Player {
+        public int id;
+        public String name;
+        @JsonProperty("short_name")
+        public String shortName;
+        /**
+         * Primary position code: GK / D / M / F
+         */
+        public String position;
+        @JsonProperty("specific_position")
+        public String specificPosition;
+        @JsonProperty("jersey_number")
+        public Integer jerseyNumber;
+        @JsonProperty("date_of_birth")
+        public String dateOfBirth;
+        @JsonProperty("height_cm")
+        public Integer heightCm;
+        @JsonProperty("weight_kg")
+        public Integer weightKg;
+        @JsonProperty("preferred_foot")
+        public String preferredFoot;
+        public String nationality;
+        @JsonProperty("current_team_id")
+        public Integer currentTeamId;
+        @JsonProperty("national_team_id")
+        public Integer nationalTeamId;
+        @JsonProperty("market_value_eur")
+        public Long marketValueEur;
+        @JsonProperty("contract_until")
+        public String contractUntil;
+        /**
+         * e.g. "available", "injured", "suspended"
+         */
+        public String availability;
+        public PlayerAttributes attributes;
+        public List<String> strengths;
+        public List<String> weaknesses;
+        public Integer rating;
+        public String potential;
+        @JsonProperty("injury_risk")
+        public String injuryRisk;
+        @JsonProperty("wage_eur_annual")
+        public Long wageEurAnnual;
+
+        @Override
+        public String toString() {
+            return String.format("#%-3s %-25s %-3s %-4s | rating %s | value €%,d | %s",
+                    jerseyNumber != null ? jerseyNumber : "?",
+                    name,
+                    position != null ? position : "-",
+                    specificPosition != null ? specificPosition : "-",
+                    rating != null ? rating : "?",
+                    marketValueEur != null ? marketValueEur : 0,
+                    availability != null ? availability : "");
+        }
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class PlayerAttributes {
+        /**
+         * Evaluated position (may differ from listed position)
+         */
+        public String position;
+        public Integer tactical;
+        public Integer attacking;
+        public Integer defending;
+        public Integer technical;
+        public Integer creativity;
+    }
+
+    // ──────────────────────────────────────────────
+    // Player career model classes
+    // ──────────────────────────────────────────────
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class PlayerCareer {
+        @JsonProperty("player_id")
+        public int playerId;
+        public List<CareerSeason> seasons;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class CareerSeason {
+        @JsonProperty("season_id")
+        public int seasonId;
+        @JsonProperty("league_id")
+        public int leagueId;
+        @JsonProperty("team_id")
+        public int teamId;
+        public int matches;
+        public int minutes;
+        public int goals;
+        public int assists;
+        @JsonProperty("avg_rating")
+        public double avgRating;
+
+        @Override
+        public String toString() {
+            return String.format("season %-3d | team %-5d | matches %2d | mins %4d | goals %2d | assists %2d | avg rating %.2f",
+                    seasonId, teamId, matches, minutes, goals, assists, avgRating);
+        }
+    }
+
 
     // ──────────────────────────────────────────────
     // HTTP client
@@ -287,6 +404,61 @@ public class SportsApiClient {
         return mapper.readValue(response.body(), RefereesResponse.class);
     }
 
+    /**
+     * Fetch players for a given team.
+     * Calls: GET /api/v2/players/?team_id={teamId}
+     */
+    public PlayersResponse fetchPlayers(int teamId) throws Exception {
+        String url = BASE_URL_PLAYERS + "?team_id=" + teamId;
+
+        HttpClient client = HttpClient.newBuilder().build();
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Authorization", "Token " + API_TOKEN)
+                .header("Accept", "application/json")
+                .GET()
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 200) {
+            throw new RuntimeException("API error " + response.statusCode() + ": " + response.body());
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        return mapper.readValue(response.body(), PlayersResponse.class);
+    }
+
+    /**
+     * Fetch career statistics for a single player.
+     * Calls: GET /api/v2/players/{playerId}/career/
+     */
+    public PlayerCareer fetchPlayerCareer(int playerId) throws Exception {
+        String url = BASE_URL_PLAYERS + playerId + "/career/";
+
+        HttpClient client = HttpClient.newBuilder().build();
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Authorization", "Token " + API_TOKEN)
+                .header("Accept", "application/json")
+                .GET()
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 200) {
+            throw new RuntimeException("API error " + response.statusCode() + ": " + response.body());
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        return mapper.readValue(response.body(), PlayerCareer.class);
+    }
+
+
     private HttpClient createHttpClient() {
         HttpClient client = HttpClient.newBuilder()
                 //.proxy(ProxySelector.of(new InetSocketAddress("proxy.sfa.se", 8080)))
@@ -342,11 +514,42 @@ public class SportsApiClient {
         */
 
         // ── Referees ──────────────────────────────────
-        System.out.println("\n=== Referees (league 26) ===");
+        /*System.out.println("\n=== Referees (league 26) ===");
         RefereesResponse refs = client.fetchReferees(26);
         System.out.printf("Total referees: %d%n%n", refs.count);
         for (Referee ref : refs.results) {
             System.out.println(ref);
+        }*/
+
+        // ── Players ───────────────────────────────────
+        System.out.println("\n=== Players (team 439 – IFK Göteborg) ===");
+        PlayersResponse players = client.fetchPlayers(439);
+        System.out.printf("Total players: %d%n%n", players.count);
+        for (Player player : players.results) {
+            System.out.println(player);
+            if (player.attributes != null) {
+                System.out.printf("   attrs → tac:%d atk:%d def:%d tec:%d cre:%d%n",
+                        player.attributes.tactical,
+                        player.attributes.attacking,
+                        player.attributes.defending,
+                        player.attributes.technical,
+                        player.attributes.creativity);
+            }
+            if (player.strengths != null && !player.strengths.isEmpty()) {
+                System.out.println("   strengths: " + player.strengths);
+            }
+            if (player.weaknesses != null && !player.weaknesses.isEmpty()) {
+                System.out.println("   weaknesses: " + player.weaknesses);
+            }
         }
+
+        // ── Player Career ─────────────────────────────
+        System.out.println("\n=== Player Career (player 15907) ===");
+        PlayerCareer career = client.fetchPlayerCareer(15907);
+        System.out.printf("Player ID: %d | seasons: %d%n%n", career.playerId, career.seasons.size());
+        for (CareerSeason season : career.seasons) {
+            System.out.println(season);
+        }
+
     }
 }

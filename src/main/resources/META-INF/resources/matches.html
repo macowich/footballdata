@@ -131,7 +131,7 @@
 
   .modal-stats { padding: 20px 24px 24px; display: flex; flex-direction: column; gap: 12px; }
   .modal-stats-title {
-    font-family: var(--font); font-size: 11px; font-weight: 700;
+    font-family: var(--font),serif; font-size: 11px; font-weight: 700;
     letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
     margin-bottom: 4px;
   }
@@ -140,7 +140,7 @@
     font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 500;
     color: var(--text); text-align: center;
   }
-  .stat-label { font-family: var(--font); font-size: 12px; color: var(--muted); text-align: center; }
+  .stat-label { font-family: var(--font),serif; font-size: 12px; color: var(--muted); text-align: center; }
   .stat-bars { display: flex; gap: 2px; height: 6px; border-radius: 99px; overflow: hidden; }
   .stat-bar-home { background: var(--accent); border-radius: 99px 0 0 99px; transition: width .6s ease; }
   .stat-bar-away { background: #f97316; border-radius: 0 99px 99px 0; transition: width .6s ease; }
@@ -150,7 +150,7 @@
     display: flex; align-items: center; justify-content: space-between;
   }
   .modal-referee {
-    font-family: var(--font); font-size: 12px; color: var(--muted);
+    font-family: var(--font),serif; font-size: 12px; color: var(--muted);
   }
   .modal-referee span { color: var(--text); font-weight: 600; }
 
@@ -414,13 +414,12 @@ const { createApp, ref, computed, onBeforeMount, onMounted } = Vue;
 createApp({
   setup() {
     const BASE = 'http://localhost:8080/events';
-    let leagues = [{ "id": 1, "name": "Premier League" },
-            { "id": 26, "name": "Allsvenskan" }];
+    const leagues = ref([]);
     const matches = ref([]);
     const loading = ref(false);
     const error = ref('');
     const search = ref('');
-    const selectedLeague = ref(leagues[0]);
+    const selectedLeague = ref({ "id": 26, "name": "Allsvenskan" });
 
     const modalOpen = ref(false);
     const modalLoading = ref(false);
@@ -476,11 +475,11 @@ createApp({
       loading.value = true;
       error.value = '';
       try {
-        let res = await fetch(`${BASE}/league/all`);
+        const res = await fetch(`${BASE}/league/all`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        leagues = await res.json();
+        leagues.value = await res.json();
       } catch (e) {
-        error.value = `Kunde inte hämta data: ${e.message}. Kontrollera att API:et körs på ${BASE}.`;
+        error.value = `Kunde inte hämta ligor: ${e.message}. Kontrollera att API:et körs på ${BASE}.`;
       } finally {
         loading.value = false;
       }
@@ -491,11 +490,11 @@ createApp({
       error.value = '';
       matches.value = [];
       try {
-        let res = await fetch(`${BASE}/league/${selectedLeague.value.id}`);
+        const res = await fetch(`${BASE}/league/${selectedLeague.value.id}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         matches.value = await res.json();
       } catch (e) {
-        error.value = `Kunde inte hämta data: ${e.message}. Kontrollera att API:et körs på ${BASE}.`;
+        error.value = `Kunde inte hämta matcher: ${e.message}. Kontrollera att API:et körs på ${BASE}.`;
       } finally {
         loading.value = false;
       }
@@ -506,7 +505,7 @@ createApp({
       fetchMatches();
     }
 
-    //onBeforeMount(fetchLeagues);
+    onBeforeMount(fetchLeagues);
     onMounted(fetchMatches);
 
     return { leagues, matches, loading, error, search, selectedLeague, fetchLeagues, fetchMatches, selectLeague, modalOpen, modalLoading, detail, openModal, closeModal, pct, halfView, scoreHome, scoreAway, currentResult };

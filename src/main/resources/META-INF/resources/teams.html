@@ -143,11 +143,11 @@
 
       <div class="league-tabs">
         <button
-          v-for="l in leagues" :key="l"
-          class="league-tab"
-          :class="{ active: selectedLeague === l }"
-          @click="selectLeague(l)"
-        >{{ l }}</button>
+            v-for="l in leagues" :key="l.id"
+            class="league-tab"
+            :class="{ active: selectedLeague.id === l.id }"
+            @click="selectLeague(l)"
+        >{{ l.name }}</button>
       </div>
 
       <button class="btn btn-secondary" @click="fetchTeams('all')" :disabled="loading">
@@ -252,13 +252,16 @@ const { createApp, ref, computed, onMounted } = Vue;
 createApp({
   setup() {
     const BASE = 'http://localhost:8080/teams';
-    const leagues = ['Premier League', 'La Liga', 'Bundesliga', 'Serie A', 'Ligue 1'];
+    const leagues = [
+      { id: 1,  name: 'Premier League' },
+      { id: 26, name: 'Allsvenskan'    },
+    ];
 
     const teams = ref([]);
     const loading = ref(false);
     const error = ref('');
     const search = ref('');
-    const selectedLeague = ref('Premier League');
+    const selectedLeague = ref({ "id": 26, "name": "Allsvenskan" });
     const sortKey = ref('avgGoals');
     const sortDir = ref(-1);
     const viewMode = ref('all');
@@ -308,7 +311,7 @@ createApp({
       error.value = '';
       teams.value = [];
       try {
-        const res = await fetch(`${BASE}/${selectedLeague.value}`);
+        const res = await fetch(`${BASE}/${selectedLeague.value.id}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         teams.value = await res.json();
       } catch (e) {
