@@ -9,14 +9,14 @@ import jakarta.ws.rs.core.Response;
 import se.mac.footballdata.predictions.PredictionRepository;
 import se.mac.footballdata.predictions.ResultPredictor;
 import se.mac.footballdata.predictions.model.Prediction;
+import se.mac.footballdata.rest.model.Event;
 import se.mac.footballdata.rest.model.Fixture;
-import se.mac.footballdata.rest.model.Result;
 import se.mac.footballdata.rest.model.Team;
 
 import java.util.List;
 import java.util.Map;
 
-import static se.mac.footballdata.Util.createTeamFromResult;
+import static se.mac.footballdata.Util.createTeamFromEvent;
 import static se.mac.footballdata.predictions.ResultPredictor.printResults;
 
 @Path("/predictions")
@@ -26,10 +26,7 @@ public class PredictionResource {
     PredictionRepository predictionRepository;
 
     @Inject
-    FixtureRepository fixtureRepository;
-
-    @Inject
-    ResultRepository resultRepository;
+    EventRepository eventRepository;
 
     @GET
     @Path("/all")
@@ -47,14 +44,20 @@ public class PredictionResource {
     }
 
     void loadPredictions() {
-        List<Fixture> fixtureList = fixtureRepository.findByHomeTeam("Brighton");
-        Fixture f = fixtureList.getFirst();
-        if (f == null) return;
+        //List<Fixture> fixtureList = fixtureRepository.findByHomeTeam("Brighton");
+        //Fixture f = fixtureList.getFirst();
+        //if (f == null) return;
 
-        List<Result> homeTeamResult = resultRepository.findByTeam("Brighton");
-        List<Result> awayTeamResult = resultRepository.findByTeam("Man City");
-        Team homeTeam = createTeamFromResult("Brighton", homeTeamResult);
-        Team awayTeam = createTeamFromResult("Man City", awayTeamResult);
+        Fixture f = new Fixture();
+        f.hometeam = "IK Sirius";
+        f.awayteam = "Hammarby IF";
+        f.date = "2026-06-20";
+        f.time = "15:00";
+
+        List<Event> homeTeamResult = eventRepository.findByTeam("IK Sirius");
+        List<Event> awayTeamResult = eventRepository.findByTeam("Hammarby IF");
+        Team homeTeam = createTeamFromEvent("IK Sirius", homeTeamResult);
+        Team awayTeam = createTeamFromEvent("Hammarby IF", awayTeamResult);
 
         ResultPredictor resultPredictor = new ResultPredictor();
 
@@ -73,7 +76,7 @@ public class PredictionResource {
 
     static Prediction createPrediction(Fixture f, Map<String, Float> oddsInfoMap) {
         Prediction prediction = new Prediction();
-        prediction.fixture_id = f.fixture_id;
+        prediction.fixture_id = f.hometeam + ":" + f.awayteam;
         prediction.hometeam = f.hometeam;
         prediction.awayteam = f.awayteam;
         prediction.date = f.date;

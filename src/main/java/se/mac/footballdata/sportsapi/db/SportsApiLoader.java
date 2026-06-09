@@ -45,25 +45,62 @@ public class SportsApiLoader {
                     .getDatabase("sportsdb")
                     .withCodecRegistry(pojoCodecRegistry);
 
-            handleEventsData(database);
-            handleRefereeData(database);
+            MongoCollection<EventDB> collection =
+                    database.getCollection("events", EventDB.class);
+            collection.createIndex(new Document("eventId", 1), new IndexOptions().unique(true));
+
+            handleFixturesData(database, 26);
+
+            //handleLeague(database, 26);
 
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    static void handleEventsData(MongoDatabase database) throws Exception {
-        MongoCollection<EventDB> collection =
-                database.getCollection("events", EventDB.class);
+    static void handleLeague(MongoDatabase database, int leagueId) throws Exception {
+        handleEventsData(database, leagueId);
+        //handleRefereeData(database, leagueId);
+    }
 
+    static void handleFixturesData(MongoDatabase database, int leagueId) throws Exception {
+        MongoCollection<FixtureDB> collection =
+                database.getCollection("fixtures", FixtureDB.class);
         collection.createIndex(new Document("eventId", 1), new IndexOptions().unique(true));
 
         List<SportsApiClient.Event> eventList = new ArrayList<>();
-        loadEvents("2026-04-04", "2026-04-18", 26, eventList);
-        loadEvents("2026-04-19", "2026-05-04", 26, eventList);
-        loadEvents("2026-05-05", "2026-05-19", 26, eventList);
-        loadEvents("2026-05-20", "2026-05-31", 26, eventList);
+        SportsApiClient.EventsResponse response = sportsApiClient.
+                fetchEvents("2026-06-08", "2026-07-04", leagueId, "notstarted");
+
+        for (SportsApiClient.Event event : response.results) {
+            System.out.println(event.id);
+            System.out.println(event);
+        }
+        eventList.addAll(response.results);
+
+        List<FixtureDB> fixtureDBList = createFixtureDB(eventList);
+        for (FixtureDB db : fixtureDBList) {
+            loadFixtureOdds(db);
+        }
+
+        try {
+            collection.insertMany(fixtureDBList, new InsertManyOptions().ordered(false));
+            System.out.println("Inserted: " + fixtureDBList);
+        } catch (MongoException ex) {
+            System.out.println("Error: " + ex);
+        }
+
+    }
+
+    static void handleEventsData(MongoDatabase database, int leagueId) throws Exception {
+        MongoCollection<EventDB> collection =
+                database.getCollection("events", EventDB.class);
+
+        List<SportsApiClient.Event> eventList = new ArrayList<>();
+        loadEvents("2026-04-04", "2026-04-18", leagueId, eventList);
+        loadEvents("2026-04-19", "2026-05-04", leagueId, eventList);
+        loadEvents("2026-05-05", "2026-05-19", leagueId, eventList);
+        loadEvents("2026-05-20", "2026-05-31", leagueId, eventList);
         List<EventDB> eventDBList = createEventDB(eventList);
         for (EventDB db : eventDBList) {
             loadEventStats(db);
@@ -80,6 +117,36 @@ public class SportsApiLoader {
         EventDB result = collection.find().first();
         assert result != null;
         System.out.println("Read from MongoDB: " + result.eventId);
+    }
+
+    private static List<FixtureDB> createFixtureDB(List<SportsApiClient.Event> eventList) {
+        return eventList.stream()
+                .map(SportsApiLoader::createFixtureDB)
+                .toList();
+    }
+
+    private static FixtureDB createFixtureDB(SportsApiClient.Event event) {
+        FixtureDB fixtureDB = new FixtureDB();
+        fixtureDB.eventId = event.id;
+        fixtureDB.leagueId = event.leagueId;
+        fixtureDB.seasonId = event.seasonId;
+        fixtureDB.date = event.eventDate.toString().substring(0, 10);
+        fixtureDB.time = event.eventDate.toString().substring(11, 16);
+        fixtureDB.hometeam = event.homeTeam;
+        fixtureDB.awayteam = event.awayTeam;
+        if (event.refereeId != null)
+            fixtureDB.refereeId = event.refereeId;
+        return fixtureDB;
+    }
+
+    private static void loadFixtureOdds(FixtureDB fixtureDB) throws Exception {
+        SportsApiClient.EventOdds eventOdds = sportsApiClient.fetchEventOdds(fixtureDB.eventId);
+        System.out.printf("Event ID: %d%n", fixtureDB.eventId);
+        fixtureDB.homeWin = eventOdds.odds.homeWin;
+        fixtureDB.draw = eventOdds.odds.draw;
+        fixtureDB.awayWin = eventOdds.odds.awayWin;
+        fixtureDB.over25Goals = eventOdds.odds.over25Goals;
+        fixtureDB.under25Goals = eventOdds.odds.under25Goals;
     }
 
     private static List<EventDB> createEventDB(List<SportsApiClient.Event> eventList) {
@@ -131,12 +198,12 @@ public class SportsApiLoader {
         eventDB.aPoss = eventStats.stats.away.ballPossession;
     }
 
-    static void handleRefereeData(MongoDatabase database) throws Exception {
+    static void handleRefereeData(MongoDatabase database, int leagueId) throws Exception {
 
         // ── Referees ──────────────────────────────────
-        System.out.println("\n=== Loading referees (league 26) ===");
-        SportsApiClient.RefereesResponse refs = sportsApiClient.fetchReferees(26);
-        List<RefereeDB> refereeDBList = createRefereeDB(refs.results, 26);
+        System.out.println("\n=== Loading referees (league: " + leagueId + " ) ===");
+        SportsApiClient.RefereesResponse refs = sportsApiClient.fetchReferees(leagueId);
+        List<RefereeDB> refereeDBList = createRefereeDB(refs.results, leagueId);
 
         MongoCollection<RefereeDB> collection =
                 database.getCollection("referees", RefereeDB.class);

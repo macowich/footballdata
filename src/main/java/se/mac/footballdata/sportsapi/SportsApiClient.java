@@ -325,6 +325,43 @@ public class SportsApiClient {
         }
     }
 
+    // ──────────────────────────────────────────────
+    // Odds model classes
+    // ──────────────────────────────────────────────
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class EventOdds {
+        @JsonProperty("event_id") public int eventId;
+        public Odds odds;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Odds {
+        @JsonProperty("home_win")       public double homeWin;
+        public double draw;
+        @JsonProperty("away_win")       public double awayWin;
+        @JsonProperty("over_15_goals")  public double over15Goals;
+        @JsonProperty("over_25_goals")  public double over25Goals;
+        @JsonProperty("over_35_goals")  public double over35Goals;
+        @JsonProperty("under_15_goals") public double under15Goals;
+        @JsonProperty("under_25_goals") public double under25Goals;
+        @JsonProperty("under_35_goals") public double under35Goals;
+        @JsonProperty("btts_yes")       public double bttsYes;
+        @JsonProperty("btts_no")        public double bttsNo;
+
+        @Override
+        public String toString() {
+            return String.format(
+                    "  1X2       : home %.2f  draw %.2f  away %.2f%n" +
+                            "  Over/Under: o1.5 %.2f  o2.5 %.2f  o3.5 %.2f%n" +
+                            "              u1.5 %.2f  u2.5 %.2f  u3.5 %.2f%n" +
+                            "  BTTS      : yes  %.2f  no   %.2f",
+                    homeWin, draw, awayWin,
+                    over15Goals, over25Goals, over35Goals,
+                    under15Goals, under25Goals, under35Goals,
+                    bttsYes, bttsNo);
+        }
+    }
 
     // ──────────────────────────────────────────────
     // HTTP client
@@ -356,10 +393,18 @@ public class SportsApiClient {
 
     /**
      * Fetch a list of events filtered by league and date range.
-     * Calls: GET /api/v2/events/?league_id=&date_from=&date_to=
+     * Calls: GET /api/v2/events/?league_id=&date_from=&date_to=&status=
      */
     public EventsResponse fetchEvents(String dateFrom, String dateTo, int leagueId) throws Exception {
-        String url = String.format("%s?league_id=%d&date_from=%s&date_to=%s", BASE_URL, leagueId, dateFrom, dateTo);
+        return fetchEvents(dateFrom, dateTo, leagueId, "finished");
+    }
+
+    /**
+     * Fetch a list of events filtered by league, date range, and status.
+     * Calls: GET /api/v2/events/?league_id=&date_from=&date_to=&status=
+     */
+    public EventsResponse fetchEvents(String dateFrom, String dateTo, int leagueId, String status) throws Exception {
+        String url = String.format("%s?league_id=%d&date_from=%s&date_to=%s&status=%s", BASE_URL, leagueId, dateFrom, dateTo, status);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .header("Authorization", "Token " + API_TOKEN)
@@ -458,6 +503,33 @@ public class SportsApiClient {
         return mapper.readValue(response.body(), PlayerCareer.class);
     }
 
+    /**
+     * Fetch odds for a single event.
+     * Calls: GET /api/v2/events/{eventId}/odds/
+     */
+    public EventOdds fetchEventOdds(int eventId) throws Exception {
+        String url = BASE_URL + eventId + "/odds/";
+
+        HttpClient client = HttpClient.newBuilder().build();
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Authorization", "Token " + API_TOKEN)
+                .header("Accept", "application/json")
+                .GET()
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 200) {
+            throw new RuntimeException("API error " + response.statusCode() + ": " + response.body());
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        return mapper.readValue(response.body(), EventOdds.class);
+    }
+
 
     private HttpClient createHttpClient() {
         HttpClient client = HttpClient.newBuilder()
@@ -484,7 +556,7 @@ public class SportsApiClient {
         System.out.println();*/
 
         // ── Event list ────────────────────────────────
-       /* EventsResponse response = client.fetchEvents("2026-04-04", "2026-05-25", 1);
+        EventsResponse response = client.fetchEvents("2026-06-08", "2026-07-04", 26, "notstarted");
         System.out.printf("Total events: %d%n%n", response.count);
 
         for (Event event : response.results) {
@@ -511,8 +583,6 @@ public class SportsApiClient {
             System.out.println();
         }
 
-        */
-
         // ── Referees ──────────────────────────────────
         /*System.out.println("\n=== Referees (league 26) ===");
         RefereesResponse refs = client.fetchReferees(26);
@@ -521,6 +591,7 @@ public class SportsApiClient {
             System.out.println(ref);
         }*/
 
+        /*
         // ── Players ───────────────────────────────────
         System.out.println("\n=== Players (team 439 – IFK Göteborg) ===");
         PlayersResponse players = client.fetchPlayers(439);
@@ -550,6 +621,12 @@ public class SportsApiClient {
         for (CareerSeason season : career.seasons) {
             System.out.println(season);
         }
+*/
 
+        // ── Event Odds ────────────────────────────────
+        System.out.println("\n=== Event Odds (event 46385) ===");
+        EventOdds eventOdds = client.fetchEventOdds(46385);
+        System.out.printf("Event ID: %d%n", eventOdds.eventId);
+        System.out.println(eventOdds.odds);
     }
 }
