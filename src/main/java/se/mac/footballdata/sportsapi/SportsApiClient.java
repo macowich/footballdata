@@ -18,6 +18,7 @@ public class SportsApiClient {
     private static final String BASE_URL = "https://sports.bzzoiro.com/api/v2/events/";
     private static final String BASE_URL_REFEREES = "https://sports.bzzoiro.com/api/v2/referees/";
     private static final String BASE_URL_PLAYERS = "https://sports.bzzoiro.com/api/v2/players/";
+    private static final String BASE_URL_PREDICTIONS = "https://sports.bzzoiro.com/api/v2/predictions/";
     private static final String API_TOKEN = "bb387466704c69d4660a51d47153ce12f6a1c433";
 
     // ──────────────────────────────────────────────
@@ -364,6 +365,100 @@ public class SportsApiClient {
     }
 
     // ──────────────────────────────────────────────
+    // Prediction model classes
+    // ──────────────────────────────────────────────
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class PredictionsResponse {
+        public int count;
+        public String next;
+        public String previous;
+        public List<Prediction> results;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Prediction {
+        public int id;
+        @JsonProperty("created_at") public OffsetDateTime createdAt;
+        public PredictionEvent event;
+        public PredictionMarkets markets;
+        public PredictionRecommendations recommendations;
+        public PredictionModel model;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class PredictionEvent {
+        public int id;
+        @JsonProperty("event_date")    public OffsetDateTime eventDate;
+        public String status;
+        @JsonProperty("home_team_id")  public int homeTeamId;
+        @JsonProperty("home_team")     public String homeTeam;
+        @JsonProperty("away_team_id")  public int awayTeamId;
+        @JsonProperty("away_team")     public String awayTeam;
+        @JsonProperty("league_id")     public int leagueId;
+        @JsonProperty("league_name")   public String leagueName;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class PredictionMarkets {
+        @JsonProperty("match_result")    public MatchResultMarket matchResult;
+        @JsonProperty("expected_goals")  public ExpectedGoalsMarket expectedGoals;
+        @JsonProperty("over_under")      public OverUnderMarket overUnder;
+        public BttsMarket btts;
+        public ScoreMarket score;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class MatchResultMarket {
+        @JsonProperty("prob_home")  public double probHome;
+        @JsonProperty("prob_draw")  public double probDraw;
+        @JsonProperty("prob_away")  public double probAway;
+        /** "H", "D", or "A" */
+        public String predicted;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class ExpectedGoalsMarket {
+        public double home;
+        public double away;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class OverUnderMarket {
+        @JsonProperty("prob_over_15") public double probOver15;
+        @JsonProperty("prob_over_25") public double probOver25;
+        @JsonProperty("prob_over_35") public double probOver35;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class BttsMarket {
+        @JsonProperty("prob_yes") public double probYes;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class ScoreMarket {
+        @JsonProperty("most_likely") public String mostLikely;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class PredictionRecommendations {
+        public String favorite;
+        @JsonProperty("favorite_prob") public double favoriteProb;
+        @JsonProperty("bet_favorite")  public boolean betFavorite;
+        @JsonProperty("over_15")       public boolean over15;
+        @JsonProperty("over_25")       public boolean over25;
+        @JsonProperty("over_35")       public boolean over35;
+        public boolean btts;
+        public boolean winner;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class PredictionModel {
+        public double confidence;
+        public String version;
+    }
+
+    // ──────────────────────────────────────────────
     // HTTP client
     // ──────────────────────────────────────────────
 
@@ -530,6 +625,33 @@ public class SportsApiClient {
         return mapper.readValue(response.body(), EventOdds.class);
     }
 
+    /**
+     * Fetch predictions filtered by league and date range.
+     * Calls: GET /api/v2/predictions/?league_id={leagueId}&date_from={dateFrom}&date_to={dateTo}
+     */
+    public PredictionsResponse fetchPredictions(int leagueId, String dateFrom, String dateTo) throws Exception {
+        String url = String.format("%s?league_id=%d&date_from=%s&date_to=%s",
+                BASE_URL_PREDICTIONS, leagueId, dateFrom, dateTo);
+
+        HttpClient client = HttpClient.newBuilder().build();
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Authorization", "Token " + API_TOKEN)
+                .header("Accept", "application/json")
+                .GET()
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 200) {
+            throw new RuntimeException("API error " + response.statusCode() + ": " + response.body());
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        return mapper.readValue(response.body(), PredictionsResponse.class);
+    }
 
     private HttpClient createHttpClient() {
         HttpClient client = HttpClient.newBuilder()
@@ -550,10 +672,10 @@ public class SportsApiClient {
         SportsApiClient client = new SportsApiClient();
 
         // ── Single event ──────────────────────────────
-        /*Event single = client.fetchEvent(46375);
+     /*   Event single = client.fetchEvent(8287);
         System.out.println("Single event fetch:");
         System.out.println(single);
-        System.out.println();*/
+        System.out.println();
 
         // ── Event list ────────────────────────────────
         EventsResponse response = client.fetchEvents("2026-06-08", "2026-07-04", 26, "notstarted");
@@ -582,6 +704,8 @@ public class SportsApiClient {
 
             System.out.println();
         }
+
+      */
 
         // ── Referees ──────────────────────────────────
         /*System.out.println("\n=== Referees (league 26) ===");
@@ -624,9 +748,42 @@ public class SportsApiClient {
 */
 
         // ── Event Odds ────────────────────────────────
-        System.out.println("\n=== Event Odds (event 46385) ===");
+     /*   System.out.println("\n=== Event Odds (event 46385) ===");
         EventOdds eventOdds = client.fetchEventOdds(46385);
         System.out.printf("Event ID: %d%n", eventOdds.eventId);
         System.out.println(eventOdds.odds);
+*/
+
+        // ── Predictions ───────────────────────────────
+        System.out.println("\n=== Predictions (league 27, 2026-06-11 to 2026-06-12) ===");
+        PredictionsResponse preds = client.fetchPredictions(27, "2026-06-11", "2026-06-19");
+        System.out.printf("Total predictions: %d%n%n", preds.count);
+        for (Prediction pred : preds.results) {
+            PredictionEvent ev = pred.event;
+            System.out.printf("[%s] %s vs %s (%s)%n",
+                    ev.leagueName, ev.homeTeam, ev.awayTeam, ev.eventDate);
+
+            MatchResultMarket mr = pred.markets.matchResult;
+            System.out.printf("  1X2 probs   : H %.1f%%  D %.1f%%  A %.1f%%  → predicted: %s%n",
+                    mr.probHome, mr.probDraw, mr.probAway, mr.predicted);
+
+            ExpectedGoalsMarket xg = pred.markets.expectedGoals;
+            System.out.printf("  xG          : home %.2f  away %.2f%n", xg.home, xg.away);
+
+            OverUnderMarket ou = pred.markets.overUnder;
+            System.out.printf("  Over probs  : o1.5 %.1f%%  o2.5 %.1f%%  o3.5 %.1f%%%n",
+                    ou.probOver15, ou.probOver25, ou.probOver35);
+
+            System.out.printf("  BTTS yes    : %.1f%%%n", pred.markets.btts.probYes);
+            System.out.printf("  Most likely : %s%n", pred.markets.score.mostLikely);
+
+            PredictionRecommendations rec = pred.recommendations;
+            System.out.printf("  Bets flagged: favorite=%s  o1.5=%s  o2.5=%s  btts=%s  winner=%s%n",
+                    rec.betFavorite, rec.over15, rec.over25, rec.btts, rec.winner);
+
+            System.out.printf("  Model       : confidence %.3f  version %s%n",
+                    pred.model.confidence, pred.model.version);
+            System.out.println();
+        }
     }
 }

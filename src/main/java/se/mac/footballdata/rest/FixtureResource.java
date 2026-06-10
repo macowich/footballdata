@@ -32,7 +32,7 @@ public class FixtureResource {
         String searchDate;
 
         if (date == null || date.isBlank()) {
-            searchDate = LocalDate.now().format(CSV_DATE_FORMAT);
+            searchDate = LocalDate.now().toString();
         } else {
             searchDate = date;
         }

@@ -24,8 +24,7 @@ public class PredictionRepository {
     }
 
     public void saveOrOverwrite(Prediction prediction) {
-        // Query by "_id" because MongoDB treats your @BsonId field as the core identifier
-        var filter = eq("fixture_id", prediction.fixture_id);
+        var filter = eq("eventId", prediction.eventId);
         var options = new ReplaceOptions().upsert(true);
 
         getCollection().replaceOne(filter, prediction, options);

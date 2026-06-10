@@ -22,18 +22,20 @@ import static se.mac.footballdata.predictions.ResultPredictor.printResults;
 @Path("/predictions")
 @Produces(MediaType.APPLICATION_JSON)
 public class PredictionResource {
+
     @Inject
     PredictionRepository predictionRepository;
 
     @Inject
     EventRepository eventRepository;
 
+    @Inject
+    FixtureRepository fixtureRepository;
+
     @GET
     @Path("/all")
     public List<Prediction> all() {
-
-        List<Prediction> predictions = predictionRepository.listAll();
-        return predictions;
+        return predictionRepository.listAll();
     }
 
     @GET
@@ -44,20 +46,16 @@ public class PredictionResource {
     }
 
     void loadPredictions() {
-        //List<Fixture> fixtureList = fixtureRepository.findByHomeTeam("Brighton");
-        //Fixture f = fixtureList.getFirst();
-        //if (f == null) return;
+        //String startDate = LocalDate.now().toString();
+        String startDate = "2026-07-04";
+        List<Fixture> fixtureList = fixtureRepository.findByDate(startDate);
+        Fixture f = fixtureList.getFirst();
+        if (f == null) return;
 
-        Fixture f = new Fixture();
-        f.hometeam = "IK Sirius";
-        f.awayteam = "Hammarby IF";
-        f.date = "2026-06-20";
-        f.time = "15:00";
-
-        List<Event> homeTeamResult = eventRepository.findByTeam("IK Sirius");
-        List<Event> awayTeamResult = eventRepository.findByTeam("Hammarby IF");
-        Team homeTeam = createTeamFromEvent("IK Sirius", homeTeamResult);
-        Team awayTeam = createTeamFromEvent("Hammarby IF", awayTeamResult);
+        List<Event> homeTeamResult = eventRepository.findByTeam(f.hometeam);
+        List<Event> awayTeamResult = eventRepository.findByTeam(f.awayteam);
+        Team homeTeam = createTeamFromEvent(f.hometeam, homeTeamResult);
+        Team awayTeam = createTeamFromEvent(f.awayteam, awayTeamResult);
 
         ResultPredictor resultPredictor = new ResultPredictor();
 
@@ -76,14 +74,14 @@ public class PredictionResource {
 
     static Prediction createPrediction(Fixture f, Map<String, Float> oddsInfoMap) {
         Prediction prediction = new Prediction();
-        prediction.fixture_id = f.hometeam + ":" + f.awayteam;
+        prediction.eventId = f.eventId;
         prediction.hometeam = f.hometeam;
         prediction.awayteam = f.awayteam;
         prediction.date = f.date;
         prediction.time = f.time;
-        prediction.homewin = String.valueOf(oddsInfoMap.get("1"));
+        prediction.homeWin = String.valueOf(oddsInfoMap.get("1"));
         prediction.draw = String.valueOf(oddsInfoMap.get("x"));
-        prediction.awaywin = String.valueOf(oddsInfoMap.get("2"));
+        prediction.awayWin = String.valueOf(oddsInfoMap.get("2"));
         prediction.o25 = String.valueOf(oddsInfoMap.get("o2.5"));
         prediction.u25 = String.valueOf(oddsInfoMap.get("u2.5"));
         return prediction;

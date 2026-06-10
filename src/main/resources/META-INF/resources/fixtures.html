@@ -147,20 +147,20 @@
       <table v-else>
         <thead>
           <tr>
-            <th @click="setSort('league')" style="cursor:pointer;user-select:none">League {{ sortIcon('league') }}</th>
+            <th @click="setSort('leagueId')" style="cursor:pointer;user-select:none">League {{ sortIcon('leagueId') }}</th>
             <th @click="setSort('date')" style="cursor:pointer;user-select:none">Date &amp; Time {{ sortIcon('date') }}</th>
             <th>Home / Away</th>
             <th>Referee</th>
-            <th>B365H</th>
-            <th>B365D</th>
-            <th>B365A</th>
-            <th @click="setSort('b365_u25')" style="cursor:pointer;user-select:none">B365 U2.5 {{ sortIcon('b365_u25') }}</th>
-            <th @click="setSort('b365_o25')" style="cursor:pointer;user-select:none">B365 O2.5 {{ sortIcon('b365_o25') }}</th>
+            <th>Home</th>
+            <th>Draw</th>
+            <th>Away</th>
+            <th @click="setSort('under25Goals')" style="cursor:pointer;user-select:none">U2.5 {{ sortIcon('under25Goals') }}</th>
+            <th @click="setSort('over25Goals')" style="cursor:pointer;user-select:none">O2.5 {{ sortIcon('over25Goals') }}</th>
           </tr>
         </thead>
         <tbody>
           <tr class="row-hover" v-for="item in filtered" :key="item.id">
-            <td>{{ item.league || '—' }}</td>
+            <td>{{ getLeagueName(item.leagueId) || '—' }}</td>
             <td style="white-space: nowrap;">
               <strong>{{ item.date || '—' }}</strong>
               <span style="color:var(--muted)">{{ item.time }}</span>
@@ -170,11 +170,11 @@
               <div><span class="odds-chip orange" v-if="item.awayteam">{{ item.awayteam }}</span><span v-else style="color:var(--muted)">—</span></div>
             </td>
             <td>{{ item.referee || '—' }}</td>
-            <td>{{ item.b365h || '—' }}</td>
-            <td>{{ item.b365d || '—' }}</td>
-            <td>{{ item.b365a || '—' }}</td>
-            <td>{{ item.b365_u25 || '—' }}</td>
-            <td>{{ item.b365_o25 || '—' }}</td>
+            <td>{{ item.homeWin || '—' }}</td>
+            <td>{{ item.draw || '—' }}</td>
+            <td>{{ item.awayWin || '—' }}</td>
+            <td>{{ item.under25Goals || '—' }}</td>
+            <td>{{ item.over25Goals || '—' }}</td>
           </tr>
         </tbody>
       </table>
@@ -195,6 +195,17 @@ createApp({
     const error = ref('');
     const search = ref('');
     const selectedDate = ref('');
+    const leagues = ref([
+      { id: 1,  name: 'Premier League' },
+      { id: 26, name: 'Allsvenskan'    },
+    ]);
+
+    const getLeagueName = computed(() => {
+      return (id) => {
+        const league = leagues.value.find(item => item.id === id)
+        return league ? league.name : 'Okänd liga'
+      }
+    })
 
     const availableDates = computed(() => {
       const dates = [...new Set(items.value.map(i => i.date).filter(Boolean))];
@@ -225,11 +236,11 @@ createApp({
       if (q) {
         rows = rows.filter(i =>
           s(i.date).includes(q) || s(i.time).includes(q) ||
-          s(i.league).includes(q) || s(i.hometeam).includes(q) ||
+          s(i.leagueId).includes(q) || s(i.hometeam).includes(q) ||
           s(i.awayteam).includes(q) || s(i.referee).includes(q) ||
-          s(i.b365h).includes(q) || s(i.b365d).includes(q) ||
-          s(i.b365a).includes(q) || s(i.b365_u25).includes(q) ||
-          s(i.b365_o25).includes(q)
+          s(i.homeWin).includes(q) || s(i.draw).includes(q) ||
+          s(i.awayWin).includes(q) || s(i.under25goals).includes(q) ||
+          s(i.over25goals).includes(q)
         );
       }
       if (!sortKey.value) return rows;
@@ -259,7 +270,7 @@ createApp({
 
     onMounted(fetchAll);
 
-    return { items, loading, error, search, selectedDate, availableDates, filtered, fetchAll, sortKey, sortDir, setSort, sortIcon };
+    return { items, loading, error, search, selectedDate, availableDates, filtered, fetchAll, sortKey, sortDir, setSort, sortIcon, getLeagueName };
   }
 }).mount('#app');
 </script>

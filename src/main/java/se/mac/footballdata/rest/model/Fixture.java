@@ -4,33 +4,44 @@ import io.quarkus.mongodb.panache.PanacheMongoEntity;
 import io.quarkus.mongodb.panache.common.MongoEntity;
 
 @MongoEntity(collection = "fixtures")
-public class Fixture extends PanacheMongoEntity {
+public class Fixture extends PanacheMongoEntity
+{
 
-    public String fixture_id;
+   public int eventId;
 
-    public String league;
+   public int leagueId;
 
-    public String date;
+   public String date;
 
-    public String time;
+   public String time;
 
-    public String hometeam;
+   public String hometeam;
 
-    public String awayteam;
+   public String awayteam;
 
-    public String referee;
+   public String referee;
 
-    public String b365h;
+   public double homeWin;
 
-    public String b365d;
+   public double draw;
 
-    public String b365a;
+   public double awayWin;
 
-    public String b365_u25;
+   public double over25Goals;
 
-    public String b365_o25;
+   public double under25Goals;
 
+   public String b365h;
 
-    public Fixture() {
-    }
+   public String b365d;
+
+   public String b365a;
+
+   public String b365_u25;
+
+   public String b365_o25;
+
+   public Fixture()
+   {
+   }
 }

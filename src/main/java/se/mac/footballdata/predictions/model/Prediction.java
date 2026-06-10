@@ -5,7 +5,7 @@ import io.quarkus.mongodb.panache.common.MongoEntity;
 @MongoEntity(collection = "predictions")
 public class Prediction {
 
-    public String fixture_id;
+    public int eventId;
 
     public String date;
 
@@ -15,11 +15,11 @@ public class Prediction {
 
     public String awayteam;
 
-    public String homewin;
+    public String homeWin;
 
     public String draw;
 
-    public String awaywin;
+    public String awayWin;
 
     public String u25;
 

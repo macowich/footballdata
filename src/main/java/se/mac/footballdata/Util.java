@@ -1,13 +1,16 @@
 package se.mac.footballdata;
 
 import se.mac.footballdata.rest.model.Event;
+import se.mac.footballdata.rest.model.League;
 import se.mac.footballdata.rest.model.Team;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 public class Util {
     public static double round(double d, int decimalPlace) {
@@ -15,6 +18,11 @@ public class Util {
         bd = bd.setScale(decimalPlace, RoundingMode.HALF_UP);
         return bd.doubleValue();
     }
+
+    public static Map<Integer, League> leagues = Map.of(
+          1, new League(1, "Premier League"),
+          26, new League(26, "Allsvenskan")
+    );
 
     public static String getLeagueName(String code) {
         return switch (code) {

@@ -221,16 +221,16 @@
           <tr>
             <th class="sortable" @click="setSort('date')">Datum &amp; Tid {{ sortIcon('date') }}</th>
             <th>Hemma / Borta</th>
-            <th class="sortable" @click="setSort('homewin')">Hemmaseger {{ sortIcon('homewin') }}</th>
+            <th class="sortable" @click="setSort('homeWin')">Hemmaseger {{ sortIcon('homeWin') }}</th>
             <th class="sortable" @click="setSort('draw')">Oavgjort {{ sortIcon('draw') }}</th>
-            <th class="sortable" @click="setSort('awaywin')">Bortaseger {{ sortIcon('awaywin') }}</th>
+            <th class="sortable" @click="setSort('awayWin')">Bortaseger {{ sortIcon('awayWin') }}</th>
             <th class="sortable" @click="setSort('u25')">U 2.5 {{ sortIcon('u25') }}</th>
             <th class="sortable" @click="setSort('o25')">Ö 2.5 {{ sortIcon('o25') }}</th>
             <th>Favorit</th>
           </tr>
         </thead>
         <tbody>
-          <tr class="row-hover" v-for="item in filtered" :key="item.fixture_id">
+          <tr class="row-hover" v-for="item in filtered" :key="item.eventId">
             <td style="white-space:nowrap">
               <strong>{{ item.date || '—' }}</strong>
               <span style="color:var(--muted)"> {{ item.time }}</span>
@@ -243,11 +243,11 @@
             <td>
               <div class="prob-bar-wrap">
                 <div class="prob-bar-track">
-                  <div class="prob-bar-fill fill-home" :style="{width: impliedPct(item.homewin)+'%'}"></div>
+                  <div class="prob-bar-fill fill-home" :style="{width: impliedPct(item.homeWin)+'%'}"></div>
                 </div>
-                <span class="prob-pct">{{ impliedPct(item.homewin) }}%</span>
+                <span class="prob-pct">{{ impliedPct(item.homeWin) }}%</span>
               </div>
-              <div style="font-family:'JetBrains Mono',monospace;font-size:13px;margin-top:2px;color:var(--text)">{{ item.homewin }}</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:13px;margin-top:2px;color:var(--text)">{{ item.homeWin }}</div>
             </td>
             <!-- Draw -->
             <td>
@@ -263,11 +263,11 @@
             <td>
               <div class="prob-bar-wrap">
                 <div class="prob-bar-track">
-                  <div class="prob-bar-fill fill-away" :style="{width: impliedPct(item.awaywin)+'%'}"></div>
+                  <div class="prob-bar-fill fill-away" :style="{width: impliedPct(item.awayWin)+'%'}"></div>
                 </div>
-                <span class="prob-pct">{{ impliedPct(item.awaywin) }}%</span>
+                <span class="prob-pct">{{ impliedPct(item.awayWin) }}%</span>
               </div>
-              <div style="font-family:'JetBrains Mono',monospace;font-size:13px;margin-top:2px;color:var(--text)">{{ item.awaywin }}</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:13px;margin-top:2px;color:var(--text)">{{ item.awayWin }}</div>
             </td>
             <!-- U2.5 -->
             <td>
@@ -332,7 +332,7 @@ createApp({
     }
 
     function favoriteLabel(item) {
-      const h = parseFloat(item.homewin), d = parseFloat(item.draw), a = parseFloat(item.awaywin);
+      const h = parseFloat(item.homewin), d = parseFloat(item.draw), a = parseFloat(item.awayWin);
       const min = Math.min(h, d, a);
       if (min === h) return item.hometeam;
       if (min === a) return item.awayteam;
@@ -340,7 +340,7 @@ createApp({
     }
 
     function favoriteClass(item) {
-      const h = parseFloat(item.homewin), d = parseFloat(item.draw), a = parseFloat(item.awaywin);
+      const h = parseFloat(item.homewin), d = parseFloat(item.draw), a = parseFloat(item.awayWin);
       const min = Math.min(h, d, a);
       if (min === h) return 'chip-home';
       if (min === a) return 'chip-away';
@@ -366,7 +366,7 @@ createApp({
       if (q) rows = rows.filter(i =>
         s(i.date).includes(q) || s(i.time).includes(q) ||
         s(i.hometeam).includes(q) || s(i.awayteam).includes(q) ||
-        s(i.fixture_id).includes(q)
+        s(i.eventId).includes(q)
       );
       if (!sortKey.value) return rows;
       const key = sortKey.value;

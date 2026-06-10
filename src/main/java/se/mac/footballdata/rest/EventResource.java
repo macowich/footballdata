@@ -1,15 +1,21 @@
 package se.mac.footballdata.rest;
 
 import jakarta.inject.Inject;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.bson.types.ObjectId;
+import se.mac.footballdata.Util;
 import se.mac.footballdata.rest.model.Event;
 import se.mac.footballdata.rest.model.League;
 import se.mac.footballdata.rest.model.Referee;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,9 +23,6 @@ import java.util.Optional;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class EventResource {
-
-    static List<League> leagues =
-            Arrays.asList(new League(1, "Premier League"), new League(26, "Allsvenskan"));
 
     @Inject
     EventRepository eventRepository;
@@ -50,7 +53,7 @@ public class EventResource {
     @GET
     @Path("/league/all")
     public List<League> leagues() {
-        return leagues;
+        return new ArrayList<>(Util.leagues.values());
     }
 
 }

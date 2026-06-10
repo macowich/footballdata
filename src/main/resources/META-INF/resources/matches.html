@@ -440,7 +440,6 @@ createApp({
     });
     const currentResult = computed(() => {
       const h = scoreHome.value, a = scoreAway.value;
-      if (halfView.value === 'full') return detail.value?.fullTimeResult ?? 'D';
       return h > a ? 'H' : a > h ? 'A' : 'D';
     });
 
@@ -456,7 +455,7 @@ createApp({
       detail.value = null;
       halfView.value = 'full';
       try {
-        let res = await fetch(`${BASE}/${id}`);
+        const res = await fetch(`${BASE}/${id}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         detail.value = await res.json();
       } catch (e) {
