@@ -28,5 +28,12 @@ public class Team
    public double concededHomeLeague; // Samma som goalsAwayLeague
 
    public int over2;
+   public int over1;
+   public int btts;
+   public int cleanSheets;
+   public double avgCorners;// Average
+   public double avgCornersHome;
+   public double avgCornersAway;
+
 
 }

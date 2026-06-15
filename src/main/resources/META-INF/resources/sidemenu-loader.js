@@ -8,6 +8,10 @@
  * The page must have:
  *   - <div id="sidemenu-root"></div>  as the first child of #app (or body)
  *   - .main-content element that gets shifted when menu collapses
+ *
+ * window.leaguesReady is NOT set here because this script is deferred and
+ * therefore runs after inline scripts (including Vue mount). Instead, each
+ * page sets it via a non-deferred <script> tag in <head> — see leagues.js.
  */
 (function () {
   const script   = document.currentScript || document.querySelector('script[data-page]');

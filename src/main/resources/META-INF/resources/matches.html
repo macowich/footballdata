@@ -388,6 +388,42 @@
           <div class="stat-val">{{ detail.awayPossesion }}</div>
         </div>
 
+        <div class="stat-row">
+          <div class="stat-val">{{ detail.homeFouls }}</div>
+          <div>
+            <div class="stat-label" style="margin-bottom:4px">Frisparkar</div>
+            <div class="stat-bars">
+              <div class="stat-bar-home" :style="{width: pct(detail.hFouls, detail.awayFouls)+'%'}"></div>
+              <div class="stat-bar-away" :style="{width: pct(detail.aFouls, detail.homeFouls)+'%'}"></div>
+            </div>
+          </div>
+          <div class="stat-val">{{ detail.awayFouls }}</div>
+        </div>
+
+        <div class="stat-row">
+          <div class="stat-val">{{ detail.homeBigChances }}</div>
+          <div>
+            <div class="stat-label" style="margin-bottom:4px">Stora chanser</div>
+            <div class="stat-bars">
+              <div class="stat-bar-home" :style="{width: pct(detail.hBigChances, detail.awayBigChances)+'%'}"></div>
+              <div class="stat-bar-away" :style="{width: pct(detail.aBigChances, detail.homeBigChances)+'%'}"></div>
+            </div>
+          </div>
+          <div class="stat-val">{{ detail.awayBigChances }}</div>
+        </div>
+
+        <div class="stat-row">
+          <div class="stat-val">{{ detail.homeSaves }}</div>
+          <div>
+            <div class="stat-label" style="margin-bottom:4px">Räddningar</div>
+            <div class="stat-bars">
+              <div class="stat-bar-home" :style="{width: pct(detail.hSaves, detail.awaySaves)+'%'}"></div>
+              <div class="stat-bar-away" :style="{width: pct(detail.aSaves, detail.homeSaves)+'%'}"></div>
+            </div>
+          </div>
+          <div class="stat-val">{{ detail.awaySaves }}</div>
+        </div>
+
       </div>
 
       <div class="modal-divider"></div>

@@ -5,23 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Domare</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="leagues.js"></script>
     <script src="sidemenu-loader.js" data-page="referee" defer></script>
-    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap"
+          rel="stylesheet"/>
     <link rel="stylesheet" href="fixtures.css"/>
     <link rel="stylesheet" href="sidemenu.css"/>
     <style>
-        body { margin: 0; }
-        #app { display: flex; min-height: 100vh; }
+        body {
+            margin: 0;
+        }
+
+        #app {
+            display: flex;
+            min-height: 100vh;
+        }
 
         .main-content {
             margin-left: 220px;
             flex: 1;
-            transition: margin-left .25s cubic-bezier(.4,0,.2,1);
+            transition: margin-left .25s cubic-bezier(.4, 0, .2, 1);
             min-width: 0;
         }
-        .main-content.shifted { margin-left: 56px; }
 
-        .league-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+        .main-content.shifted {
+            margin-left: 56px;
+        }
+
+        .league-tabs {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
         .league-tab {
             padding: 8px 16px;
             border-radius: 10px;
@@ -35,121 +51,265 @@
             transition: all .15s;
             white-space: nowrap;
         }
-        .league-tab:hover { border-color: var(--border2); background: var(--surface2); color: var(--text); }
-        .league-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+        .league-tab:hover {
+            border-color: var(--border2);
+            background: var(--surface2);
+            color: var(--text);
+        }
+
+        .league-tab.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+        }
 
         .referee-avatar {
-            width: 36px; height: 36px;
+            width: 36px;
+            height: 36px;
             border-radius: 10px;
             background: var(--surface2);
             border: 1.5px solid var(--border2);
-            display: flex; align-items: center; justify-content: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-family: 'JetBrains Mono', monospace;
-            font-size: 14px; font-weight: 700;
+            font-size: 14px;
+            font-weight: 700;
             color: var(--accent);
             flex-shrink: 0;
         }
-        .referee-name-cell { display: flex; align-items: center; gap: 12px; }
-        .referee-name { font-family: var(--font); font-size: 14px; font-weight: 600; color: var(--text); }
+
+        .referee-name-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .referee-name {
+            font-family: var(--font);
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
         .referee-id-badge {
             font-family: 'JetBrains Mono', monospace;
-            font-size: 11px; color: var(--muted);
-            background: var(--surface2); border: 1px solid var(--border);
-            border-radius: 5px; padding: 2px 6px;
+            font-size: 11px;
+            color: var(--muted);
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            padding: 2px 6px;
         }
-        .mono { font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+        }
+
         .card-pip {
-            display: inline-flex; align-items: center; gap: 4px;
-            font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600;
-            padding: 2px 7px; border-radius: 5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 2px 7px;
+            border-radius: 5px;
         }
-        .card-yellow { background: rgba(234,179,8,.15); color: #ca8a04; border: 1px solid rgba(234,179,8,.25); }
-        .card-red    { background: rgba(239,68,68,.12);  color: #ef4444; border: 1px solid rgba(239,68,68,.25); }
-        .avg-bar-wrap { display: flex; align-items: center; gap: 6px; }
+
+        .card-yellow {
+            background: rgba(234, 179, 8, .15);
+            color: #ca8a04;
+            border: 1px solid rgba(234, 179, 8, .25);
+        }
+
+        .card-red {
+            background: rgba(239, 68, 68, .12);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, .25);
+        }
+
+        .avg-bar-wrap {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
         .avg-bar-track {
-            flex: 1; height: 5px;
-            background: rgba(255,255,255,.07);
-            border-radius: 99px; overflow: hidden;
+            flex: 1;
+            height: 5px;
+            background: rgba(255, 255, 255, .07);
+            border-radius: 99px;
+            overflow: hidden;
             min-width: 60px;
         }
-        .avg-bar-fill { height: 100%; border-radius: 99px; transition: width .5s ease; }
-        .fill-yellow { background: #ca8a04; }
-        .fill-red    { background: #ef4444; }
-        .avg-val {
-            font-family: 'JetBrains Mono', monospace; font-size: 12px;
-            color: var(--muted); min-width: 28px; text-align: right;
+
+        .avg-bar-fill {
+            height: 100%;
+            border-radius: 99px;
+            transition: width .5s ease;
         }
-        th.sortable { cursor: pointer; user-select: none; }
-        tr.row-hover { cursor: pointer; }
+
+        .fill-yellow {
+            background: #ca8a04;
+        }
+
+        .fill-red {
+            background: #ef4444;
+        }
+
+        .avg-val {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--muted);
+            min-width: 28px;
+            text-align: right;
+        }
+
+        th.sortable {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        tr.row-hover {
+            cursor: pointer;
+        }
 
         /* ── Modal ───────────────────────────────────────────────────── */
         .modal-backdrop {
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,.65);
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .65);
             backdrop-filter: blur(4px);
-            display: flex; align-items: center; justify-content: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             z-index: 1000;
             padding: 24px;
             animation: backdropIn .18s ease;
         }
-        @keyframes backdropIn { from { opacity: 0 } to { opacity: 1 } }
+
+        @keyframes backdropIn {
+            from {
+                opacity: 0
+            }
+            to {
+                opacity: 1
+            }
+        }
 
         .modal {
             background: var(--surface);
             border: 1px solid var(--border2);
             border-radius: 20px;
-            width: 100%; max-width: 480px;
+            width: 100%;
+            max-width: 480px;
             overflow: hidden;
-            animation: modalIn .22s cubic-bezier(.34,1.56,.64,1);
+            animation: modalIn .22s cubic-bezier(.34, 1.56, .64, 1);
             position: relative;
         }
-        @keyframes modalIn { from { opacity:0; transform:scale(.9) translateY(8px) } to { opacity:1; transform:scale(1) translateY(0) } }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(.9) translateY(8px)
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0)
+            }
+        }
 
         .modal-header {
             padding: 24px 24px 0;
-            display: flex; align-items: flex-start; justify-content: space-between;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
         }
+
         .modal-close {
-            width: 32px; height: 32px; border-radius: 8px;
-            background: var(--surface2); border: 1px solid var(--border);
-            color: var(--muted); font-size: 18px; line-height: 1;
-            cursor: pointer; display: flex; align-items: center; justify-content: center;
-            transition: all .15s; flex-shrink: 0;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 18px;
+            line-height: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all .15s;
+            flex-shrink: 0;
         }
-        .modal-close:hover { background: var(--border); color: var(--text); }
+
+        .modal-close:hover {
+            background: var(--border);
+            color: var(--text);
+        }
 
         /* Hero section */
         .modal-hero {
             padding: 28px 24px 24px;
-            display: flex; align-items: center; gap: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
         }
+
         .modal-avatar {
-            width: 72px; height: 72px;
+            width: 72px;
+            height: 72px;
             border-radius: 18px;
             background: var(--surface2);
             border: 2px solid var(--border2);
-            display: flex; align-items: center; justify-content: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-family: 'JetBrains Mono', monospace;
-            font-size: 28px; font-weight: 700;
+            font-size: 28px;
+            font-weight: 700;
             color: var(--accent);
             flex-shrink: 0;
         }
-        .modal-hero-info { flex: 1; min-width: 0; }
+
+        .modal-hero-info {
+            flex: 1;
+            min-width: 0;
+        }
+
         .modal-name {
-            font-family: var(--font); font-size: 20px; font-weight: 700;
-            color: var(--text); margin-bottom: 6px;
+            font-family: var(--font);
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 6px;
         }
+
         .modal-meta {
-            display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
         }
+
         .modal-meta-chip {
-            font-family: 'JetBrains Mono', monospace; font-size: 11px;
-            color: var(--muted); background: var(--surface2);
-            border: 1px solid var(--border); border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--muted);
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 6px;
             padding: 3px 8px;
         }
 
-        .modal-divider { height: 1px; background: var(--border); margin: 0 24px; }
+        .modal-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 0 24px;
+        }
 
         /* Stat grid */
         .modal-stats-grid {
@@ -158,58 +318,113 @@
             grid-template-columns: 1fr 1fr;
             gap: 12px;
         }
+
         .stat-card {
             background: var(--surface2);
             border: 1px solid var(--border);
             border-radius: 12px;
             padding: 16px;
         }
+
         .stat-card-label {
-            font-family: var(--font); font-size: 11px; font-weight: 600;
-            letter-spacing: .06em; text-transform: uppercase;
-            color: var(--muted); margin-bottom: 8px;
+            font-family: var(--font);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 8px;
         }
+
         .stat-card-value {
             font-family: 'JetBrains Mono', monospace;
-            font-size: 28px; font-weight: 700;
-            color: var(--text); line-height: 1;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1;
         }
+
         .stat-card-sub {
-            font-family: var(--font); font-size: 12px;
-            color: var(--muted); margin-top: 4px;
+            font-family: var(--font);
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 4px;
         }
-        .stat-card.yellow .stat-card-value { color: #ca8a04; }
-        .stat-card.red    .stat-card-value { color: #ef4444; }
-        .stat-card.blue   .stat-card-value { color: var(--accent); }
+
+        .stat-card.yellow .stat-card-value {
+            color: #ca8a04;
+        }
+
+        .stat-card.red .stat-card-value {
+            color: #ef4444;
+        }
+
+        .stat-card.blue .stat-card-value {
+            color: var(--accent);
+        }
 
         /* Avg bars inside modal */
-        .modal-avg-section { padding: 0 24px 24px; display: flex; flex-direction: column; gap: 14px; }
-        .modal-avg-row { display: flex; flex-direction: column; gap: 6px; }
+        .modal-avg-section {
+            padding: 0 24px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .modal-avg-row {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
         .modal-avg-label {
-            display: flex; justify-content: space-between;
-            font-family: var(--font),serif; font-size: 12px; color: var(--muted);
+            display: flex;
+            justify-content: space-between;
+            font-family: var(--font), serif;
+            font-size: 12px;
+            color: var(--muted);
         }
+
         .modal-avg-label span:last-child {
-            font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--text);
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            color: var(--text);
         }
+
         .modal-avg-track {
-            height: 8px; background: rgba(255,255,255,.07);
-            border-radius: 99px; overflow: hidden;
+            height: 8px;
+            background: rgba(255, 255, 255, .07);
+            border-radius: 99px;
+            overflow: hidden;
         }
-        .modal-avg-fill { height: 100%; border-radius: 99px; transition: width .6s ease; }
+
+        .modal-avg-fill {
+            height: 100%;
+            border-radius: 99px;
+            transition: width .6s ease;
+        }
 
         .modal-footer {
             padding: 12px 24px 20px;
-            display: flex; justify-content: flex-end;
+            display: flex;
+            justify-content: flex-end;
         }
 
         .state-box-inline {
-            display: flex; flex-direction: column; align-items: center;
-            gap: 8px; padding: 48px 24px;
-            color: var(--muted); font-family: var(--font),serif; font-size: 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 48px 24px;
+            color: var(--muted);
+            font-family: var(--font), serif;
+            font-size: 14px;
             text-align: center;
         }
-        .state-box-inline .icon { font-size: 32px; }
+
+        .state-box-inline .icon {
+            font-size: 32px;
+        }
     </style>
 </head>
 <body>
@@ -231,13 +446,14 @@
 
             <div class="error-banner" v-if="error">
                 ⚠ {{ error }}
-                <button class="btn btn-secondary btn-sm" style="margin-left:auto" @click="fetchReferees">Försök igen</button>
+                <button class="btn btn-secondary btn-sm" style="margin-left:auto" @click="fetchReferees">Försök igen
+                </button>
             </div>
 
             <div class="toolbar">
                 <div class="search-wrap">
                     <span class="search-icon">🔍</span>
-                    <input v-model="search" placeholder="Sök domare…" />
+                    <input v-model="search" placeholder="Sök domare…"/>
                 </div>
                 <div class="league-tabs">
                     <button
@@ -245,7 +461,8 @@
                             class="league-tab"
                             :class="{ active: selectedLeague.id === l.id }"
                             @click="selectLeague(l)"
-                    >{{ l.name }}</button>
+                    >{{ l.name }}
+                    </button>
                 </div>
                 <button class="btn btn-secondary" @click="fetchReferees" :disabled="loading">
                     {{ loading ? '…' : '↻ Ladda om' }}
@@ -269,15 +486,25 @@
                         <th style="width:40px">#</th>
                         <th>Domare</th>
                         <th class="sortable" @click="setSort('matches')">Matcher {{ sortIcon('matches') }}</th>
-                        <th class="sortable" @click="setSort('totalYellowCards')">🟨 Totalt {{ sortIcon('totalYellowCards') }}</th>
-                        <th class="sortable" @click="setSort('totalRedCards')">🟥 Totalt {{ sortIcon('totalRedCards') }}</th>
-                        <th class="sortable" @click="setSort('avgYellowPerMatch')">🟨 / match {{ sortIcon('avgYellowPerMatch') }}</th>
-                        <th class="sortable" @click="setSort('avgRedPerMatch')">🟥 / match {{ sortIcon('avgRedPerMatch') }}</th>
+                        <th class="sortable" @click="setSort('totalYellowCards')">🟨 Totalt
+                            {{ sortIcon('totalYellowCards') }}
+                        </th>
+                        <th class="sortable" @click="setSort('totalRedCards')">🟥 Totalt {{ sortIcon('totalRedCards')
+                            }}
+                        </th>
+                        <th class="sortable" @click="setSort('avgYellowPerMatch')">🟨 / match
+                            {{ sortIcon('avgYellowPerMatch') }}
+                        </th>
+                        <th class="sortable" @click="setSort('avgRedPerMatch')">🟥 / match {{ sortIcon('avgRedPerMatch')
+                            }}
+                        </th>
                     </tr>
                     </thead>
                     <tbody>
                     <tr class="row-hover" v-for="(ref, i) in filtered" :key="ref.id" @click="openModal(ref.id)">
-                        <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted)">{{ i + 1 }}</td>
+                        <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted)">{{ i + 1
+                            }}
+                        </td>
                         <td>
                             <div class="referee-name-cell">
                                 <div class="referee-avatar">{{ ref.name?.[0] }}</div>
@@ -291,12 +518,14 @@
                         <td><span class="card-pip card-yellow">{{ ref.totalYellowCards }}</span></td>
                         <td>
                             <span class="card-pip card-red" v-if="ref.totalRedCards > 0">{{ ref.totalRedCards }}</span>
-                            <span style="color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:12px" v-else>—</span>
+                            <span style="color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:12px"
+                                  v-else>—</span>
                         </td>
                         <td>
                             <div class="avg-bar-wrap">
                                 <div class="avg-bar-track">
-                                    <div class="avg-bar-fill fill-yellow" :style="{ width: avgBarPct(ref.avgYellowPerMatch, maxAvgYellow) + '%' }"></div>
+                                    <div class="avg-bar-fill fill-yellow"
+                                         :style="{ width: avgBarPct(ref.avgYellowPerMatch, maxAvgYellow) + '%' }"></div>
                                 </div>
                                 <span class="avg-val">{{ ref.avgYellowPerMatch.toFixed(2) }}</span>
                             </div>
@@ -304,11 +533,13 @@
                         <td>
                             <div class="avg-bar-wrap" v-if="ref.avgRedPerMatch > 0">
                                 <div class="avg-bar-track">
-                                    <div class="avg-bar-fill fill-red" :style="{ width: avgBarPct(ref.avgRedPerMatch, maxAvgRed) + '%' }"></div>
+                                    <div class="avg-bar-fill fill-red"
+                                         :style="{ width: avgBarPct(ref.avgRedPerMatch, maxAvgRed) + '%' }"></div>
                                 </div>
                                 <span class="avg-val">{{ ref.avgRedPerMatch.toFixed(2) }}</span>
                             </div>
-                            <span style="color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:12px" v-else>—</span>
+                            <span style="color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:12px"
+                                  v-else>—</span>
                         </td>
                     </tr>
                     </tbody>
@@ -362,7 +593,8 @@
                     <div class="stat-card">
                         <div class="stat-card-label">Kort totalt</div>
                         <div class="stat-card-value">{{ detail.totalYellowCards + detail.totalRedCards }}</div>
-                        <div class="stat-card-sub">🟨 {{ detail.totalYellowCards }} &nbsp;🟥 {{ detail.totalRedCards }}</div>
+                        <div class="stat-card-sub">🟨 {{ detail.totalYellowCards }} &nbsp;🟥 {{ detail.totalRedCards }}
+                        </div>
                     </div>
                     <div class="stat-card yellow">
                         <div class="stat-card-label">Gula / match</div>
@@ -371,7 +603,9 @@
                     </div>
                     <div class="stat-card" :class="detail.avgRedPerMatch > 0 ? 'red' : ''">
                         <div class="stat-card-label">Röda / match</div>
-                        <div class="stat-card-value">{{ detail.avgRedPerMatch > 0 ? detail.avgRedPerMatch.toFixed(2) : '—' }}</div>
+                        <div class="stat-card-value">
+                            {{ detail.avgRedPerMatch > 0 ? detail.avgRedPerMatch.toFixed(2) : '—' }}
+                        </div>
                         <div class="stat-card-sub">genomsnitt</div>
                     </div>
                 </div>
@@ -386,7 +620,8 @@
                             <span>{{ detail.avgYellowPerMatch.toFixed(2) }}</span>
                         </div>
                         <div class="modal-avg-track">
-                            <div class="modal-avg-fill fill-yellow" :style="{ width: avgBarPct(detail.avgYellowPerMatch, maxAvgYellow) + '%' }"></div>
+                            <div class="modal-avg-fill fill-yellow"
+                                 :style="{ width: avgBarPct(detail.avgYellowPerMatch, maxAvgYellow) + '%' }"></div>
                         </div>
                     </div>
                     <div class="modal-avg-row" v-if="detail.avgRedPerMatch > 0">
@@ -395,7 +630,8 @@
                             <span>{{ detail.avgRedPerMatch.toFixed(2) }}</span>
                         </div>
                         <div class="modal-avg-track">
-                            <div class="modal-avg-fill fill-red" :style="{ width: avgBarPct(detail.avgRedPerMatch, maxAvgRed) + '%' }"></div>
+                            <div class="modal-avg-fill fill-red"
+                                 :style="{ width: avgBarPct(detail.avgRedPerMatch, maxAvgRed) + '%' }"></div>
                         </div>
                     </div>
                 </div>
@@ -413,30 +649,26 @@
 </div>
 
 <script>
-    const { createApp, ref, computed, onMounted } = Vue;
+    const {createApp, ref, computed, onBeforeMount, onMounted} = Vue;
 
     createApp({
         setup() {
             const BASE = 'http://localhost:8080/referees';
-            const leagues = [
-                { id: 1,  name: 'Premier League' },
-                { id: 26, name: 'Allsvenskan'    },
-            ];
+            const leagues = ref([]);
+            const referees = ref([]);
+            const loading = ref(false);
+            const error = ref('');
+            const search = ref('');
+            const selectedLeague = ref({ "id": 26, "name": "Allsvenskan" });
+            const sortKey = ref('avgYellowPerMatch');
+            const sortDir = ref(-1);
 
-            const referees       = ref([]);
-            const loading        = ref(false);
-            const error          = ref('');
-            const search         = ref('');
-            const selectedLeague = ref(leagues.find(l => l.id === 26));
-            const sortKey        = ref('avgYellowPerMatch');
-            const sortDir        = ref(-1);
-
-            const modalOpen    = ref(false);
+            const modalOpen = ref(false);
             const modalLoading = ref(false);
-            const detail       = ref(null);
+            const detail = ref(null);
 
             const maxAvgYellow = computed(() => Math.max(...referees.value.map(r => r.avgYellowPerMatch ?? 0), 1));
-            const maxAvgRed    = computed(() => Math.max(...referees.value.map(r => r.avgRedPerMatch    ?? 0), 1));
+            const maxAvgRed = computed(() => Math.max(...referees.value.map(r => r.avgRedPerMatch ?? 0), 1));
 
             function avgBarPct(val, max) {
                 if (!max) return 0;
@@ -445,8 +677,12 @@
 
             function setSort(key) {
                 if (sortKey.value === key) sortDir.value *= -1;
-                else { sortKey.value = key; sortDir.value = -1; }
+                else {
+                    sortKey.value = key;
+                    sortDir.value = -1;
+                }
             }
+
             function sortIcon(key) {
                 if (sortKey.value !== key) return '\u2195';
                 return sortDir.value === 1 ? '\u2191' : '\u2193';
@@ -464,8 +700,14 @@
                 return [...rows].sort((a, b) => ((a[key] ?? 0) - (b[key] ?? 0)) * dir);
             });
 
+            function fetchLeagues() {
+                window.leaguesReady.then(data => { leagues.value = data; });
+            }
+
             async function fetchReferees() {
-                loading.value = true; error.value = ''; referees.value = [];
+                loading.value = true;
+                error.value = '';
+                referees.value = [];
                 try {
                     const res = await fetch(`${BASE}/league/${selectedLeague.value.id}`);
                     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -478,9 +720,9 @@
             }
 
             async function openModal(id) {
-                modalOpen.value    = true;
+                modalOpen.value = true;
                 modalLoading.value = true;
-                detail.value       = null;
+                detail.value = null;
                 try {
                     const res = await fetch(`${BASE}/${id}`);
                     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -492,14 +734,22 @@
                 }
             }
 
-            function closeModal() { modalOpen.value = false; detail.value = null; }
-            function selectLeague(l) { selectedLeague.value = l; fetchReferees(); }
+            function closeModal() {
+                modalOpen.value = false;
+                detail.value = null;
+            }
 
+            function selectLeague(l) {
+                selectedLeague.value = l;
+                fetchReferees();
+            }
+
+            onBeforeMount(fetchLeagues);
             onMounted(fetchReferees);
 
             return {
                 leagues, referees, loading, error, search, selectedLeague,
-                filtered, fetchReferees, selectLeague,
+                filtered, fetchReferees, fetchLeagues, selectLeague,
                 sortKey, sortDir, setSort, sortIcon,
                 maxAvgYellow, maxAvgRed, avgBarPct,
                 modalOpen, modalLoading, detail, openModal, closeModal,

@@ -672,13 +672,14 @@ public class SportsApiClient {
         SportsApiClient client = new SportsApiClient();
 
         // ── Single event ──────────────────────────────
-     /*   Event single = client.fetchEvent(8287);
+        Event single = client.fetchEvent(8287);
         System.out.println("Single event fetch:");
         System.out.println(single);
         System.out.println();
 
+
         // ── Event list ────────────────────────────────
-        EventsResponse response = client.fetchEvents("2026-06-08", "2026-07-04", 26, "notstarted");
+        EventsResponse response = client.fetchEvents("2026-04-04", "2026-04-17", 26);
         System.out.printf("Total events: %d%n%n", response.count);
 
         for (Event event : response.results) {
@@ -705,7 +706,7 @@ public class SportsApiClient {
             System.out.println();
         }
 
-      */
+      /*
 
         // ── Referees ──────────────────────────────────
         /*System.out.println("\n=== Referees (league 26) ===");
@@ -748,12 +749,12 @@ public class SportsApiClient {
 */
 
         // ── Event Odds ────────────────────────────────
-     /*   System.out.println("\n=== Event Odds (event 46385) ===");
-        EventOdds eventOdds = client.fetchEventOdds(46385);
+        System.out.println("\n=== Event Odds (event 46355) ===");
+        EventOdds eventOdds = client.fetchEventOdds(46355);
         System.out.printf("Event ID: %d%n", eventOdds.eventId);
         System.out.println(eventOdds.odds);
-*/
 
+/*
         // ── Predictions ───────────────────────────────
         System.out.println("\n=== Predictions (league 27, 2026-06-11 to 2026-06-12) ===");
         PredictionsResponse preds = client.fetchPredictions(27, "2026-06-11", "2026-06-19");
@@ -785,5 +786,8 @@ public class SportsApiClient {
                     pred.model.confidence, pred.model.version);
             System.out.println();
         }
+
+ */
     }
+
 }

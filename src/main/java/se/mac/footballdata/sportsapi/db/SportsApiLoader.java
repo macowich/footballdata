@@ -49,9 +49,10 @@ public class SportsApiLoader {
                     database.getCollection("events", EventDB.class);
             collection.createIndex(new Document("eventId", 1), new IndexOptions().unique(true));
 
-            handleFixturesData(database, 26);
+            //handleFixturesData(database, 26);
 
-            //handleLeague(database, 26);
+            handleLeague(database, 26);
+            //handleLeague(database, 55);
 
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -101,6 +102,7 @@ public class SportsApiLoader {
         loadEvents("2026-04-19", "2026-05-04", leagueId, eventList);
         loadEvents("2026-05-05", "2026-05-19", leagueId, eventList);
         loadEvents("2026-05-20", "2026-05-31", leagueId, eventList);
+        loadEvents("2026-06-01", "2026-06-13", leagueId, eventList);
         List<EventDB> eventDBList = createEventDB(eventList);
         for (EventDB db : eventDBList) {
             loadEventStats(db);
@@ -162,6 +164,7 @@ public class SportsApiLoader {
         eventDB.seasonId = event.seasonId;
         eventDB.date = event.eventDate.toString().substring(0, 10);
         eventDB.time = event.eventDate.toString().substring(11, 16);
+        eventDB.round = event.roundNumber;
         eventDB.hometeam = event.homeTeam;
         eventDB.awayteam = event.awayTeam;
         eventDB.homeScore = event.homeScore;
@@ -186,6 +189,7 @@ public class SportsApiLoader {
 
     private static void loadEventStats(EventDB eventDB) throws Exception {
         EventStats eventStats = eventStatsClient.fetchEventStats(eventDB.eventId);
+        System.out.println("EventStaus for " + eventDB.eventId + " is loaded " + eventStats.eventId);
         eventDB.hs = eventStats.stats.home.totalShots;
         eventDB.as = eventStats.stats.away.totalShots;
         eventDB.hy = eventStats.stats.home.yellowCards;
@@ -196,6 +200,12 @@ public class SportsApiLoader {
         eventDB.aXg = eventStats.stats.away.xg.actual;
         eventDB.hPoss = eventStats.stats.home.ballPossession;
         eventDB.aPoss = eventStats.stats.away.ballPossession;
+        eventDB.hFouls = eventStats.stats.home.fouls;
+        eventDB.aFouls = eventStats.stats.away.fouls;
+        eventDB.hBigChances = eventStats.stats.home.bigChances;
+        eventDB.aBigChances = eventStats.stats.away.bigChances;
+        eventDB.hSaves = eventStats.stats.home.totalSaves;
+        eventDB.aSaves = eventStats.stats.away.totalSaves;
     }
 
     static void handleRefereeData(MongoDatabase database, int leagueId) throws Exception {

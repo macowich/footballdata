@@ -5,67 +5,86 @@ import io.quarkus.mongodb.panache.common.MongoEntity;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 
 @MongoEntity(collection = "events")
-public class Event extends PanacheMongoEntity
-{
-   public String league;
-   public String date;
-   public String time;
+public class Event extends PanacheMongoEntity {
+    public String league;
+    public String date;
+    public String time;
 
-   @BsonProperty("hometeam")
-   public String homeTeam;
+    @BsonProperty("hometeam")
+    public String homeTeam;
 
-   @BsonProperty("awayteam")
-   public String awayTeam;
+    @BsonProperty("awayteam")
+    public String awayTeam;
 
-   public String referee;
+    public String referee;
 
-   public Integer refereeId;
+    public Integer refereeId;
 
-   @BsonProperty("homeScore")
-   public Integer fullTimeHomeGoals;
+    public Integer round;
 
-   @BsonProperty("awayScore")
-   public Integer fullTimeAwayGoals;
+    @BsonProperty("homeScore")
+    public Integer fullTimeHomeGoals;
 
-   @BsonProperty("homeScoreHt")
-   public Integer halfTimeHomeGoals;
+    @BsonProperty("awayScore")
+    public Integer fullTimeAwayGoals;
 
-   @BsonProperty("awayScoreHt")
-   public Integer halfTimeAwayGoals;
+    @BsonProperty("homeScoreHt")
+    public Integer halfTimeHomeGoals;
 
-   @BsonProperty("hs")
-   public Integer homeShots;
+    @BsonProperty("awayScoreHt")
+    public Integer halfTimeAwayGoals;
 
-   @BsonProperty("as")
-   public Integer awayShots;
+    @BsonProperty("hs")
+    public Integer homeShots;
 
-   @BsonProperty("hc")
-   public Integer homeCorners;
+    @BsonProperty("as")
+    public Integer awayShots;
 
-   @BsonProperty("ac")
-   public Integer awayCorners;
+    @BsonProperty("hc")
+    public Integer homeCorners;
 
-   @BsonProperty("hy")
-   public Integer homeYellowcards;
+    @BsonProperty("ac")
+    public Integer awayCorners;
 
-   @BsonProperty("ay")
-   public Integer awayYellowcards;
+    @BsonProperty("hy")
+    public Integer homeYellowcards;
 
-   @BsonProperty("hr")
-   public Integer homeRedcards;
+    @BsonProperty("ay")
+    public Integer awayYellowcards;
 
-   @BsonProperty("ar")
-   public Integer awayRedcards;
+    @BsonProperty("hr")
+    public Integer homeRedcards;
 
-   @BsonProperty("hXg")
-   public Double homeXg;
+    @BsonProperty("ar")
+    public Integer awayRedcards;
 
-   @BsonProperty("aXg")
-   public Double awayXg;
+    @BsonProperty("hXg")
+    public Double homeXg;
 
-   @BsonProperty("hPoss")
-   public Integer homePossesion;
+    @BsonProperty("aXg")
+    public Double awayXg;
 
-   @BsonProperty("aPoss")
-   public Integer awayPossesion;
+    @BsonProperty("hPoss")
+    public Integer homePossesion;
+
+    @BsonProperty("aPoss")
+    public Integer awayPossesion;
+
+    @BsonProperty("hSaves")
+    public Integer homeSaves;
+
+    @BsonProperty("aSaves")
+    public Integer awaySaves;
+
+    @BsonProperty("hFouls")
+    public Integer homeFouls;
+
+    @BsonProperty("aFouls")
+    public Integer awayFouls;
+
+    @BsonProperty("hBigChances")
+    public Integer homeBigChances;
+
+    @BsonProperty("aBigChances")
+    public Integer awayBigChances;
 }

@@ -6,6 +6,7 @@ public class EventDB {
     public int seasonId;
     public String date;
     public String time;
+    public int round;
     public String hometeam;
     public String awayteam;
     public int homeScore;
@@ -25,6 +26,12 @@ public class EventDB {
     public int hPoss;
     public int aPoss;
     public int refereeId;
+    public int hFouls;
+    public int aFouls;
+    public int hBigChances;
+    public int aBigChances;
+    public int hSaves;
+    public int aSaves;
 
     public EventDB() {
 
