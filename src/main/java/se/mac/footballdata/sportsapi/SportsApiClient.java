@@ -19,6 +19,7 @@ public class SportsApiClient {
     private static final String BASE_URL_REFEREES = "https://sports.bzzoiro.com/api/v2/referees/";
     private static final String BASE_URL_PLAYERS = "https://sports.bzzoiro.com/api/v2/players/";
     private static final String BASE_URL_PREDICTIONS = "https://sports.bzzoiro.com/api/v2/predictions/";
+    private static final String BASE_URL_ODDS        = "https://sports.bzzoiro.com/api/v2/odds/";
     private static final String API_TOKEN = "bb387466704c69d4660a51d47153ce12f6a1c433";
 
     // ──────────────────────────────────────────────
@@ -332,23 +333,34 @@ public class SportsApiClient {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class EventOdds {
-        @JsonProperty("event_id") public int eventId;
+        @JsonProperty("event_id")
+        public int eventId;
         public Odds odds;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Odds {
-        @JsonProperty("home_win")       public double homeWin;
+        @JsonProperty("home_win")
+        public double homeWin;
         public double draw;
-        @JsonProperty("away_win")       public double awayWin;
-        @JsonProperty("over_15_goals")  public double over15Goals;
-        @JsonProperty("over_25_goals")  public double over25Goals;
-        @JsonProperty("over_35_goals")  public double over35Goals;
-        @JsonProperty("under_15_goals") public double under15Goals;
-        @JsonProperty("under_25_goals") public double under25Goals;
-        @JsonProperty("under_35_goals") public double under35Goals;
-        @JsonProperty("btts_yes")       public double bttsYes;
-        @JsonProperty("btts_no")        public double bttsNo;
+        @JsonProperty("away_win")
+        public double awayWin;
+        @JsonProperty("over_15_goals")
+        public double over15Goals;
+        @JsonProperty("over_25_goals")
+        public double over25Goals;
+        @JsonProperty("over_35_goals")
+        public double over35Goals;
+        @JsonProperty("under_15_goals")
+        public double under15Goals;
+        @JsonProperty("under_25_goals")
+        public double under25Goals;
+        @JsonProperty("under_35_goals")
+        public double under35Goals;
+        @JsonProperty("btts_yes")
+        public double bttsYes;
+        @JsonProperty("btts_no")
+        public double bttsNo;
 
         @Override
         public String toString() {
@@ -379,7 +391,8 @@ public class SportsApiClient {
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Prediction {
         public int id;
-        @JsonProperty("created_at") public OffsetDateTime createdAt;
+        @JsonProperty("created_at")
+        public OffsetDateTime createdAt;
         public PredictionEvent event;
         public PredictionMarkets markets;
         public PredictionRecommendations recommendations;
@@ -389,31 +402,46 @@ public class SportsApiClient {
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class PredictionEvent {
         public int id;
-        @JsonProperty("event_date")    public OffsetDateTime eventDate;
+        @JsonProperty("event_date")
+        public OffsetDateTime eventDate;
         public String status;
-        @JsonProperty("home_team_id")  public int homeTeamId;
-        @JsonProperty("home_team")     public String homeTeam;
-        @JsonProperty("away_team_id")  public int awayTeamId;
-        @JsonProperty("away_team")     public String awayTeam;
-        @JsonProperty("league_id")     public int leagueId;
-        @JsonProperty("league_name")   public String leagueName;
+        @JsonProperty("home_team_id")
+        public int homeTeamId;
+        @JsonProperty("home_team")
+        public String homeTeam;
+        @JsonProperty("away_team_id")
+        public int awayTeamId;
+        @JsonProperty("away_team")
+        public String awayTeam;
+        @JsonProperty("league_id")
+        public int leagueId;
+        @JsonProperty("league_name")
+        public String leagueName;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class PredictionMarkets {
-        @JsonProperty("match_result")    public MatchResultMarket matchResult;
-        @JsonProperty("expected_goals")  public ExpectedGoalsMarket expectedGoals;
-        @JsonProperty("over_under")      public OverUnderMarket overUnder;
+        @JsonProperty("match_result")
+        public MatchResultMarket matchResult;
+        @JsonProperty("expected_goals")
+        public ExpectedGoalsMarket expectedGoals;
+        @JsonProperty("over_under")
+        public OverUnderMarket overUnder;
         public BttsMarket btts;
         public ScoreMarket score;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class MatchResultMarket {
-        @JsonProperty("prob_home")  public double probHome;
-        @JsonProperty("prob_draw")  public double probDraw;
-        @JsonProperty("prob_away")  public double probAway;
-        /** "H", "D", or "A" */
+        @JsonProperty("prob_home")
+        public double probHome;
+        @JsonProperty("prob_draw")
+        public double probDraw;
+        @JsonProperty("prob_away")
+        public double probAway;
+        /**
+         * "H", "D", or "A"
+         */
         public String predicted;
     }
 
@@ -425,29 +453,39 @@ public class SportsApiClient {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class OverUnderMarket {
-        @JsonProperty("prob_over_15") public double probOver15;
-        @JsonProperty("prob_over_25") public double probOver25;
-        @JsonProperty("prob_over_35") public double probOver35;
+        @JsonProperty("prob_over_15")
+        public double probOver15;
+        @JsonProperty("prob_over_25")
+        public double probOver25;
+        @JsonProperty("prob_over_35")
+        public double probOver35;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class BttsMarket {
-        @JsonProperty("prob_yes") public double probYes;
+        @JsonProperty("prob_yes")
+        public double probYes;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ScoreMarket {
-        @JsonProperty("most_likely") public String mostLikely;
+        @JsonProperty("most_likely")
+        public String mostLikely;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class PredictionRecommendations {
         public String favorite;
-        @JsonProperty("favorite_prob") public double favoriteProb;
-        @JsonProperty("bet_favorite")  public boolean betFavorite;
-        @JsonProperty("over_15")       public boolean over15;
-        @JsonProperty("over_25")       public boolean over25;
-        @JsonProperty("over_35")       public boolean over35;
+        @JsonProperty("favorite_prob")
+        public double favoriteProb;
+        @JsonProperty("bet_favorite")
+        public boolean betFavorite;
+        @JsonProperty("over_15")
+        public boolean over15;
+        @JsonProperty("over_25")
+        public boolean over25;
+        @JsonProperty("over_35")
+        public boolean over35;
         public boolean btts;
         public boolean winner;
     }
@@ -456,6 +494,68 @@ public class SportsApiClient {
     public static class PredictionModel {
         public double confidence;
         public String version;
+    }
+
+    // ──────────────────────────────────────────────
+    // Bookmaker odds model classes
+    // ──────────────────────────────────────────────
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class OddsLineResponse {
+        public int count;
+        public String next;
+        public String previous;
+        public List<OddsLine> results;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class OddsLine {
+        public int id;
+        @JsonProperty("event_id")
+        public int eventId;
+        /**
+         * e.g. "1x2", "double_chance", "over_under_25", "btts", "draw_no_bet"
+         */
+        public String market;
+        /**
+         * e.g. "HOME", "DRAW", "AWAY", "over", "under", "yes", "no", "1X", "X2", "12"
+         */
+        public String outcome;
+        /**
+         * Line value for over/under markets (null for others)
+         */
+        public Double line;
+        @JsonProperty("outcome_name")
+        public String outcomeName;
+        @JsonProperty("bookmaker_slug")
+        public String bookmakerSlug;
+        @JsonProperty("bookmaker_name")
+        public String bookmakerName;
+        @JsonProperty("decimal_odds")
+        public double decimalOdds;
+        @JsonProperty("previous_decimal_odds")
+        public double previousDecimalOdds;
+        @JsonProperty("implied_probability")
+        public double impliedProbability;
+        /**
+         * "SHORTENING" (odds dropping, more likely) or "DRIFTING" (odds rising, less likely)
+         */
+        public String movement;
+        @JsonProperty("is_max_quote")
+        public boolean isMaxQuote;
+        @JsonProperty("updated_at")
+        public OffsetDateTime updatedAt;
+
+        @Override
+        public String toString() {
+            return String.format("%-20s %-6s %-5s odds %5.3f (was %5.3f) prob %.2f%% %-10s %s",
+                    market, outcome,
+                    line != null ? line.toString() : "",
+                    decimalOdds, previousDecimalOdds,
+                    impliedProbability * 100,
+                    movement,
+                    isMaxQuote ? "[BEST]" : "");
+        }
     }
 
     // ──────────────────────────────────────────────
@@ -653,6 +753,50 @@ public class SportsApiClient {
         return mapper.readValue(response.body(), PredictionsResponse.class);
     }
 
+    /**
+     * Fetch bookmaker odds for a specific event, optionally filtered by bookmaker.
+     * Calls: GET /api/v2/odds/?event_id={eventId}[&bookmaker_slug={slug}]
+     * Handles pagination automatically, returning all pages merged.
+     */
+    public OddsLineResponse fetchOdds(int eventId, String bookmakerSlug) throws Exception {
+        String url = BASE_URL_ODDS + "?event_id=" + eventId;
+        if (bookmakerSlug != null && !bookmakerSlug.isEmpty()) {
+            url += "&bookmaker_slug=" + bookmakerSlug;
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+
+        List<OddsLine> allResults = new java.util.ArrayList<>();
+        int totalCount = 0;
+        String nextUrl = url;
+
+        while (nextUrl != null) {
+            HttpClient client = HttpClient.newBuilder().build();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(nextUrl))
+                    .header("Authorization", "Token " + API_TOKEN)
+                    .header("Accept", "application/json")
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() != 200) {
+                throw new RuntimeException("API error " + response.statusCode() + ": " + response.body());
+            }
+
+            OddsLineResponse page = mapper.readValue(response.body(), OddsLineResponse.class);
+            totalCount = page.count;
+            allResults.addAll(page.results);
+            nextUrl = page.next;
+        }
+
+        OddsLineResponse merged = new OddsLineResponse();
+        merged.count = totalCount;
+        merged.results = allResults;
+        return merged;
+    }
+
     private HttpClient createHttpClient() {
         HttpClient client = HttpClient.newBuilder()
                 //.proxy(ProxySelector.of(new InetSocketAddress("proxy.sfa.se", 8080)))
@@ -672,8 +816,8 @@ public class SportsApiClient {
         SportsApiClient client = new SportsApiClient();
 
         // ── Single event ──────────────────────────────
-        Event single = client.fetchEvent(8287);
-        System.out.println("Single event fetch:");
+        Event single = client.fetchEvent(46355);
+        System.out.println("Single event fetch: id=" + single.id);
         System.out.println(single);
         System.out.println();
 
@@ -753,6 +897,21 @@ public class SportsApiClient {
         EventOdds eventOdds = client.fetchEventOdds(46355);
         System.out.printf("Event ID: %d%n", eventOdds.eventId);
         System.out.println(eventOdds.odds);
+
+
+        // ── Bookmaker Odds Lines ───────────────────────
+        System.out.println("\n=== Bookmaker Odds (event 46355, Pinnacle) ===");
+        OddsLineResponse oddsLines = client.fetchOdds(46355, "pinnacle");
+        System.out.printf("Total odds lines: %d%n%n", oddsLines.count);
+        String currentMarket = null;
+        for (OddsLine ol : oddsLines.results) {
+            if (!ol.market.equals(currentMarket)) {
+                currentMarket = ol.market;
+                System.out.println("  -- " + currentMarket + " --");
+            }
+            System.out.println("  " + ol);
+        }
+
 
 /*
         // ── Predictions ───────────────────────────────

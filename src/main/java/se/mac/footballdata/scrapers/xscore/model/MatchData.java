@@ -1,0 +1,54 @@
+package se.mac.footballdata.scrapers.xscore.model;
+
+import java.util.List;
+
+public class MatchData {
+   public boolean hasTopscorerList;
+   public List<TeamInfo> away;
+   public String statusType;
+   public int correctionTime;
+   public String gender;
+   public boolean hasEventStats;
+   public String roundName;
+   public boolean hasTvListing;
+   public int templateId;
+   public boolean hasFilteredLigatable;
+   public int countryId;
+   public String statusShortName;
+   public String stageStart;
+   public String tournamentName;
+   public String stageName;
+   public boolean hasAssists;
+   public boolean hasLigatableTest;
+   public List<OutcomeWrapper> outcomes;
+   public int tournamentId;
+   public String statusName;
+   public List<Incident> incidents;
+   public boolean hasParticipantStats;
+   public boolean isLineupConfirmed;
+   public boolean hasLiveLeagueTable;
+   public long id;
+   public boolean hasCardList;
+   public boolean hasSeedingMaleSingle;
+   public boolean hasSpectatorsStatistic;
+   public List<Result> results;
+   public long stageId;
+   public boolean stageHasLiveEvents;
+   public boolean isKnockoutRound;
+   public List<Object> injuryTimes;
+   public boolean ftr;
+   public String stageEnd;
+   public boolean hasLineupInfo;
+   public String start;
+   public boolean hasLigatable;
+   public boolean hasLeagueTableRound;
+   public List<TeamInfo> home;
+   public boolean hasBettingOdds;
+   public String winner;
+   public int statusId;
+   public String templateName;
+   public List<TimelineEvent> timeline;
+   public String ranking;
+   public String countryName;
+   public boolean hasEventCommentary;
+}

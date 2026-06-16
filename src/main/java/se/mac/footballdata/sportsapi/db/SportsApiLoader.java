@@ -104,8 +104,11 @@ public class SportsApiLoader {
         loadEvents("2026-05-20", "2026-05-31", leagueId, eventList);
         loadEvents("2026-06-01", "2026-06-13", leagueId, eventList);
         List<EventDB> eventDBList = createEventDB(eventList);
+
+        ArrayList<OddsDB> oddsList = new ArrayList<>();
         for (EventDB db : eventDBList) {
             loadEventStats(db);
+            oddsList.add(loadEventOdds(db.eventId));
         }
 
         try {
@@ -119,6 +122,8 @@ public class SportsApiLoader {
         EventDB result = collection.find().first();
         assert result != null;
         System.out.println("Read from MongoDB: " + result.eventId);
+
+        //handleOddsData(database, oddsList);
     }
 
     private static List<FixtureDB> createFixtureDB(List<SportsApiClient.Event> eventList) {
@@ -208,9 +213,76 @@ public class SportsApiLoader {
         eventDB.aSaves = eventStats.stats.away.totalSaves;
     }
 
-    static void handleRefereeData(MongoDatabase database, int leagueId) throws Exception {
+    private static OddsDB loadEventOdds(int eventId) throws Exception {
+        System.out.println("\n=== Loading odds (eventId: " + eventId + " ) ===");
+        SportsApiClient.OddsLineResponse oddsLineResponse = sportsApiClient.fetchOdds(eventId, "pinnacle");
+        return createOddsDB(oddsLineResponse.results, eventId);
+    }
 
-        // ── Referees ──────────────────────────────────
+    static void handleOddsData(MongoDatabase database, List<OddsDB> oddsDBList) throws Exception {
+        MongoCollection<OddsDB> collection =
+                database.getCollection("odds", OddsDB.class);
+        collection.createIndex(new Document("eventId", 1), new IndexOptions().unique(true));
+
+        // Build bulk write list
+        ReplaceOptions replaceOptions = new ReplaceOptions().upsert(true);
+        List<ReplaceOneModel<OddsDB>> operations = new ArrayList<>();
+
+        for (OddsDB odds : oddsDBList) {
+            operations.add(new ReplaceOneModel<>(
+                    Filters.eq("eventId", odds.eventId),
+                    odds,
+                    replaceOptions
+            ));
+        }
+
+        // Execute parallel bulk operations
+        BulkWriteResult result = collection.bulkWrite(operations, new BulkWriteOptions().ordered(false));
+
+        System.out.println("Upsert complete.");
+        System.out.println("Modified existing: " + result.getModifiedCount());
+        System.out.println("Newly inserted: " + result.getUpserts().size());
+    }
+
+    /*
+    private static List<OddsDB> createOddsDB(List<SportsApiClient.EventOdds> eventOddsList, int leagueId) {
+        return eventOddsList.stream()
+                .map(odds -> createOddsDB(odds, leagueId))
+                .toList();
+    }*/
+
+    private static OddsDB createOddsDB(List<SportsApiClient.OddsLine> results, int eventId) {
+        OddsDB oddsDB = new OddsDB();
+        oddsDB.eventId = eventId;
+
+        for (SportsApiClient.OddsLine ol : results) {
+            if (ol.market.equals("1x2")) {
+                if (ol.outcome.equals("HOME")) {
+                    oddsDB.homeWin = ol.decimalOdds;
+                } else if (ol.outcome.equals("DRAW")) {
+                    oddsDB.draw = ol.decimalOdds;
+                } else if (ol.outcome.equals("AWAY")) {
+                    oddsDB.awayWin = ol.decimalOdds;
+                }
+            } else if (ol.market.equals("over_under_25")) {
+                if (ol.outcome.equals("over")) {
+                    oddsDB.over25Goals = ol.decimalOdds;
+                } else if (ol.outcome.equals("under")) {
+                    oddsDB.under25Goals = ol.decimalOdds;
+                }
+            }
+            System.out.println("  " + ol);
+        }
+/*
+        oddsDB.over25Goals = eventOdds.odds.over25Goals;
+        oddsDB.under25Goals = eventOdds.odds.under25Goals;
+        oddsDB.bttsYes = eventOdds.odds.bttsYes;
+        oddsDB.bttsNo = eventOdds.odds.bttsNo;
+  */
+        return oddsDB;
+    }
+
+    static void handleRefereeData(MongoDatabase database, int leagueId) throws Exception {
         System.out.println("\n=== Loading referees (league: " + leagueId + " ) ===");
         SportsApiClient.RefereesResponse refs = sportsApiClient.fetchReferees(leagueId);
         List<RefereeDB> refereeDBList = createRefereeDB(refs.results, leagueId);
