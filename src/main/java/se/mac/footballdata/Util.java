@@ -24,7 +24,8 @@ public class Util {
     public static Map<Integer, League> leagues = Map.of(
             1, new League(1, "Premier League"),
             26, new League(26, "Allsvenskan"),
-            55, new League(55, "Finland")
+            55, new League(55, "Finland"),
+            1000, new League(1000, "Superettan")
     );
 
     public static String getLeagueName(String code) {

@@ -3,11 +3,12 @@ package se.mac.footballdata.scrapers.xscore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoException;
+import com.mongodb.bulk.BulkWriteResult;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.InsertManyOptions;
+import com.mongodb.client.model.*;
 import org.bson.codecs.configuration.CodecProvider;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
@@ -15,8 +16,12 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import se.mac.footballdata.DBUtil;
+import se.mac.footballdata.scrapers.xscore.model.Incident;
 import se.mac.footballdata.scrapers.xscore.model.MatchData;
+import se.mac.footballdata.scrapers.xscore.model.OutcomeWrapper;
 import se.mac.footballdata.sportsapi.db.EventDB;
+import se.mac.footballdata.sportsapi.db.OddsDB;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -26,13 +31,14 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
@@ -44,24 +50,44 @@ public class XscoresScraper {
 
     private final static String DB_CONNECTION_STRING = "mongodb://localhost:27017";
     private static String BASE_PATH = "C:\\data\\xscore\\";
+    private static String BASE_PATH_FK = "C:\\FKApps\\data\\xscore\\";
 
     public static void main(String[] args) throws Exception {
         List<String> urlList = loadResultpage(BASE_PATH + "results\\Superettan - Results _ Football Sweden.html");
-        /*
         fetchDataFiles(urlList.getFirst());
         for (String url : urlList) {
             fetchDataFiles(url);
+        }
 
-            Thread.sleep(2 * 1000);
-        }*/
+        int leagueId = 1000; // Superettan
 
-        MatchData matchData = loadMatchData("2620299.json");
-        System.out.println("Winner: " + matchData.winner);
-        System.out.println("Home team: " + matchData.home.getFirst().name);
+        List<MatchData> matchDataList = loadAllMatchData();
+        List<EventDB> eventDBList = matchDataList.stream()
+                .map(match -> createEventDB(match, leagueId))
+                .toList();
 
-        EventDB eventDB = createEventDB(matchData);
+        List<OddsDB> oddsDBList = matchDataList.stream()
+                .map(XscoresScraper::createOddsDB)
+                .filter(Objects::nonNull)
+                .toList();
 
-        // Enable POJO codec support
+        updateDatabase(eventDBList, oddsDBList);
+    }
+
+    private static List<MatchData> loadAllMatchData() throws IOException {
+        List<MatchData> matchDataList = new ArrayList<>();
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(
+                Paths.get(BASE_PATH + File.separator + "json"), "*.json")) {
+
+            for (Path entry : stream) {
+                MatchData matchData = loadMatchData(String.valueOf(entry.getFileName()));
+                matchDataList.add(matchData);
+            }
+        }
+        return matchDataList;
+    }
+
+    private static void updateDatabase(List<EventDB> eventDBList, List<OddsDB> oddsDBList) {
         CodecProvider pojoCodecProvider =
                 PojoCodecProvider.builder().automatic(true).build();
 
@@ -72,7 +98,6 @@ public class XscoresScraper {
                 );
 
         try (MongoClient mongoClient = MongoClients.create(DB_CONNECTION_STRING)) {
-
             MongoDatabase database = mongoClient
                     .getDatabase("sportsdb")
                     .withCodecRegistry(pojoCodecRegistry);
@@ -81,24 +106,22 @@ public class XscoresScraper {
                     database.getCollection("events", EventDB.class);
 
             try {
-                collection.insertMany(Collections.singletonList(eventDB), new InsertManyOptions().ordered(false));
+                collection.insertMany(eventDBList, new InsertManyOptions().ordered(false));
+                System.out.println("Inserted eventDBList:" + eventDBList);
             } catch (MongoException ex) {
-                System.out.println("Error: " + ex);
+                System.out.println("Error when inserting eventDBList: " + ex);
             }
 
-            // Read back
-            EventDB result = collection.find().first();
-            assert result != null;
-            System.out.println("Read from MongoDB: " + result.eventId);
+            DBUtil.updateOddsCollection(database, oddsDBList);
         }
     }
 
-    private static EventDB createEventDB(MatchData matchData) {
+    private static EventDB createEventDB(MatchData matchData, int leagueId) {
         EventDB eventDB = new EventDB();
-        eventDB.leagueId = 26;
+        eventDB.leagueId = leagueId;
         eventDB.round = Integer.parseInt(matchData.roundName);
         eventDB.date = matchData.stageStart.substring(0, 10);
-        eventDB.time = matchData.stageStart.substring(11);
+        eventDB.time = matchData.stageStart.substring(11, matchData.stageStart.length() - 3);
         eventDB.eventId = Math.toIntExact(matchData.id);
         eventDB.hometeam = matchData.home.getFirst().name;
         eventDB.awayteam = matchData.away.getFirst().name;
@@ -109,7 +132,35 @@ public class XscoresScraper {
         eventDB.homeScoreHt = score[0];
         eventDB.awayScoreHt = score[1];
 
+        parseIncidents(eventDB, matchData.incidents);
+
         return eventDB;
+    }
+
+    private static void parseIncidents(EventDB eventDB, List<Incident> incidents) {
+        int yCardsHome = 0;
+        int rCardsHome = 0;
+        int yCardsAway = 0;
+        int rCardsAway = 0;
+        for (Incident incident : incidents) {
+            if (incident.typeName.equalsIgnoreCase("Yellow card")) {
+                if (incident.side.equalsIgnoreCase("home")) {
+                    yCardsHome++;
+                } else {
+                    yCardsAway++;
+                }
+            } else if (incident.typeName.equalsIgnoreCase("Red card")) {
+                if (incident.side.equalsIgnoreCase("home")) {
+                    rCardsHome++;
+                } else {
+                    rCardsAway++;
+                }
+            }
+        }
+        eventDB.hy = yCardsHome;
+        eventDB.ay = yCardsAway;
+        eventDB.hr = rCardsHome;
+        eventDB.ar = rCardsAway;
     }
 
     private static int[] parseScore(String value) {
@@ -119,6 +170,20 @@ public class XscoresScraper {
         return score;
     }
 
+    private static OddsDB createOddsDB(MatchData matchData) {
+        if (matchData.outcomes == null || matchData.outcomes.isEmpty()) return null;
+
+        OddsDB oddsDB = new OddsDB();
+        oddsDB.eventId = Math.toIntExact(matchData.id);
+        for (OutcomeWrapper outcomeWrapper : matchData.outcomes) {
+            if (outcomeWrapper.providerName.equalsIgnoreCase("Bet365")) {
+                oddsDB.homeWin = outcomeWrapper.outcomes.getFirst().odds;
+                oddsDB.draw = outcomeWrapper.outcomes.get(1).odds;
+                oddsDB.awayWin = outcomeWrapper.outcomes.get(2).odds;
+            }
+        }
+        return oddsDB;
+    }
 
     static MatchData loadMatchData(String filename) throws IOException {
         String json = new String(Files.readAllBytes(Paths.get(BASE_PATH + File.separator + "json" + File.separator + filename)));
@@ -155,9 +220,10 @@ public class XscoresScraper {
         name = name + ".json";
         String outFile = BASE_PATH + "json" + File.separator + name;
         if (new File(outFile).exists()) {
-            System.out.println("File " + name + " + already exists");
+            System.out.println("File " + name + " already exists");
             return;
         }
+        Thread.sleep(2 * 1000);
         System.out.println("--> Saving into file " + outFile);
         saveMatchFile(url, outFile);
     }

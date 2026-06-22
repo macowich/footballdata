@@ -172,6 +172,49 @@
     background: var(--accent); color: #fff;
     box-shadow: 0 1px 4px rgba(0,0,0,.2);
   }
+
+  /* Odds table scroll */
+  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table { min-width: 820px; }
+
+  /* Odds chips in table */
+  .odd-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px; font-weight: 600;
+    padding: 3px 9px; border-radius: 6px;
+    display: inline-block; white-space: nowrap;
+  }
+  .odd-fav   { background: var(--green-bg);    color: var(--green); border: 1px solid var(--green-border); }
+  .odd-mid   { background: var(--accent-light); color: var(--accent); border: 1px solid #e8c0a8; }
+  .odd-long  { background: var(--surface2);    color: var(--muted);  border: 1px solid var(--border); }
+  .odd-none  { color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+
+  /* Odds section inside modal */
+  .modal-odds-section { padding: 0 24px 20px; }
+  .modal-odds-title {
+    font-family: var(--font),serif; font-size: 11px; font-weight: 700;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .modal-odds-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .modal-odds-grid.wide { grid-template-columns: repeat(3, 1fr); margin-top: 8px; }
+  .modal-odd-card {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 12px;
+    display: flex; flex-direction: column; gap: 3px;
+  }
+  .modal-odd-label {
+    font-family: var(--font),serif; font-size: 11px; color: var(--muted);
+  }
+  .modal-odd-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 18px; font-weight: 700; color: var(--text);
+  }
+  .modal-odd-value.fav  { color: var(--green); }
+  .modal-odd-value.long { color: var(--muted); }
 </style>
 </head>
 <body>
@@ -234,25 +277,44 @@
       <div class="state-box" v-else-if="matches.length === 0 && !error">
         <div class="icon">📭</div>
         <strong>Inga resultat hittades</strong>
-        {{ search ? 'Inga resultat matchar sökningen.' : 'Inga resultgat hittades för denna liga.' }}
+        {{ search ? 'Inga resultat matchar sökningen.' : 'Inga resultat hittades för denna liga.' }}
       </div>
 
       <table v-else>
         <thead>
           <tr>
-            <th style="width:48px">Datum</th>
-            <th style="cursor:pointer;user-select:none">Match</th>
-            <th style="cursor:pointer;user-select:none">Resultat</th>
+            <th>Datum</th>
+            <th>Match</th>
+            <th>Resultat</th>
+            <th>1</th>
+            <th>X</th>
+            <th>2</th>
+            <th>O2.5</th>
+            <th>U2.5</th>
+            <th>BTTS J/N</th>
           </tr>
         </thead>
         <tbody>
           <tr class="row-hover" v-for="(item, i) in matches" :key="item.id" @click="openModal(item.id)">
             <td style="white-space: nowrap;">
               <strong>{{ item.date }}</strong>
-              <span style="color:var(--muted)">{{ item.time }}</span>
+              <span style="color:var(--muted)"> {{ item.time }}</span>
             </td>
-            <td style="text-align:right;font-family:var(--mono);font-size:13px">{{ item.homeTeam }} - {{ item.awayTeam }}</td>
-            <td style="text-align:right;font-family:var(--mono);font-size:13px">{{ item.fullTimeHomeGoals }} - {{ item.fullTimeAwayGoals }}</td>
+            <td style="font-family:var(--mono);font-size:13px">{{ item.homeTeam }} – {{ item.awayTeam }}</td>
+            <td style="font-family:var(--mono);font-size:13px;font-weight:700">{{ item.fullTimeHomeGoals }} – {{ item.fullTimeAwayGoals }}</td>
+            <td><span v-if="item.odds?.homeWin" :class="['odd-val', oddClass(item.odds?.homeWin, item.odds)]">{{ item.odds.homeWin }}</span><span v-else class="odd-none">—</span></td>
+            <td><span v-if="item.odds?.draw"    :class="['odd-val', oddClass(item.odds?.draw,    item.odds)]">{{ item.odds.draw }}</span><span v-else class="odd-none">—</span></td>
+            <td><span v-if="item.odds?.awayWin" :class="['odd-val', oddClass(item.odds?.awayWin, item.odds)]">{{ item.odds.awayWin }}</span><span v-else class="odd-none">—</span></td>
+            <td><span v-if="item.odds?.over25Goals" :class="['odd-val', item.odds.over25Goals <= 1.9 ? 'odd-fav' : 'odd-mid']">{{ item.odds.over25Goals }}</span><span v-else class="odd-none">—</span></td>
+            <td><span v-if="item.odds?.under25Goals" :class="['odd-val', item.odds.under25Goals <= 1.9 ? 'odd-fav' : 'odd-mid']">{{ item.odds.under25Goals }}</span><span v-else class="odd-none">—</span></td>
+            <td>
+              <span v-if="item.odds?.bttsYes" style="display:inline-flex;gap:4px;align-items:center">
+                <span :class="['odd-val', item.odds.bttsYes <= item.odds.bttsNo ? 'odd-fav' : 'odd-long']">{{ item.odds.bttsYes }}</span>
+                <span style="color:var(--muted);font-size:11px">/</span>
+                <span :class="['odd-val', item.odds.bttsNo < item.odds.bttsYes ? 'odd-fav' : 'odd-long']">{{ item.odds.bttsNo }}</span>
+              </span>
+              <span v-else class="odd-none">—</span>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -388,45 +450,44 @@
           <div class="stat-val">{{ detail.awayPossesion }}</div>
         </div>
 
-        <div class="stat-row">
-          <div class="stat-val">{{ detail.homeFouls }}</div>
-          <div>
-            <div class="stat-label" style="margin-bottom:4px">Frisparkar</div>
-            <div class="stat-bars">
-              <div class="stat-bar-home" :style="{width: pct(detail.hFouls, detail.awayFouls)+'%'}"></div>
-              <div class="stat-bar-away" :style="{width: pct(detail.aFouls, detail.homeFouls)+'%'}"></div>
-            </div>
-          </div>
-          <div class="stat-val">{{ detail.awayFouls }}</div>
-        </div>
-
-        <div class="stat-row">
-          <div class="stat-val">{{ detail.homeBigChances }}</div>
-          <div>
-            <div class="stat-label" style="margin-bottom:4px">Stora chanser</div>
-            <div class="stat-bars">
-              <div class="stat-bar-home" :style="{width: pct(detail.hBigChances, detail.awayBigChances)+'%'}"></div>
-              <div class="stat-bar-away" :style="{width: pct(detail.aBigChances, detail.homeBigChances)+'%'}"></div>
-            </div>
-          </div>
-          <div class="stat-val">{{ detail.awayBigChances }}</div>
-        </div>
-
-        <div class="stat-row">
-          <div class="stat-val">{{ detail.homeSaves }}</div>
-          <div>
-            <div class="stat-label" style="margin-bottom:4px">Räddningar</div>
-            <div class="stat-bars">
-              <div class="stat-bar-home" :style="{width: pct(detail.hSaves, detail.awaySaves)+'%'}"></div>
-              <div class="stat-bar-away" :style="{width: pct(detail.aSaves, detail.homeSaves)+'%'}"></div>
-            </div>
-          </div>
-          <div class="stat-val">{{ detail.awaySaves }}</div>
-        </div>
-
       </div>
 
       <div class="modal-divider"></div>
+
+      <!-- Odds -->
+      <div class="modal-odds-section" v-if="detail?.odds">
+        <div style="padding-top:20px" class="modal-odds-title">Odds</div>
+        <div class="modal-odds-grid">
+          <div class="modal-odd-card">
+            <div class="modal-odd-label">1 Hemmaseger</div>
+            <div class="modal-odd-value" :class="oddModalClass(detail.odds.homeWin, detail.odds)">{{ detail.odds.homeWin ?? '—' }}</div>
+          </div>
+          <div class="modal-odd-card">
+            <div class="modal-odd-label">X Oavgjort</div>
+            <div class="modal-odd-value" :class="oddModalClass(detail.odds.draw, detail.odds)">{{ detail.odds.draw ?? '—' }}</div>
+          </div>
+          <div class="modal-odd-card">
+            <div class="modal-odd-label">2 Bortaseger</div>
+            <div class="modal-odd-value" :class="oddModalClass(detail.odds.awayWin, detail.odds)">{{ detail.odds.awayWin ?? '—' }}</div>
+          </div>
+        </div>
+        <div class="modal-odds-grid wide">
+          <div class="modal-odd-card" v-if="detail.odds.over25Goals">
+            <div class="modal-odd-label">Över 2.5</div>
+            <div class="modal-odd-value">{{ detail.odds.over25Goals }}</div>
+          </div>
+          <div class="modal-odd-card" v-if="detail.odds.under25Goals">
+            <div class="modal-odd-label">Under 2.5</div>
+            <div class="modal-odd-value">{{ detail.odds.under25Goals }}</div>
+          </div>
+          <div class="modal-odd-card" v-if="detail.odds.bttsYes">
+            <div class="modal-odd-label">BTTS Ja / Nej</div>
+            <div class="modal-odd-value" style="font-size:15px">{{ detail.odds.bttsYes }} / {{ detail.odds.bttsNo }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-divider" v-if="detail?.odds"></div>
 
       <div class="modal-footer" v-if="detail">
         <div class="modal-referee">Domare: <span>{{ detail.referee }}</span></div>
@@ -483,6 +544,23 @@ createApp({
       const total = a + b;
       if (!total) return 50;
       return Math.round((a / total) * 100);
+    }
+
+    // Returns chip class based on whether this odd is the lowest (favourite)
+    function oddClass(val, odds) {
+      if (!val || !odds) return 'odd-mid';
+      const min = Math.min(odds.homeWin ?? 99, odds.draw ?? 99, odds.awayWin ?? 99);
+      if (val === min) return 'odd-fav';
+      if (val >= 4) return 'odd-long';
+      return 'odd-mid';
+    }
+
+    function oddModalClass(val, odds) {
+      if (!val || !odds) return '';
+      const min = Math.min(odds.homeWin ?? 99, odds.draw ?? 99, odds.awayWin ?? 99);
+      if (val === min) return 'fav';
+      if (val >= 5) return 'long';
+      return '';
     }
 
     async function openModal(id) {
@@ -543,7 +621,7 @@ createApp({
     onBeforeMount(fetchLeagues);
     onMounted(fetchMatches);
 
-    return { leagues, matches, loading, error, search, selectedLeague, fetchLeagues, fetchMatches, selectLeague, modalOpen, modalLoading, detail, openModal, closeModal, pct, halfView, scoreHome, scoreAway, currentResult };
+    return { leagues, matches, loading, error, search, selectedLeague, fetchLeagues, fetchMatches, selectLeague, modalOpen, modalLoading, detail, openModal, closeModal, pct, halfView, scoreHome, scoreAway, currentResult, oddClass, oddModalClass };
   }
 }).mount('#app');
 </script>
