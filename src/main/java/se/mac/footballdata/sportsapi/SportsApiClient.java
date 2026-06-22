@@ -900,8 +900,8 @@ public class SportsApiClient {
 
 
         // ── Bookmaker Odds Lines ───────────────────────
-        System.out.println("\n=== Bookmaker Odds (event 46355, Pinnacle) ===");
-        OddsLineResponse oddsLines = client.fetchOdds(46355, "pinnacle");
+        System.out.println("\n=== Bookmaker Odds (event 46324, Pinnacle) ===");
+        OddsLineResponse oddsLines = client.fetchOdds(46324, "pinnacle");
         System.out.printf("Total odds lines: %d%n%n", oddsLines.count);
         String currentMarket = null;
         for (OddsLine ol : oddsLines.results) {

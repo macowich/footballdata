@@ -12,6 +12,7 @@ import org.bson.Document;
 import org.bson.codecs.configuration.CodecProvider;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
+import se.mac.footballdata.DBUtil;
 import se.mac.footballdata.sportsapi.SportsApiClient;
 import se.mac.footballdata.sportsapi.stats.EventStats;
 import se.mac.footballdata.sportsapi.stats.EventStatsClient;
@@ -103,27 +104,28 @@ public class SportsApiLoader {
         loadEvents("2026-05-05", "2026-05-19", leagueId, eventList);
         loadEvents("2026-05-20", "2026-05-31", leagueId, eventList);
         loadEvents("2026-06-01", "2026-06-13", leagueId, eventList);
+        loadEvents("2026-06-14", "2026-06-17", leagueId, eventList);
         List<EventDB> eventDBList = createEventDB(eventList);
 
         ArrayList<OddsDB> oddsList = new ArrayList<>();
         for (EventDB db : eventDBList) {
             loadEventStats(db);
-            oddsList.add(loadEventOdds(db.eventId));
+            OddsDB oddsDB = loadEventOdds(db.eventId);
+            if (oddsDB != null) {
+                oddsList.add(oddsDB);
+            }
         }
 
+
+        // Util
         try {
             collection.insertMany(eventDBList, new InsertManyOptions().ordered(false));
-            System.out.println("Inserted: " + eventDBList);
+            System.out.println("Inserted eventDBList: " + eventDBList);
         } catch (MongoException ex) {
-            System.out.println("Error: " + ex);
+            System.out.println("Error when inserting eventDBList: " + ex);
         }
 
-        // Read back
-        EventDB result = collection.find().first();
-        assert result != null;
-        System.out.println("Read from MongoDB: " + result.eventId);
-
-        //handleOddsData(database, oddsList);
+        DBUtil.updateOddsCollection(database, oddsList);
     }
 
     private static List<FixtureDB> createFixtureDB(List<SportsApiClient.Event> eventList) {
@@ -194,7 +196,7 @@ public class SportsApiLoader {
 
     private static void loadEventStats(EventDB eventDB) throws Exception {
         EventStats eventStats = eventStatsClient.fetchEventStats(eventDB.eventId);
-        System.out.println("EventStaus for " + eventDB.eventId + " is loaded " + eventStats.eventId);
+        System.out.println("EventStatus for " + eventDB.eventId + " is loaded " + eventStats.eventId);
         eventDB.hs = eventStats.stats.home.totalShots;
         eventDB.as = eventStats.stats.away.totalShots;
         eventDB.hy = eventStats.stats.home.yellowCards;
@@ -216,32 +218,10 @@ public class SportsApiLoader {
     private static OddsDB loadEventOdds(int eventId) throws Exception {
         System.out.println("\n=== Loading odds (eventId: " + eventId + " ) ===");
         SportsApiClient.OddsLineResponse oddsLineResponse = sportsApiClient.fetchOdds(eventId, "pinnacle");
-        return createOddsDB(oddsLineResponse.results, eventId);
-    }
-
-    static void handleOddsData(MongoDatabase database, List<OddsDB> oddsDBList) throws Exception {
-        MongoCollection<OddsDB> collection =
-                database.getCollection("odds", OddsDB.class);
-        collection.createIndex(new Document("eventId", 1), new IndexOptions().unique(true));
-
-        // Build bulk write list
-        ReplaceOptions replaceOptions = new ReplaceOptions().upsert(true);
-        List<ReplaceOneModel<OddsDB>> operations = new ArrayList<>();
-
-        for (OddsDB odds : oddsDBList) {
-            operations.add(new ReplaceOneModel<>(
-                    Filters.eq("eventId", odds.eventId),
-                    odds,
-                    replaceOptions
-            ));
+        if (!oddsLineResponse.results.isEmpty()) {
+            return createOddsDB(oddsLineResponse.results, eventId);
         }
-
-        // Execute parallel bulk operations
-        BulkWriteResult result = collection.bulkWrite(operations, new BulkWriteOptions().ordered(false));
-
-        System.out.println("Upsert complete.");
-        System.out.println("Modified existing: " + result.getModifiedCount());
-        System.out.println("Newly inserted: " + result.getUpserts().size());
+        return null;
     }
 
     /*
@@ -265,20 +245,20 @@ public class SportsApiLoader {
                     oddsDB.awayWin = ol.decimalOdds;
                 }
             } else if (ol.market.equals("over_under_25")) {
-                if (ol.outcome.equals("over")) {
+                if (ol.outcome.startsWith("over")) {
                     oddsDB.over25Goals = ol.decimalOdds;
-                } else if (ol.outcome.equals("under")) {
+                } else {
                     oddsDB.under25Goals = ol.decimalOdds;
+                }
+            } else if (ol.market.equals("btts")) {
+                if (ol.outcome.startsWith("yes")) {
+                    oddsDB.bttsYes = ol.decimalOdds;
+                } else {
+                    oddsDB.bttsNo = ol.decimalOdds;
                 }
             }
             System.out.println("  " + ol);
         }
-/*
-        oddsDB.over25Goals = eventOdds.odds.over25Goals;
-        oddsDB.under25Goals = eventOdds.odds.under25Goals;
-        oddsDB.bttsYes = eventOdds.odds.bttsYes;
-        oddsDB.bttsNo = eventOdds.odds.bttsNo;
-  */
         return oddsDB;
     }
 

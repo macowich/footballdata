@@ -6,7 +6,7 @@ import org.bson.codecs.pojo.annotations.BsonProperty;
 
 @MongoEntity(collection = "events")
 public class Event extends PanacheMongoEntity {
-    public String league;
+    public int eventId;
     public String date;
     public String time;
 
@@ -87,4 +87,6 @@ public class Event extends PanacheMongoEntity {
 
     @BsonProperty("aBigChances")
     public Integer awayBigChances;
+
+    public Odds odds;
 }
