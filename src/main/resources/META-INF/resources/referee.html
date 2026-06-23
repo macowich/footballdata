@@ -659,7 +659,9 @@
             const loading = ref(false);
             const error = ref('');
             const search = ref('');
-            const selectedLeague = ref({ "id": 26, "name": "Allsvenskan" });
+            const LEAGUE_KEY = 'selected_league';
+            const savedLeague = (() => { try { return JSON.parse(localStorage.getItem(LEAGUE_KEY)); } catch { return null; } })();
+            const selectedLeague = ref(savedLeague || { "id": 26, "name": "Allsvenskan" });
             const sortKey = ref('avgYellowPerMatch');
             const sortDir = ref(-1);
 
@@ -741,6 +743,7 @@
 
             function selectLeague(l) {
                 selectedLeague.value = l;
+                localStorage.setItem(LEAGUE_KEY, JSON.stringify(l));
                 fetchReferees();
             }
 

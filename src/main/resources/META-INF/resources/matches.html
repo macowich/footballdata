@@ -544,7 +544,9 @@ createApp({
     const loading = ref(false);
     const error = ref('');
     const search = ref('');
-    const selectedLeague = ref({ "id": 26, "name": "Allsvenskan" });
+    const LEAGUE_KEY = 'selected_league';
+    const savedLeague = (() => { try { return JSON.parse(localStorage.getItem(LEAGUE_KEY)); } catch { return null; } })();
+    const selectedLeague = ref(savedLeague || { "id": 26, "name": "Allsvenskan" });
 
     const modalOpen = ref(false);
     const modalLoading = ref(false);
@@ -643,6 +645,7 @@ createApp({
 
     function selectLeague(code) {
       selectedLeague.value = code;
+      localStorage.setItem(LEAGUE_KEY, JSON.stringify(code));
       fetchMatches();
     }
 
