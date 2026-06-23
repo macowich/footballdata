@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lag — Detalj</title>
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="sidemenu-loader.js" data-page="teams" defer></script>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="fixtures.css"/>
+<link rel="stylesheet" href="sidemenu.css"/>
+<style>
+  body { margin: 0; }
+  #app { display: flex; min-height: 100vh; }
+
+  .main-content {
+    margin-left: 220px;
+    flex: 1;
+    transition: margin-left .25s cubic-bezier(.4,0,.2,1);
+    min-width: 0;
+  }
+  .main-content.shifted { margin-left: 56px; }
+
+  .back-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--mono); font-size: 12px;
+    color: var(--muted); text-decoration: none;
+    margin-bottom: 28px;
+    transition: color .15s;
+  }
+  .back-link:hover { color: var(--text); }
+
+  .team-hero {
+    display: flex; align-items: center; gap: 20px;
+    margin-bottom: 32px;
+  }
+  .team-crest {
+    width: 72px; height: 72px; border-radius: 18px;
+    background: var(--surface2); border: 2px solid var(--border2);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 30px; font-weight: 700;
+    color: var(--accent); flex-shrink: 0;
+  }
+  .team-hero-name {
+    font-size: 42px; font-weight: 900; letter-spacing: -2px; line-height: 1;
+  }
+  .team-hero-name span { color: var(--accent); }
+  .team-hero-meta {
+    font-family: var(--mono); font-size: 12px; color: var(--muted); margin-top: 6px;
+  }
+
+  .tabs {
+    display: flex; gap: 4px; margin-bottom: 28px;
+    background: var(--surface2); border: 1.5px solid var(--border);
+    border-radius: 12px; padding: 4px; width: fit-content;
+  }
+  .tab-btn {
+    padding: 8px 20px; border-radius: 8px; border: none;
+    font-family: var(--font); font-size: 13px; font-weight: 600;
+    cursor: pointer; background: transparent; color: var(--muted);
+    transition: all .15s;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { background: var(--accent); color: #fff; box-shadow: 0 2px 8px rgba(200,80,26,.25); }
+
+  .stat-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px;
+  }
+  @media (max-width: 760px) { .stat-grid { grid-template-columns: repeat(2, 1fr); } }
+
+  .stat-card {
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: 14px; padding: 18px 20px;
+  }
+  .stat-card-label {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1.4px;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 8px;
+  }
+  .stat-card-value {
+    font-family: var(--mono); font-size: 32px; font-weight: 700; color: var(--text); line-height: 1;
+  }
+  .stat-card-sub { font-size: 12px; color: var(--muted); margin-top: 5px; }
+  .stat-card.accent .stat-card-value { color: var(--accent); }
+  .stat-card.green .stat-card-value  { color: var(--green);  }
+  .stat-card.red   .stat-card-value  { color: var(--red);    }
+
+  .section-label {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--muted); margin: 28px 0 14px;
+  }
+
+  .info-panel {
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: 14px; padding: 20px 24px; margin-bottom: 20px;
+  }
+
+  .pct-row { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+  .pct-row:last-child { margin-bottom: 0; }
+  .pct-label-row {
+    display: flex; justify-content: space-between;
+    font-size: 13px; color: var(--muted);
+  }
+  .pct-label-row strong { font-family: var(--mono); color: var(--text); font-weight: 600; }
+  .pct-track { height: 7px; background: var(--border); border-radius: 99px; overflow: hidden; }
+  .pct-fill { height: 100%; border-radius: 99px; transition: width .6s ease; }
+  .pct-fill.accent { background: var(--accent); }
+  .pct-fill.green  { background: var(--green);  }
+  .pct-fill.blue   { background: #3b82f6;        }
+  .pct-fill.purple { background: #a855f7;        }
+
+  .split-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+  .split-card {
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: 14px; padding: 20px;
+  }
+  .split-card-title {
+    font-size: 13px; font-weight: 700; color: var(--text);
+    margin-bottom: 16px; display: flex; align-items: center; gap: 6px;
+  }
+  .split-tag {
+    display: inline-block; padding: 2px 8px; border-radius: 5px;
+    font-family: var(--mono); font-size: 10px; font-weight: 500;
+  }
+  .split-tag.home { background: rgba(59,130,246,.12); color: #3b82f6; border: 1px solid rgba(59,130,246,.2); }
+  .split-tag.away { background: rgba(249,115,22,.12);  color: #f97316; border: 1px solid rgba(249,115,22,.2); }
+  .split-stat-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 0; border-bottom: 1px solid var(--border);
+  }
+  .split-stat-row:last-child { border-bottom: none; }
+  .split-stat-name { font-size: 13px; color: var(--muted); }
+  .split-stat-val  { font-family: var(--mono); font-size: 14px; font-weight: 600; color: var(--text); }
+
+  .corners-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+  .corner-card {
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: 14px; padding: 16px 18px; text-align: center;
+  }
+  .corner-val { font-family: var(--mono); font-size: 28px; font-weight: 700; color: var(--text); }
+  .corner-lbl { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  .results-table-wrap {
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: 14px; overflow: hidden;
+  }
+
+  .squad-card {
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: 14px; padding: 40px 24px; text-align: center; color: var(--muted);
+  }
+  .squad-icon { font-size: 40px; margin-bottom: 12px; }
+  .squad-card strong { display: block; font-size: 16px; color: var(--text); font-weight: 700; margin-bottom: 6px; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="sidemenu-root"></div>
+
+  <div class="main-content">
+  <div class="wrapper">
+
+    <a href="teams.html" class="back-link">← Tillbaka till lag</a>
+
+    <div class="state-box" v-if="loading">
+      <div class="icon">⏳</div>
+      <strong>Hämtar lagdata…</strong>
+    </div>
+
+    <div class="error-banner" v-if="error">
+      ⚠ {{ error }}
+      <button class="btn btn-secondary btn-sm" style="margin-left:auto" @click="fetchTeam">Försök igen</button>
+    </div>
+
+    <template v-if="team && !loading">
+
+      <div class="team-hero">
+        <div class="team-crest">{{ team.name?.[0] }}</div>
+        <div>
+          <div class="team-hero-name">{{ teamNameSplit(team.name)[0] }}<span>{{ teamNameSplit(team.name)[1] }}</span></div>
+          <div class="team-hero-meta">{{ team.matches }} matcher spelade · Allsvenskan</div>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn" :class="{ active: tab === 'overview' }" @click="tab = 'overview'">Översikt</button>
+        <button class="tab-btn" :class="{ active: tab === 'results'  }" @click="switchTab('results')">Resultat</button>
+        <button class="tab-btn" :class="{ active: tab === 'squad'    }" @click="tab = 'squad'">Trupp</button>
+      </div>
+
+      <!-- OVERVIEW -->
+      <div v-if="tab === 'overview'">
+
+        <div class="stat-grid">
+          <div class="stat-card accent">
+            <div class="stat-card-label">Genomsn. mål</div>
+            <div class="stat-card-value">{{ team.avgGoals }}</div>
+            <div class="stat-card-sub">per match totalt</div>
+          </div>
+          <div class="stat-card green">
+            <div class="stat-card-label">Gjorda mål</div>
+            <div class="stat-card-value">{{ team.goals }}</div>
+            <div class="stat-card-sub">{{ team.matches }} matcher</div>
+          </div>
+          <div class="stat-card red">
+            <div class="stat-card-label">Insläppta mål</div>
+            <div class="stat-card-value">{{ team.conceeded }}</div>
+            <div class="stat-card-sub">{{ team.matches }} matcher</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-label">Nollor</div>
+            <div class="stat-card-value">{{ team.cleanSheets }}</div>
+            <div class="stat-card-sub">clean sheets</div>
+          </div>
+        </div>
+
+        <div class="section-label">Matchfrekvenser</div>
+        <div class="info-panel">
+          <div class="pct-row">
+            <div class="pct-label-row"><span>Över 2.5 mål</span><strong>{{ team.over2 }} / {{ team.matches }} ({{ pct(team.over2, team.matches) }}%)</strong></div>
+            <div class="pct-track"><div class="pct-fill accent" :style="{ width: pct(team.over2, team.matches) + '%' }"></div></div>
+          </div>
+          <div class="pct-row">
+            <div class="pct-label-row"><span>Över 1.5 mål</span><strong>{{ team.over1 }} / {{ team.matches }} ({{ pct(team.over1, team.matches) }}%)</strong></div>
+            <div class="pct-track"><div class="pct-fill blue" :style="{ width: pct(team.over1, team.matches) + '%' }"></div></div>
+          </div>
+          <div class="pct-row">
+            <div class="pct-label-row"><span>Båda lag gör mål (BTTS)</span><strong>{{ team.btts }} / {{ team.matches }} ({{ pct(team.btts, team.matches) }}%)</strong></div>
+            <div class="pct-track"><div class="pct-fill purple" :style="{ width: pct(team.btts, team.matches) + '%' }"></div></div>
+          </div>
+          <div class="pct-row">
+            <div class="pct-label-row"><span>Clean sheets</span><strong>{{ team.cleanSheets }} / {{ team.matches }} ({{ pct(team.cleanSheets, team.matches) }}%)</strong></div>
+            <div class="pct-track"><div class="pct-fill green" :style="{ width: pct(team.cleanSheets, team.matches) + '%' }"></div></div>
+          </div>
+        </div>
+
+        <div class="section-label">Hemma vs Borta</div>
+        <div class="split-grid">
+          <div class="split-card">
+            <div class="split-card-title"><span class="split-tag home">🏠 Hemma</span></div>
+            <div class="split-stat-row"><span class="split-stat-name">Matcher</span><span class="split-stat-val">{{ team.homeMatches }}</span></div>
+            <div class="split-stat-row"><span class="split-stat-name">Gjorda mål</span><span class="split-stat-val">{{ team.goalshome }}</span></div>
+            <div class="split-stat-row"><span class="split-stat-name">Insläppta</span><span class="split-stat-val">{{ team.conceededhome }}</span></div>
+            <div class="split-stat-row"><span class="split-stat-name">Avg mål / match</span><span class="split-stat-val">{{ team.avgGoalsHome }}</span></div>
+            <div class="split-stat-row"><span class="split-stat-name">Gjorda / match</span><span class="split-stat-val">{{ team.goalsHomeTeam }}</span></div>
+            <div class="split-stat-row"><span class="split-stat-name">Insläppta / match</span><span class="split-stat-val">{{ team.concededHomeTeam }}</span></div>
+          </div>
+          <div class="split-card">
+            <div class="split-card-title"><span class="split-tag away">✈️ Borta</span></div>
+            <div class="split-stat-row"><span class="split-stat-name">Matcher</span><span class="split-stat-val">{{ team.awayMatches }}</span></div>
+            <div class="split-stat-row"><span class="split-stat-name">Gjorda mål</span><span class="split-stat-val">{{ team.goalsaway }}</span></div>
+            <div class="split-stat-row"><span class="split-stat-name">Insläppta</span><span class="split-stat-val">{{ team.conceededaway }}</span></div>
+            <div class="split-stat-row"><span class="split-stat-name">Avg mål / match</span><span class="split-stat-val">{{ team.avgGoalsAway }}</span></div>
+            <div class="split-stat-row"><span class="split-stat-name">Gjorda / match</span><span class="split-stat-val">{{ team.goalsAwayTeam }}</span></div>
+            <div class="split-stat-row"><span class="split-stat-name">Insläppta / match</span><span class="split-stat-val">{{ team.concededAwayTeam }}</span></div>
+          </div>
+        </div>
+
+        <div class="section-label">Hörnstatistik</div>
+        <div class="corners-grid">
+          <div class="corner-card">
+            <div class="corner-val">{{ team.avgCorners }}</div>
+            <div class="corner-lbl">Avg hörnor totalt</div>
+          </div>
+          <div class="corner-card">
+            <div class="corner-val">{{ team.avgCornersHome }}</div>
+            <div class="corner-lbl">Avg hörnor hemma</div>
+          </div>
+          <div class="corner-card">
+            <div class="corner-val">{{ team.avgCornersAway }}</div>
+            <div class="corner-lbl">Avg hörnor borta</div>
+          </div>
+        </div>
+
+        <div class="section-label">Ligakontext (hemmaindex)</div>
+        <div class="info-panel">
+          <div class="pct-row">
+            <div class="pct-label-row"><span>Mål gjorda hemma — ligasnitt</span><strong>{{ team.goalsHomeLeague }}</strong></div>
+            <div class="pct-track"><div class="pct-fill blue" :style="{ width: Math.min(100, team.goalsHomeLeague * 33) + '%' }"></div></div>
+          </div>
+          <div class="pct-row">
+            <div class="pct-label-row"><span>Insläppta hemma — ligasnitt</span><strong>{{ team.concededHomeLeague }}</strong></div>
+            <div class="pct-track"><div class="pct-fill accent" :style="{ width: Math.min(100, team.concededHomeLeague * 33) + '%' }"></div></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RESULTS -->
+      <div v-if="tab === 'results'">
+        <div class="state-box" v-if="resultsLoading">
+          <div class="icon">⏳</div>
+          <strong>Hämtar resultat…</strong>
+        </div>
+        <div class="error-banner" v-if="resultsError">⚠ {{ resultsError }}</div>
+        <div class="state-box" v-if="!resultsLoading && results.length === 0 && !resultsError">
+          <div class="icon">📭</div>
+          <strong>Inga resultat</strong>
+          Inga matcher hittades för detta lag.
+        </div>
+        <div class="results-table-wrap fade-in" v-if="results.length > 0">
+          <table>
+            <thead>
+              <tr>
+                <th>Datum</th>
+                <th>Hemma</th>
+                <th style="text-align:center">Resultat</th>
+                <th>Borta</th>
+                <th>Utfall</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="row-hover" v-for="m in results" :key="m.id">
+                <td style="white-space:nowrap;font-family:var(--mono);font-size:12px;color:var(--muted)">{{ m.date }}</td>
+                <td style="font-size:13px;font-weight:600">{{ m.homeTeam }}</td>
+                <td style="text-align:center;font-family:var(--mono);font-size:15px;font-weight:700;letter-spacing:2px">
+                  {{ m.fullTimeHomeGoals }} – {{ m.fullTimeAwayGoals }}
+                </td>
+                <td style="font-size:13px;font-weight:600">{{ m.awayTeam }}</td>
+                <td>
+                  <span
+                    style="display:inline-block;padding:2px 10px;border-radius:5px;font-family:var(--mono);font-size:11px;font-weight:700"
+                    :style="outcomeStyle(m)"
+                  >{{ outcomeLabel(m) }}</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- SQUAD -->
+      <div v-if="tab === 'squad'">
+        <div class="squad-card">
+          <div class="squad-icon">👕</div>
+          <strong>Truppdata saknas</strong>
+          Spelardata är inte tillgänglig via API:et ännu.
+        </div>
+      </div>
+
+    </template>
+
+  </div>
+  </div>
+</div>
+
+<script>
+const { createApp, ref, onMounted } = Vue;
+
+createApp({
+  setup() {
+    const BASE = 'http://localhost:8080';
+    const params = new URLSearchParams(window.location.search);
+    const teamName = ref(params.get('team') || 'AIK');
+
+    const team           = ref(null);
+    const loading        = ref(false);
+    const error          = ref('');
+    const tab            = ref('overview');
+
+    const results        = ref([]);
+    const resultsLoading = ref(false);
+    const resultsError   = ref('');
+    const resultsFetched = ref(false);
+
+    function pct(val, total) {
+      if (!total) return 0;
+      return Math.round((val / total) * 100);
+    }
+
+    function teamNameSplit(name) {
+      if (!name) return ['', ''];
+      const parts = name.trim().split(' ');
+      if (parts.length >= 2) { const last = parts.pop(); return [parts.join(' ') + ' ', last]; }
+      const cut = Math.max(1, name.length - 2);
+      return [name.slice(0, cut), name.slice(cut)];
+    }
+
+    function outcomeLabel(m) {
+      const isHome = m.homeTeam === teamName.value;
+      const hg = m.fullTimeHomeGoals, ag = m.fullTimeAwayGoals;
+      if (hg === ag) return 'X';
+      if (isHome) return hg > ag ? 'V' : 'F';
+      return ag > hg ? 'V' : 'F';
+    }
+
+    function outcomeStyle(m) {
+      const label = outcomeLabel(m);
+      if (label === 'V') return { background: 'var(--green-bg)', color: 'var(--green)', border: '1px solid var(--green-border)' };
+      if (label === 'F') return { background: 'var(--red-bg)',   color: 'var(--red)',   border: '1px solid var(--red-border)'   };
+      return { background: 'var(--surface2)', color: 'var(--muted)', border: '1px solid var(--border)' };
+    }
+
+    async function fetchTeam() {
+      loading.value = true; error.value = '';
+      try {
+        const res = await fetch(`${BASE}/teams/id/${encodeURIComponent(teamName.value)}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        team.value = await res.json();
+      } catch(e) {
+        error.value = `Kunde inte hämta lagdata: ${e.message}`;
+      } finally {
+        loading.value = false;
+      }
+    }
+
+    async function fetchResults() {
+      if (resultsFetched.value) return;
+      resultsLoading.value = true; resultsError.value = '';
+      try {
+        const res = await fetch(`${BASE}/events/team/${encodeURIComponent(teamName.value)}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        results.value = await res.json();
+        resultsFetched.value = true;
+      } catch(e) {
+        resultsError.value = `Kunde inte hämta resultat: ${e.message}`;
+      } finally {
+        resultsLoading.value = false;
+      }
+    }
+
+    function switchTab(name) {
+      tab.value = name;
+      if (name === 'results') fetchResults();
+    }
+
+    onMounted(fetchTeam);
+
+    return {
+      teamName, team, loading, error, tab,
+      results, resultsLoading, resultsError,
+      fetchTeam, switchTab,
+      pct, teamNameSplit, outcomeLabel, outcomeStyle,
+    };
+  }
+}).mount('#app');
+</script>
+</body>
+</html>

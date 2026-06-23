@@ -221,7 +221,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr class="row-hover" v-for="(team, i) in sorted" :key="team.name">
+          <tr class="row-hover" v-for="(team, i) in sorted" :key="team.name" style="cursor:pointer" @click="openTeam(team.name)">
             <td>
               <span class="rank-badge" :class="i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : ''">
                 {{ i + 1 }}
@@ -270,6 +270,7 @@
                 <span class="over-num">{{ team.over2 }}</span>
               </div>
             </td>
+
             <td style="text-align:right">
               <span class="btts-pip" v-if="team.btts != null">{{ team.btts }}</span>
               <span v-else style="color:var(--muted)">—</span>
@@ -333,8 +334,8 @@ createApp({
         return x.avgCorners ?? 0;
       }), 1);
       const val = viewMode.value === 'home' ? (t.avgCornersHome ?? 0)
-                : viewMode.value === 'away' ? (t.avgCornersAway ?? 0)
-                : (t.avgCorners ?? 0);
+              : viewMode.value === 'away' ? (t.avgCornersAway ?? 0)
+                      : (t.avgCorners ?? 0);
       return Math.round((val / maxCorners) * 100);
     };
 
@@ -395,7 +396,8 @@ createApp({
     onBeforeMount(fetchLeagues);
     onMounted(fetchTeams);
 
-    return { leagues, teams, loading, error, search, selectedLeague, sorted, fetchLeagues, fetchTeams, selectLeague, setSort, sortIcon, viewMode, goalPillClass, cornerBarPct };
+    function openTeam(name) { window.location.href = 'team.html?team=' + encodeURIComponent(name); }
+    return { leagues, teams, loading, error, search, selectedLeague, sorted, fetchLeagues, fetchTeams, selectLeague, setSort, sortIcon, viewMode, goalPillClass, openTeam, cornerBarPct };
   }
 }).mount('#app');
 </script>

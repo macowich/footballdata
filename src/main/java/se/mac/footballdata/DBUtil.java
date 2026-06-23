@@ -1,9 +1,12 @@
 package se.mac.footballdata;
 
+import com.mongodb.MongoException;
 import com.mongodb.bulk.BulkWriteResult;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.*;
+import org.bson.Document;
+import se.mac.footballdata.sportsapi.db.EventDB;
 import se.mac.footballdata.sportsapi.db.OddsDB;
 
 import java.util.ArrayList;
@@ -11,6 +14,25 @@ import java.util.List;
 
 public class DBUtil {
 
+    /**
+     * Updates events collection in db
+     *
+     * @param database Database
+     * @param eventDBList List of EventDB
+     */
+    public static void updateEventsCollection(MongoDatabase database, List<EventDB> eventDBList) {
+
+        MongoCollection<EventDB> collection =
+                database.getCollection("events", EventDB.class);
+        collection.createIndex(new Document("eventId", 1), new IndexOptions().unique(true));
+
+        try {
+            collection.insertMany(eventDBList, new InsertManyOptions().ordered(false));
+            System.out.println("Inserted eventDBList: " + eventDBList);
+        } catch (MongoException ex) {
+            System.out.println("Error when inserting eventDBList: " + ex);
+        }
+    }
 
     /**
      * Updates odds collection in db
@@ -40,7 +62,6 @@ public class DBUtil {
         System.out.println("Upsert of odds collection complete.");
         System.out.println("Modified existing: " + result.getModifiedCount());
         System.out.println("Newly inserted: " + result.getUpserts().size());
-
     }
 
 }

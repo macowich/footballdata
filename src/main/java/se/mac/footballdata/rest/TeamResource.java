@@ -1,17 +1,18 @@
 package se.mac.footballdata.rest;
 
 import jakarta.inject.Inject;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import org.bson.types.ObjectId;
 import se.mac.footballdata.rest.model.Event;
+import se.mac.footballdata.rest.model.Referee;
 import se.mac.footballdata.rest.model.Team;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static se.mac.footballdata.Util.createTeamFromEvent;
@@ -42,5 +43,11 @@ public class TeamResource {
         return teamList;
     }
 
+    @GET
+    @Path("/id/{team}")
+    public Team getById(@PathParam("team") String team) {
+        List<Event> teamResult = eventRepository.findByTeam(team);
+        return createTeamFromEvent(team, teamResult);
+    }
 
 }

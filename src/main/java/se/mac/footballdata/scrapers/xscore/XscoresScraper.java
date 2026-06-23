@@ -2,12 +2,9 @@ package se.mac.footballdata.scrapers.xscore;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.MongoClientSettings;
-import com.mongodb.MongoException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.InsertManyOptions;
 import org.bson.codecs.configuration.CodecProvider;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
@@ -52,11 +49,11 @@ public class XscoresScraper {
     //private static final String BASE_PATH_FK = "C:\\FKApps\\data\\xscore\\";
 
     public static void main(String[] args) throws Exception {
-        List<String> urlList = loadResultpage(BASE_PATH + "results\\Superettan - Results _ Football Sweden.html");
+        /*List<String> urlList = loadResultpage(BASE_PATH + "results\\Superettan - Results _ Football Sweden.html");
         fetchDataFiles(urlList.getFirst());
         for (String url : urlList) {
             fetchDataFiles(url);
-        }
+        }*/
 
         int leagueId = 1000; // Superettan
 
@@ -101,16 +98,7 @@ public class XscoresScraper {
                     .getDatabase("sportsdb")
                     .withCodecRegistry(pojoCodecRegistry);
 
-            MongoCollection<EventDB> collection =
-                    database.getCollection("events", EventDB.class);
-
-            try {
-                collection.insertMany(eventDBList, new InsertManyOptions().ordered(false));
-                System.out.println("Inserted eventDBList:" + eventDBList);
-            } catch (MongoException ex) {
-                System.out.println("Error when inserting eventDBList: " + ex);
-            }
-
+            DBUtil.updateEventsCollection(database, eventDBList);
             DBUtil.updateOddsCollection(database, oddsDBList);
         }
     }
@@ -119,8 +107,8 @@ public class XscoresScraper {
         EventDB eventDB = new EventDB();
         eventDB.leagueId = leagueId;
         eventDB.round = Integer.parseInt(matchData.roundName);
-        eventDB.date = matchData.stageStart.substring(0, 10);
-        eventDB.time = matchData.stageStart.substring(11, matchData.stageStart.length() - 3);
+        eventDB.date = matchData.start.substring(0, 10);
+        eventDB.time = matchData.start.substring(11, matchData.start.length() - 3);
         eventDB.eventId = Math.toIntExact(matchData.id);
         eventDB.hometeam = matchData.home.getFirst().name;
         eventDB.awayteam = matchData.away.getFirst().name;

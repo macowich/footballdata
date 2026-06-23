@@ -67,4 +67,10 @@ public class EventResource {
         return new ArrayList<>(Util.leagues.values());
     }
 
+    @GET
+    @Path("/team/{team}")
+    public List<Event> getEventsForTeam(@PathParam("team") String team) {
+        return eventRepository.findByTeam(team);
+    }
+
 }

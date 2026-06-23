@@ -7,6 +7,7 @@ import org.bson.codecs.pojo.annotations.BsonProperty;
 @MongoEntity(collection = "events")
 public class Event extends PanacheMongoEntity {
     public int eventId;
+    public int leagueId;
     public String date;
     public String time;
 

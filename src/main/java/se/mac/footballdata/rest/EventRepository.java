@@ -13,6 +13,7 @@ public class EventRepository implements PanacheMongoRepository<Event> {
     public List<Event> findByTeam(String team) {
         return find(
                 "{$or:[{hometeam:?1},{awayteam:?1}]}",
+                Sort.by("date").descending(),
                 team
         ).list();
     }

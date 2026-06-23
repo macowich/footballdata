@@ -30,7 +30,6 @@ public class SportsApiLoader {
     private static final EventStatsClient eventStatsClient = new EventStatsClient();
 
     public static void main(String[] args) {
-        // Enable POJO codec support
         CodecProvider pojoCodecProvider =
                 PojoCodecProvider.builder().automatic(true).build();
 
@@ -46,14 +45,9 @@ public class SportsApiLoader {
                     .getDatabase("sportsdb")
                     .withCodecRegistry(pojoCodecRegistry);
 
-            MongoCollection<EventDB> collection =
-                    database.getCollection("events", EventDB.class);
-            collection.createIndex(new Document("eventId", 1), new IndexOptions().unique(true));
-
-            //handleFixturesData(database, 26);
-
-            handleLeague(database, 26);
-            //handleLeague(database, 55);
+            // handleFixturesData(database, 55);
+            //handleLeague(database, 26);
+            handleLeague(database, 55);
 
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -70,7 +64,6 @@ public class SportsApiLoader {
                 database.getCollection("fixtures", FixtureDB.class);
         collection.createIndex(new Document("eventId", 1), new IndexOptions().unique(true));
 
-        List<SportsApiClient.Event> eventList = new ArrayList<>();
         SportsApiClient.EventsResponse response = sportsApiClient.
                 fetchEvents("2026-06-08", "2026-07-04", leagueId, "notstarted");
 
@@ -78,7 +71,8 @@ public class SportsApiLoader {
             System.out.println(event.id);
             System.out.println(event);
         }
-        eventList.addAll(response.results);
+
+        List<SportsApiClient.Event> eventList = new ArrayList<>(response.results);
 
         List<FixtureDB> fixtureDBList = createFixtureDB(eventList);
         for (FixtureDB db : fixtureDBList) {
@@ -87,16 +81,14 @@ public class SportsApiLoader {
 
         try {
             collection.insertMany(fixtureDBList, new InsertManyOptions().ordered(false));
-            System.out.println("Inserted: " + fixtureDBList);
+            System.out.println("Inserted fixtures: " + fixtureDBList);
         } catch (MongoException ex) {
-            System.out.println("Error: " + ex);
+            System.out.println("Error when inserting fixtures: " + ex);
         }
 
     }
 
     static void handleEventsData(MongoDatabase database, int leagueId) throws Exception {
-        MongoCollection<EventDB> collection =
-                database.getCollection("events", EventDB.class);
 
         List<SportsApiClient.Event> eventList = new ArrayList<>();
         loadEvents("2026-04-04", "2026-04-18", leagueId, eventList);
@@ -104,7 +96,7 @@ public class SportsApiLoader {
         loadEvents("2026-05-05", "2026-05-19", leagueId, eventList);
         loadEvents("2026-05-20", "2026-05-31", leagueId, eventList);
         loadEvents("2026-06-01", "2026-06-13", leagueId, eventList);
-        loadEvents("2026-06-14", "2026-06-17", leagueId, eventList);
+        loadEvents("2026-06-14", "2026-06-23", leagueId, eventList);
         List<EventDB> eventDBList = createEventDB(eventList);
 
         ArrayList<OddsDB> oddsList = new ArrayList<>();
@@ -116,15 +108,7 @@ public class SportsApiLoader {
             }
         }
 
-
-        // Util
-        try {
-            collection.insertMany(eventDBList, new InsertManyOptions().ordered(false));
-            System.out.println("Inserted eventDBList: " + eventDBList);
-        } catch (MongoException ex) {
-            System.out.println("Error when inserting eventDBList: " + ex);
-        }
-
+        DBUtil.updateEventsCollection(database, eventDBList);
         DBUtil.updateOddsCollection(database, oddsList);
     }
 
@@ -150,7 +134,6 @@ public class SportsApiLoader {
 
     private static void loadFixtureOdds(FixtureDB fixtureDB) throws Exception {
         SportsApiClient.EventOdds eventOdds = sportsApiClient.fetchEventOdds(fixtureDB.eventId);
-        System.out.printf("Event ID: %d%n", fixtureDB.eventId);
         fixtureDB.homeWin = eventOdds.odds.homeWin;
         fixtureDB.draw = eventOdds.odds.draw;
         fixtureDB.awayWin = eventOdds.odds.awayWin;
@@ -223,13 +206,6 @@ public class SportsApiLoader {
         }
         return null;
     }
-
-    /*
-    private static List<OddsDB> createOddsDB(List<SportsApiClient.EventOdds> eventOddsList, int leagueId) {
-        return eventOddsList.stream()
-                .map(odds -> createOddsDB(odds, leagueId))
-                .toList();
-    }*/
 
     private static OddsDB createOddsDB(List<SportsApiClient.OddsLine> results, int eventId) {
         OddsDB oddsDB = new OddsDB();

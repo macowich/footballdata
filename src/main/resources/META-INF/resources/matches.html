@@ -28,7 +28,7 @@
   .league-tab {
     padding: 8px 16px;
     border-radius: 10px;
-    font-family: var(--font);
+    font-family: var(--font),serif;
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
@@ -173,9 +173,29 @@
     box-shadow: 0 1px 4px rgba(0,0,0,.2);
   }
 
+  /* Round separator row */
+  .round-row td {
+    padding: 6px 16px 5px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    border-top: 2px solid var(--border);
+  }
+  .round-row:first-child td { border-top: none; }
+  .round-label {
+    font-family: var(--mono),serif;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
   /* Odds table scroll */
   .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  table { min-width: 820px; }
+  table { min-width: 1100px; width: 100%; }
+
+  /* Override the 960px wrapper cap for this page */
+  .wrapper { max-width: 1400px; }
 
   /* Odds chips in table */
   .odd-val {
@@ -277,7 +297,7 @@
       <div class="state-box" v-else-if="matches.length === 0 && !error">
         <div class="icon">📭</div>
         <strong>Inga resultat hittades</strong>
-        {{ search ? 'Inga resultat matchar sökningen.' : 'Inga resultat hittades för denna liga.' }}
+        {{ search ? 'Inga resultat matchar sökningen.' : 'Inga resultgat hittades för denna liga.' }}
       </div>
 
       <table v-else>
@@ -295,27 +315,35 @@
           </tr>
         </thead>
         <tbody>
-          <tr class="row-hover" v-for="(item, i) in matches" :key="item.id" @click="openModal(item.id)">
-            <td style="white-space: nowrap;">
-              <strong>{{ item.date }}</strong>
-              <span style="color:var(--muted)"> {{ item.time }}</span>
-            </td>
-            <td style="font-family:var(--mono);font-size:13px">{{ item.homeTeam }} – {{ item.awayTeam }}</td>
-            <td style="font-family:var(--mono);font-size:13px;font-weight:700">{{ item.fullTimeHomeGoals }} – {{ item.fullTimeAwayGoals }}</td>
-            <td><span v-if="item.odds?.homeWin" :class="['odd-val', oddClass(item.odds?.homeWin, item.odds)]">{{ item.odds.homeWin }}</span><span v-else class="odd-none">—</span></td>
-            <td><span v-if="item.odds?.draw"    :class="['odd-val', oddClass(item.odds?.draw,    item.odds)]">{{ item.odds.draw }}</span><span v-else class="odd-none">—</span></td>
-            <td><span v-if="item.odds?.awayWin" :class="['odd-val', oddClass(item.odds?.awayWin, item.odds)]">{{ item.odds.awayWin }}</span><span v-else class="odd-none">—</span></td>
-            <td><span v-if="item.odds?.over25Goals" :class="['odd-val', item.odds.over25Goals <= 1.9 ? 'odd-fav' : 'odd-mid']">{{ item.odds.over25Goals }}</span><span v-else class="odd-none">—</span></td>
-            <td><span v-if="item.odds?.under25Goals" :class="['odd-val', item.odds.under25Goals <= 1.9 ? 'odd-fav' : 'odd-mid']">{{ item.odds.under25Goals }}</span><span v-else class="odd-none">—</span></td>
-            <td>
-              <span v-if="item.odds?.bttsYes" style="display:inline-flex;gap:4px;align-items:center">
-                <span :class="['odd-val', item.odds.bttsYes <= item.odds.bttsNo ? 'odd-fav' : 'odd-long']">{{ item.odds.bttsYes }}</span>
-                <span style="color:var(--muted);font-size:11px">/</span>
-                <span :class="['odd-val', item.odds.bttsNo < item.odds.bttsYes ? 'odd-fav' : 'odd-long']">{{ item.odds.bttsNo }}</span>
-              </span>
-              <span v-else class="odd-none">—</span>
-            </td>
-          </tr>
+          <template v-for="(item, i) in matches" :key="item.id">
+            <!-- Round separator: show when round changes -->
+            <tr v-if="item.round != null && (i === 0 || item.round !== matches[i - 1].round)" class="round-row">
+              <td colspan="9">
+                <span class="round-label">Omgång {{ item.round }}</span>
+              </td>
+            </tr>
+            <tr class="row-hover" @click="openModal(item.id)">
+              <td style="white-space: nowrap;">
+                <strong>{{ item.date }}</strong>
+                <span style="color:var(--muted)"> {{ item.time }}</span>
+              </td>
+              <td style="font-family:var(--mono);font-size:13px">{{ item.homeTeam }} – {{ item.awayTeam }}</td>
+              <td style="font-family:var(--mono);font-size:13px;font-weight:700">{{ item.fullTimeHomeGoals }} – {{ item.fullTimeAwayGoals }}</td>
+              <td><span v-if="item.odds?.homeWin" :class="['odd-val', oddClass(item.odds?.homeWin, item.odds)]">{{ item.odds.homeWin }}</span><span v-else class="odd-none">—</span></td>
+              <td><span v-if="item.odds?.draw"    :class="['odd-val', oddClass(item.odds?.draw,    item.odds)]">{{ item.odds.draw }}</span><span v-else class="odd-none">—</span></td>
+              <td><span v-if="item.odds?.awayWin" :class="['odd-val', oddClass(item.odds?.awayWin, item.odds)]">{{ item.odds.awayWin }}</span><span v-else class="odd-none">—</span></td>
+              <td><span v-if="item.odds?.over25Goals" :class="['odd-val', item.odds.over25Goals <= 1.9 ? 'odd-fav' : 'odd-mid']">{{ item.odds.over25Goals }}</span><span v-else class="odd-none">—</span></td>
+              <td><span v-if="item.odds?.under25Goals" :class="['odd-val', item.odds.under25Goals <= 1.9 ? 'odd-fav' : 'odd-mid']">{{ item.odds.under25Goals }}</span><span v-else class="odd-none">—</span></td>
+              <td>
+                <span v-if="item.odds?.bttsYes" style="display:inline-flex;gap:4px;align-items:center">
+                  <span :class="['odd-val', item.odds.bttsYes <= item.odds.bttsNo ? 'odd-fav' : 'odd-long']">{{ item.odds.bttsYes }}</span>
+                  <span style="color:var(--muted);font-size:11px">/</span>
+                  <span :class="['odd-val', item.odds.bttsNo < item.odds.bttsYes ? 'odd-fav' : 'odd-long']">{{ item.odds.bttsNo }}</span>
+                </span>
+                <span v-else class="odd-none">—</span>
+              </td>
+            </tr>
+          </template>
         </tbody>
       </table>
     </div>
