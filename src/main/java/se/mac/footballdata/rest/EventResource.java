@@ -11,14 +11,13 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.bson.types.ObjectId;
 import se.mac.footballdata.Util;
-import se.mac.footballdata.rest.model.Event;
-import se.mac.footballdata.rest.model.League;
-import se.mac.footballdata.rest.model.Odds;
-import se.mac.footballdata.rest.model.Referee;
+import se.mac.footballdata.rest.model.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import static io.quarkus.mongodb.panache.PanacheMongoEntityBase.find;
 
 @Path("/events")
 @Produces(MediaType.APPLICATION_JSON)
@@ -27,6 +26,9 @@ public class EventResource {
 
     @Inject
     EventRepository eventRepository;
+
+    @Inject
+    IncidentsRepository incidentsRepository;
 
     @Inject
     RefereeRepository refereeRepository;
@@ -49,10 +51,10 @@ public class EventResource {
 
     @GET
     @Path("/{id}")
-    public Event getById(@PathParam("id") String id) {
-        Event event = Event.findById(new ObjectId(id));
+    public Event getById(@PathParam("id") String eventId) {
+        Event event = eventRepository.findByEventId(Integer.parseInt(eventId));
         if (event == null) {
-            throw new WebApplicationException("Event med id " + id + " hittades inte", Response.Status.NOT_FOUND);
+            throw new WebApplicationException("Event med id " + eventId + " hittades inte", Response.Status.NOT_FOUND);
         }
 
         Optional<Referee> r = refereeRepository.findByRefereeId(event.refereeId);
@@ -71,6 +73,12 @@ public class EventResource {
     @Path("/team/{team}")
     public List<Event> getEventsForTeam(@PathParam("team") String team) {
         return eventRepository.findByTeam(team);
+    }
+
+    @GET
+    @Path("/incidents/{eventId}")
+    public List<Incident> getIncidents(@PathParam("eventId") String eventId) {
+        return incidentsRepository.findByEventId(Integer.parseInt(eventId));
     }
 
 }

@@ -46,8 +46,8 @@ public class SportsApiLoader {
                     .withCodecRegistry(pojoCodecRegistry);
 
             // handleFixturesData(database, 55);
-            //handleLeague(database, 26);
-            handleLeague(database, 55);
+            handleLeague(database, 26);
+            //handleLeague(database, 55);
 
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -99,17 +99,23 @@ public class SportsApiLoader {
         loadEvents("2026-06-14", "2026-06-23", leagueId, eventList);
         List<EventDB> eventDBList = createEventDB(eventList);
 
+        ArrayList<IncidentDB> incidentDBList = new ArrayList<>();
         ArrayList<OddsDB> oddsList = new ArrayList<>();
         for (EventDB db : eventDBList) {
-            loadEventStats(db);
+            /*loadEventStats(db);
             OddsDB oddsDB = loadEventOdds(db.eventId);
             if (oddsDB != null) {
                 oddsList.add(oddsDB);
+            }*/
+            List<IncidentDB> incidentList = loadEventIncidents(db.eventId);
+            if (incidentList != null) {
+                incidentDBList.addAll(incidentList);
             }
         }
 
-        DBUtil.updateEventsCollection(database, eventDBList);
-        DBUtil.updateOddsCollection(database, oddsList);
+      //  DBUtil.updateEventsCollection(database, eventDBList);
+        DBUtil.updateIncidentsCollection(database, incidentDBList);
+      //  DBUtil.updateOddsCollection(database, oddsList);
     }
 
     private static List<FixtureDB> createFixtureDB(List<SportsApiClient.Event> eventList) {
@@ -196,6 +202,37 @@ public class SportsApiLoader {
         eventDB.aBigChances = eventStats.stats.away.bigChances;
         eventDB.hSaves = eventStats.stats.home.totalSaves;
         eventDB.aSaves = eventStats.stats.away.totalSaves;
+    }
+
+    private static List<IncidentDB> loadEventIncidents(int eventId) throws Exception {
+        System.out.println("\n=== Loading incidents (eventId: " + eventId + " ) ===");
+        SportsApiClient.EventData eventData = sportsApiClient.fetchIncidents(eventId);
+        if (!eventData.incidents.isEmpty()) {
+            return createIncidentDB(eventData.incidents, eventId);
+        }
+        return null;
+    }
+
+    private static List<IncidentDB> createIncidentDB(List<SportsApiClient.Incident> incidents, int eventId) {
+        ArrayList<IncidentDB> incidentDBList = new ArrayList<>();
+
+        for (SportsApiClient.Incident i : incidents) {
+            IncidentDB incidentDB = new IncidentDB();
+            incidentDB.eventId = eventId;
+            incidentDB.type = i.type;
+            incidentDB.text = i.text;
+            incidentDB.home = i.is_home != null ? i.is_home : false;
+            incidentDB.player = i.player;
+            incidentDB.playerId = i.player_id != null ? i.player_id : 0;
+            incidentDB.cardType = i.card_type;
+            incidentDB.goalType = i.goal_type;
+            incidentDB.assist = i.assist;
+            incidentDB.minute = i.minute;
+            incidentDB.playerIn = i.player_in;
+            incidentDB.playerOut = i.player_out;
+            incidentDBList.add(incidentDB);
+        }
+        return incidentDBList;
     }
 
     private static OddsDB loadEventOdds(int eventId) throws Exception {

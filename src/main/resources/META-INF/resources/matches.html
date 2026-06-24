@@ -145,6 +145,144 @@
   .stat-bar-home { background: var(--accent); border-radius: 99px 0 0 99px; transition: width .6s ease; }
   .stat-bar-away { background: #f97316; border-radius: 0 99px 99px 0; transition: width .6s ease; }
 
+  /* Modal tabs */
+  .modal-tabs {
+    display: flex; gap: 2px;
+    padding: 0 24px 0;
+    border-bottom: 1px solid var(--border);
+    margin-top: 16px;
+  }
+  .modal-tab-btn {
+    padding: 8px 16px; border: none; background: transparent;
+    font-family: 'Figtree', sans-serif; font-size: 13px; font-weight: 600;
+    color: var(--muted); cursor: pointer;
+    border-bottom: 2px solid transparent; margin-bottom: -1px;
+    transition: color .15s, border-color .15s;
+  }
+  .modal-tab-btn:hover { color: var(--text); }
+  .modal-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* Incidents tab */
+  .modal-incidents { padding: 16px 24px 8px; }
+
+  .incidents-header {
+    display: grid; grid-template-columns: 1fr 44px 1fr;
+    gap: 4px; margin-bottom: 12px;
+    padding: 0 4px;
+  }
+  .inc-team-label {
+    font-family: 'Figtree', sans-serif; font-size: 11px; font-weight: 700;
+    letter-spacing: .06em; text-transform: uppercase; color: var(--muted);
+  }
+  .inc-home-label { text-align: right; color: var(--accent); }
+  .inc-away-label { text-align: left; color: #f97316; }
+  .inc-min-label {
+    text-align: center; font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; color: var(--muted); letter-spacing: .08em;
+  }
+
+  .incidents-timeline { display: flex; flex-direction: column; gap: 2px; padding-bottom: 8px; }
+
+  /* Period separator */
+  .inc-period-row {
+    display: flex; align-items: center; gap: 8px;
+    margin: 8px 0; padding: 0 4px;
+  }
+  .inc-period-line { flex: 1; height: 1px; background: var(--border); }
+  .inc-period-badge {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    font-weight: 500; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--muted); background: var(--surface2);
+    border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; white-space: nowrap;
+  }
+
+  /* Incident row */
+  .inc-row {
+    display: grid; grid-template-columns: 1fr 44px 1fr;
+    align-items: center; gap: 4px;
+    padding: 5px 4px; border-radius: 8px;
+    transition: background .12s;
+  }
+  .inc-row:hover { background: var(--surface2); }
+
+  .inc-side {
+    display: flex; align-items: center; gap: 6px; min-height: 32px;
+  }
+  .inc-side-home { justify-content: flex-end; }
+  .inc-side-away { justify-content: flex-start; }
+
+  .inc-content {
+    display: flex; flex-direction: column; gap: 1px;
+  }
+  .inc-side-home .inc-content { align-items: flex-end; text-align: right; }
+  .inc-side-away .inc-content { align-items: flex-start; text-align: left; }
+
+  .inc-player {
+    font-family: 'Figtree', sans-serif; font-size: 13px;
+    font-weight: 600; color: var(--text);
+  }
+  .inc-assist {
+    font-family: 'Figtree', sans-serif; font-size: 11px; color: var(--muted);
+  }
+  .sub-in  { color: var(--green); font-size: 12px; }
+  .sub-out { color: var(--red);   font-size: 12px; }
+  .inc-score {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; font-weight: 600;
+    color: var(--muted); margin-left: 5px;
+  }
+
+  .inc-minute-col { display: flex; justify-content: center; align-items: center; }
+  .inc-minute {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    font-weight: 600; color: var(--muted);
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 2px 6px; min-width: 36px; text-align: center;
+  }
+
+  .inc-icon-wrap { flex-shrink: 0; }
+  .inc-icon {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 7px;
+    font-size: 13px; border: 1px solid transparent;
+  }
+  .inc-icon-goal { background: rgba(34,197,94,.12); border-color: rgba(34,197,94,.25); }
+  .inc-icon-card-yellow { background: rgba(234,179,8,.15); border-color: rgba(234,179,8,.3); }
+  .inc-icon-card-red { background: rgba(239,68,68,.12); border-color: rgba(239,68,68,.25); }
+  .inc-icon-substitution { background: rgba(99,102,241,.1); border-color: rgba(99,102,241,.2); }
+
+
+  .lineup-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+  }
+  .lineup-team-header {
+    font-family: 'Figtree', sans-serif; font-size: 12px; font-weight: 700;
+    letter-spacing: .06em; text-transform: uppercase; color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .lineup-formation {
+    font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 700;
+    color: var(--text); letter-spacing: -.01em; margin-bottom: 4px;
+  }
+  .lineup-formation-label {
+    font-family: 'Figtree', sans-serif; font-size: 11px; color: var(--muted);
+    margin-bottom: 14px;
+  }
+  .lineup-empty {
+    text-align: center; padding: 32px 0;
+    color: var(--muted); font-size: 13px;
+  }
+  .lineup-empty .lineup-empty-icon { font-size: 28px; margin-bottom: 8px; }
+  .lineup-empty strong { display: block; color: var(--text); font-size: 14px; margin-bottom: 4px; }
+
+  /* Pitch visual */
+  .pitch-wrap {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px 12px; margin-bottom: 16px;
+  }
+  .pitch-svg { width: 100%; display: block; }
+
   .modal-footer {
     padding: 12px 24px 20px;
     display: flex; align-items: center; justify-content: space-between;
@@ -322,7 +460,7 @@
                 <span class="round-label">Omgång {{ item.round }}</span>
               </td>
             </tr>
-            <tr class="row-hover" @click="openModal(item.id)">
+            <tr class="row-hover" @click="openModal(item.eventId)">
               <td style="white-space: nowrap;">
                 <strong>{{ item.date }}</strong>
                 <span style="color:var(--muted)"> {{ item.time }}</span>
@@ -390,132 +528,251 @@
 
       <div class="modal-divider"></div>
 
-      <div class="modal-stats" v-if="detail">
-        <div class="modal-stats-title">Matchstatistik</div>
-
-        <div class="stat-row">
-          <div class="stat-val">{{ detail.homeShots }}</div>
-          <div>
-            <div class="stat-label" style="margin-bottom:4px">Skott</div>
-            <div class="stat-bars">
-              <div class="stat-bar-home" :style="{width: pct(detail.homeShots, detail.awayShots)+'%'}"></div>
-              <div class="stat-bar-away" :style="{width: pct(detail.awayShots, detail.homeShots)+'%'}"></div>
-            </div>
-          </div>
-          <div class="stat-val">{{ detail.awayShots }}</div>
-        </div>
-
-        <!--
-        <div class="stat-row">
-          <div class="stat-val">{{ detail.homeShotsTarget }}</div>
-          <div>
-            <div class="stat-label" style="margin-bottom:4px">Skott på mål</div>
-            <div class="stat-bars">
-              <div class="stat-bar-home" :style="{width: pct(detail.homeShotsTarget, detail.awayShotsTarget)+'%'}"></div>
-              <div class="stat-bar-away" :style="{width: pct(detail.awayShotsTarget, detail.homeShotsTarget)+'%'}"></div>
-            </div>
-          </div>
-          <div class="stat-val">{{ detail.awayShotsTarget }}</div>
-        </div> -->
-
-        <div class="stat-row">
-          <div class="stat-val">{{ detail.homeCorners }}</div>
-          <div>
-            <div class="stat-label" style="margin-bottom:4px">Hörnor</div>
-            <div class="stat-bars">
-              <div class="stat-bar-home" :style="{width: pct(detail.homeCorners, detail.awayCorners)+'%'}"></div>
-              <div class="stat-bar-away" :style="{width: pct(detail.awayCorners, detail.homeCorners)+'%'}"></div>
-            </div>
-          </div>
-          <div class="stat-val">{{ detail.awayCorners }}</div>
-        </div>
-
-        <div class="stat-row">
-          <div class="stat-val">{{ detail.homeYellowcards }}</div>
-          <div>
-            <div class="stat-label" style="margin-bottom:4px">Gula kort</div>
-            <div class="stat-bars">
-              <div class="stat-bar-home" :style="{width: pct(detail.homeYellowcards, detail.awayYellowcards)+'%'}"></div>
-              <div class="stat-bar-away" :style="{width: pct(detail.awayYellowcards, detail.homeYellowcards)+'%'}"></div>
-            </div>
-          </div>
-          <div class="stat-val">{{ detail.awayYellowcards }}</div>
-        </div>
-
-        <div class="stat-row">
-          <div class="stat-val">{{ detail.homeRedcards }}</div>
-          <div>
-            <div class="stat-label" style="margin-bottom:4px">Röda kort</div>
-            <div class="stat-bars">
-              <div class="stat-bar-home" :style="{width: pct(detail.homeRedcards, detail.awayRedcards)+'%'}"></div>
-              <div class="stat-bar-away" :style="{width: pct(detail.awayRedcards, detail.homeRedcards)+'%'}"></div>
-            </div>
-          </div>
-          <div class="stat-val">{{ detail.awayRedcards }}</div>
-        </div>
-
-        <div class="stat-row">
-          <div class="stat-val">{{ detail.homeXg }}</div>
-          <div>
-            <div class="stat-label" style="margin-bottom:4px">xG</div>
-            <div class="stat-bars">
-              <div class="stat-bar-home" :style="{width: pct(detail.homeXg, detail.awayXg)+'%'}"></div>
-              <div class="stat-bar-away" :style="{width: pct(detail.awayXg, detail.homeXg)+'%'}"></div>
-            </div>
-          </div>
-          <div class="stat-val">{{ detail.awayXg }}</div>
-        </div>
-
-        <div class="stat-row">
-          <div class="stat-val">{{ detail.homePossesion }}</div>
-          <div>
-            <div class="stat-label" style="margin-bottom:4px">Bollinnehav</div>
-            <div class="stat-bars">
-              <div class="stat-bar-home" :style="{width: pct(detail.homePossesion, detail.awayPossesion)+'%'}"></div>
-              <div class="stat-bar-away" :style="{width: pct(detail.awayPossesion, detail.homePossesion)+'%'}"></div>
-            </div>
-          </div>
-          <div class="stat-val">{{ detail.awayPossesion }}</div>
-        </div>
-
+      <!-- Modal tabs -->
+      <div class="modal-tabs">
+        <button class="modal-tab-btn" :class="{ active: modalTab === 'stats' }" @click="modalTab = 'stats'">Statistik</button>
+        <button class="modal-tab-btn" :class="{ active: modalTab === 'incidents' }" @click="switchModalTab('incidents')">Händelser</button>
+        <button class="modal-tab-btn" :class="{ active: modalTab === 'lineups' }" @click="modalTab = 'lineups'">Uppställningar</button>
       </div>
 
-      <div class="modal-divider"></div>
+      <!-- Stats tab -->
+      <div v-if="modalTab === 'stats'">
 
-      <!-- Odds -->
-      <div class="modal-odds-section" v-if="detail?.odds">
-        <div style="padding-top:20px" class="modal-odds-title">Odds</div>
-        <div class="modal-odds-grid">
-          <div class="modal-odd-card">
-            <div class="modal-odd-label">1 Hemmaseger</div>
-            <div class="modal-odd-value" :class="oddModalClass(detail.odds.homeWin, detail.odds)">{{ detail.odds.homeWin ?? '—' }}</div>
+        <div class="modal-stats" v-if="detail">
+          <div class="modal-stats-title">Matchstatistik</div>
+
+          <div class="stat-row">
+            <div class="stat-val">{{ detail.homeShots }}</div>
+            <div>
+              <div class="stat-label" style="margin-bottom:4px">Skott</div>
+              <div class="stat-bars">
+                <div class="stat-bar-home" :style="{width: pct(detail.homeShots, detail.awayShots)+'%'}"></div>
+                <div class="stat-bar-away" :style="{width: pct(detail.awayShots, detail.homeShots)+'%'}"></div>
+              </div>
+            </div>
+            <div class="stat-val">{{ detail.awayShots }}</div>
           </div>
-          <div class="modal-odd-card">
-            <div class="modal-odd-label">X Oavgjort</div>
-            <div class="modal-odd-value" :class="oddModalClass(detail.odds.draw, detail.odds)">{{ detail.odds.draw ?? '—' }}</div>
+
+          <div class="stat-row">
+            <div class="stat-val">{{ detail.homeCorners }}</div>
+            <div>
+              <div class="stat-label" style="margin-bottom:4px">Hörnor</div>
+              <div class="stat-bars">
+                <div class="stat-bar-home" :style="{width: pct(detail.homeCorners, detail.awayCorners)+'%'}"></div>
+                <div class="stat-bar-away" :style="{width: pct(detail.awayCorners, detail.homeCorners)+'%'}"></div>
+              </div>
+            </div>
+            <div class="stat-val">{{ detail.awayCorners }}</div>
           </div>
-          <div class="modal-odd-card">
-            <div class="modal-odd-label">2 Bortaseger</div>
-            <div class="modal-odd-value" :class="oddModalClass(detail.odds.awayWin, detail.odds)">{{ detail.odds.awayWin ?? '—' }}</div>
+
+          <div class="stat-row">
+            <div class="stat-val">{{ detail.homeYellowcards }}</div>
+            <div>
+              <div class="stat-label" style="margin-bottom:4px">Gula kort</div>
+              <div class="stat-bars">
+                <div class="stat-bar-home" :style="{width: pct(detail.homeYellowcards, detail.awayYellowcards)+'%'}"></div>
+                <div class="stat-bar-away" :style="{width: pct(detail.awayYellowcards, detail.homeYellowcards)+'%'}"></div>
+              </div>
+            </div>
+            <div class="stat-val">{{ detail.awayYellowcards }}</div>
+          </div>
+
+          <div class="stat-row">
+            <div class="stat-val">{{ detail.homeRedcards }}</div>
+            <div>
+              <div class="stat-label" style="margin-bottom:4px">Röda kort</div>
+              <div class="stat-bars">
+                <div class="stat-bar-home" :style="{width: pct(detail.homeRedcards, detail.awayRedcards)+'%'}"></div>
+                <div class="stat-bar-away" :style="{width: pct(detail.awayRedcards, detail.homeRedcards)+'%'}"></div>
+              </div>
+            </div>
+            <div class="stat-val">{{ detail.awayRedcards }}</div>
+          </div>
+
+          <div class="stat-row">
+            <div class="stat-val">{{ detail.homeXg }}</div>
+            <div>
+              <div class="stat-label" style="margin-bottom:4px">xG</div>
+              <div class="stat-bars">
+                <div class="stat-bar-home" :style="{width: pct(detail.homeXg, detail.awayXg)+'%'}"></div>
+                <div class="stat-bar-away" :style="{width: pct(detail.awayXg, detail.homeXg)+'%'}"></div>
+              </div>
+            </div>
+            <div class="stat-val">{{ detail.awayXg }}</div>
+          </div>
+
+          <div class="stat-row">
+            <div class="stat-val">{{ detail.homePossesion }}</div>
+            <div>
+              <div class="stat-label" style="margin-bottom:4px">Bollinnehav</div>
+              <div class="stat-bars">
+                <div class="stat-bar-home" :style="{width: pct(detail.homePossesion, detail.awayPossesion)+'%'}"></div>
+                <div class="stat-bar-away" :style="{width: pct(detail.awayPossesion, detail.homePossesion)+'%'}"></div>
+              </div>
+            </div>
+            <div class="stat-val">{{ detail.awayPossesion }}</div>
           </div>
         </div>
-        <div class="modal-odds-grid wide">
-          <div class="modal-odd-card" v-if="detail.odds.over25Goals">
-            <div class="modal-odd-label">Över 2.5</div>
-            <div class="modal-odd-value">{{ detail.odds.over25Goals }}</div>
+
+        <div class="modal-divider"></div>
+
+        <!-- Odds -->
+        <div class="modal-odds-section" v-if="detail?.odds">
+          <div style="padding-top:20px" class="modal-odds-title">Odds</div>
+          <div class="modal-odds-grid">
+            <div class="modal-odd-card">
+              <div class="modal-odd-label">1 Hemmaseger</div>
+              <div class="modal-odd-value" :class="oddModalClass(detail.odds.homeWin, detail.odds)">{{ detail.odds.homeWin ?? '—' }}</div>
+            </div>
+            <div class="modal-odd-card">
+              <div class="modal-odd-label">X Oavgjort</div>
+              <div class="modal-odd-value" :class="oddModalClass(detail.odds.draw, detail.odds)">{{ detail.odds.draw ?? '—' }}</div>
+            </div>
+            <div class="modal-odd-card">
+              <div class="modal-odd-label">2 Bortaseger</div>
+              <div class="modal-odd-value" :class="oddModalClass(detail.odds.awayWin, detail.odds)">{{ detail.odds.awayWin ?? '—' }}</div>
+            </div>
           </div>
-          <div class="modal-odd-card" v-if="detail.odds.under25Goals">
-            <div class="modal-odd-label">Under 2.5</div>
-            <div class="modal-odd-value">{{ detail.odds.under25Goals }}</div>
-          </div>
-          <div class="modal-odd-card" v-if="detail.odds.bttsYes">
-            <div class="modal-odd-label">BTTS Ja / Nej</div>
-            <div class="modal-odd-value" style="font-size:15px">{{ detail.odds.bttsYes }} / {{ detail.odds.bttsNo }}</div>
+          <div class="modal-odds-grid wide">
+            <div class="modal-odd-card" v-if="detail.odds.over25Goals">
+              <div class="modal-odd-label">Över 2.5</div>
+              <div class="modal-odd-value">{{ detail.odds.over25Goals }}</div>
+            </div>
+            <div class="modal-odd-card" v-if="detail.odds.under25Goals">
+              <div class="modal-odd-label">Under 2.5</div>
+              <div class="modal-odd-value">{{ detail.odds.under25Goals }}</div>
+            </div>
+            <div class="modal-odd-card" v-if="detail.odds.bttsYes">
+              <div class="modal-odd-label">BTTS Ja / Nej</div>
+              <div class="modal-odd-value" style="font-size:15px">{{ detail.odds.bttsYes }} / {{ detail.odds.bttsNo }}</div>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="modal-divider" v-if="detail?.odds"></div>
+        <div class="modal-divider" v-if="detail?.odds"></div>
+
+      </div><!-- /stats tab -->
+
+      <!-- Lineups tab -->
+      <div v-if="modalTab === 'lineups'" class="modal-lineups">
+        <div v-if="detail">
+          <div class="lineup-grid">
+            <!-- Home lineup -->
+            <div>
+              <div class="lineup-team-header">{{ detail.homeTeam }}</div>
+              <div v-if="detail.homeFormation">
+                <div class="lineup-formation">{{ detail.homeFormation }}</div>
+                <div class="lineup-formation-label">Formation</div>
+              </div>
+              <div class="pitch-wrap" v-if="detail.homeFormation">
+                <svg class="pitch-svg" viewBox="0 0 100 150" xmlns="http://www.w3.org/2000/svg">
+                  <!-- Pitch markings -->
+                  <rect x="5" y="5" width="90" height="140" rx="2" fill="none" stroke="rgba(0,0,0,.1)" stroke-width=".8"/>
+                  <line x1="5" y1="75" x2="95" y2="75" stroke="rgba(0,0,0,.1)" stroke-width=".8"/>
+                  <circle cx="50" cy="75" r="12" fill="none" stroke="rgba(0,0,0,.1)" stroke-width=".8"/>
+                  <!-- Home penalty area (bottom) -->
+                  <rect x="25" y="110" width="50" height="30" fill="none" stroke="rgba(0,0,0,.1)" stroke-width=".8"/>
+                  <!-- Away penalty area (top) -->
+                  <rect x="25" y="10" width="50" height="30" fill="none" stroke="rgba(0,0,0,.1)" stroke-width=".8"/>
+                  <!-- Formation dots derived from formation string -->
+                  <circle cx="50" cy="135" r="5" fill="var(--accent)" opacity=".85"/>
+                  <text x="50" y="138" text-anchor="middle" font-size="4" fill="white" font-family="sans-serif">GK</text>
+                </svg>
+              </div>
+              <div class="lineup-empty" v-else>
+                <div class="lineup-empty-icon">👕</div>
+                <strong>Uppställning saknas</strong>
+                Inte tillgänglig via API
+              </div>
+            </div>
+            <!-- Away lineup -->
+            <div>
+              <div class="lineup-team-header">{{ detail.awayTeam }}</div>
+              <div v-if="detail.awayFormation">
+                <div class="lineup-formation">{{ detail.awayFormation }}</div>
+                <div class="lineup-formation-label">Formation</div>
+              </div>
+              <div class="lineup-empty" v-else>
+                <div class="lineup-empty-icon">👕</div>
+                <strong>Uppställning saknas</strong>
+                Inte tillgänglig via API
+              </div>
+            </div>
+          </div>
+        </div>
+      </div><!-- /lineups tab -->
+
+      <!-- Incidents tab -->
+      <div v-if="modalTab === 'incidents'" class="modal-incidents">
+        <div class="state-box" v-if="incidentsLoading" style="padding:32px">
+          <div class="icon">⏳</div>
+          <strong>Hämtar händelser…</strong>
+        </div>
+        <div class="state-box" v-else-if="incidents.length === 0" style="padding:32px">
+          <div class="icon">📋</div>
+          <strong>Inga händelser</strong>
+          Inga matchhändelser hittades.
+        </div>
+        <div v-else class="incidents-timeline">
+          <!-- Team column headers -->
+          <div class="incidents-header">
+            <span class="inc-team-label inc-home-label">{{ detail?.homeTeam }}</span>
+            <span class="inc-min-label">MIN</span>
+            <span class="inc-team-label inc-away-label">{{ detail?.awayTeam }}</span>
+          </div>
+          <template v-for="inc in incidentsWithScore" :key="inc.id">
+            <!-- Period marker -->
+            <div v-if="inc.type === 'period'" class="inc-period-row">
+              <div class="inc-period-line"></div>
+              <span class="inc-period-badge">{{ inc.minute === 45 ? 'Halvtid' : 'Slutsignal' }}</span>
+              <div class="inc-period-line"></div>
+            </div>
+            <!-- Regular incident -->
+            <div v-else class="inc-row" :class="inc.home ? 'inc-home' : 'inc-away'">
+              <!-- Home side -->
+              <div class="inc-side inc-side-home">
+                <template v-if="inc.home">
+                  <div class="inc-content">
+                    <template v-if="inc.type === 'substitution'">
+                      <span class="inc-player sub-in">▲ {{ inc.playerIn || '—' }}</span>
+                      <span class="inc-player sub-out">▼ {{ inc.playerOut || '—' }}</span>
+                    </template>
+                    <template v-else>
+                      <span class="inc-player">{{ inc.player }}<span v-if="inc.type === 'goal'" class="inc-score">({{ inc.scoreHome }}–{{ inc.scoreAway }})</span></span>
+                      <span v-if="inc.assist" class="inc-assist">↳ {{ inc.assist }}</span>
+                    </template>
+                  </div>
+                  <span class="inc-icon-wrap">
+                    <span class="inc-icon" :class="'inc-icon-' + inc.type + (inc.cardType ? '-' + inc.cardType : '')">{{ incidentIcon(inc) }}</span>
+                  </span>
+                </template>
+              </div>
+              <!-- Minute bubble -->
+              <div class="inc-minute-col">
+                <span class="inc-minute">{{ inc.minute }}'</span>
+              </div>
+              <!-- Away side -->
+              <div class="inc-side inc-side-away">
+                <template v-if="!inc.home">
+                  <span class="inc-icon-wrap">
+                    <span class="inc-icon" :class="'inc-icon-' + inc.type + (inc.cardType ? '-' + inc.cardType : '')">{{ incidentIcon(inc) }}</span>
+                  </span>
+                  <div class="inc-content">
+                    <template v-if="inc.type === 'substitution'">
+                      <span class="inc-player sub-in">▲ {{ inc.playerIn || '—' }}</span>
+                      <span class="inc-player sub-out">▼ {{ inc.playerOut || '—' }}</span>
+                    </template>
+                    <template v-else>
+                      <span class="inc-player">{{ inc.player }}<span v-if="inc.type === 'goal'" class="inc-score">({{ inc.scoreHome }}–{{ inc.scoreAway }})</span></span>
+                      <span v-if="inc.assist" class="inc-assist">↳ {{ inc.assist }}</span>
+                    </template>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div><!-- /incidents tab -->
 
       <div class="modal-footer" v-if="detail">
         <div class="modal-referee">Domare: <span>{{ detail.referee }}</span></div>
@@ -544,14 +801,57 @@ createApp({
     const loading = ref(false);
     const error = ref('');
     const search = ref('');
-    const LEAGUE_KEY = 'selected_league';
-    const savedLeague = (() => { try { return JSON.parse(localStorage.getItem(LEAGUE_KEY)); } catch { return null; } })();
-    const selectedLeague = ref(savedLeague || { "id": 26, "name": "Allsvenskan" });
+    const selectedLeague = ref({ "id": 26, "name": "Allsvenskan" });
 
     const modalOpen = ref(false);
     const modalLoading = ref(false);
     const detail = ref(null);
     const halfView = ref('full');
+    const modalTab = ref('stats');
+
+    const incidents = ref([]);
+    const incidentsLoading = ref(false);
+    const currentEventId = ref(null);
+
+    function incidentIcon(inc) {
+      if (inc.type === 'goal') return '⚽';
+      if (inc.type === 'card' && inc.cardType === 'yellow') return '🟨';
+      if (inc.type === 'card' && inc.cardType === 'red') return '🟥';
+      if (inc.type === 'substitution') return '🔄';
+      return '•';
+    }
+
+    async function fetchIncidents(eventId) {
+      incidentsLoading.value = true;
+      incidents.value = [];
+      try {
+        const res = await fetch(`http://localhost:8080/events/incidents/${eventId}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        incidents.value = await res.json();
+      } catch(e) {
+        incidents.value = [];
+      } finally {
+        incidentsLoading.value = false;
+      }
+    }
+
+    const incidentsWithScore = computed(() => {
+      let home = 0, away = 0;
+      return incidents.value.map(inc => {
+        if (inc.type === 'goal') {
+          if (inc.home) home++; else away++;
+          return { ...inc, scoreHome: home, scoreAway: away };
+        }
+        return inc;
+      });
+    });
+
+    function switchModalTab(tab) {
+      modalTab.value = tab;
+      if (tab === 'incidents' && incidents.value.length === 0 && !incidentsLoading.value && currentEventId.value) {
+        fetchIncidents(currentEventId.value);
+      }
+    }
 
     const scoreHome = computed(() => {
       if (!detail.value) return 0;
@@ -598,6 +898,9 @@ createApp({
       modalLoading.value = true;
       detail.value = null;
       halfView.value = 'full';
+      modalTab.value = 'stats';
+      incidents.value = [];
+      currentEventId.value = id;
       try {
         const res = await fetch(`${BASE}/${id}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -645,14 +948,13 @@ createApp({
 
     function selectLeague(code) {
       selectedLeague.value = code;
-      localStorage.setItem(LEAGUE_KEY, JSON.stringify(code));
       fetchMatches();
     }
 
     onBeforeMount(fetchLeagues);
     onMounted(fetchMatches);
 
-    return { leagues, matches, loading, error, search, selectedLeague, fetchLeagues, fetchMatches, selectLeague, modalOpen, modalLoading, detail, openModal, closeModal, pct, halfView, scoreHome, scoreAway, currentResult, oddClass, oddModalClass };
+    return { leagues, matches, loading, error, search, selectedLeague, fetchLeagues, fetchMatches, selectLeague, modalOpen, modalLoading, detail, openModal, closeModal, pct, halfView, scoreHome, scoreAway, currentResult, oddClass, oddModalClass, modalTab, switchModalTab, incidents, incidentsLoading, incidentIcon, incidentsWithScore };
   }
 }).mount('#app');
 </script>

@@ -558,6 +558,67 @@ public class SportsApiClient {
         }
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class EventData {
+        public int event_id;
+        public List<Incident> incidents;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Incident {
+        public String text;
+        public String type;
+        public Integer minute;
+        public Boolean is_live;
+
+        public Integer away_score;
+        public Integer home_score;
+
+        // goal
+        public String assist;
+        public String player;
+        public Boolean is_home;
+        public String goal_type;
+        public Integer player_id;
+        public Integer added_time;
+
+        // substitution
+        public String player_in;
+        public String player_out;
+        public Integer player_in_id;
+        public Integer player_out_id;
+
+        // card
+        public String card_type;
+
+        // injury time
+        public Integer length;
+
+        @Override
+        public String toString() {
+            return "Incident{" +
+                    "text='" + text + '\'' +
+                    ", type='" + type + '\'' +
+                    ", minute=" + minute +
+                    ", is_live=" + is_live +
+                    ", away_score=" + away_score +
+                    ", home_score=" + home_score +
+                    ", assist='" + assist + '\'' +
+                    ", player='" + player + '\'' +
+                    ", is_home=" + is_home +
+                    ", goal_type='" + goal_type + '\'' +
+                    ", player_id=" + player_id +
+                    ", added_time=" + added_time +
+                    ", player_in='" + player_in + '\'' +
+                    ", player_out='" + player_out + '\'' +
+                    ", player_in_id=" + player_in_id +
+                    ", player_out_id=" + player_out_id +
+                    ", card_type='" + card_type + '\'' +
+                    ", length=" + length +
+                    '}';
+        }
+    }
+
     // ──────────────────────────────────────────────
     // HTTP client
     // ──────────────────────────────────────────────
@@ -615,6 +676,30 @@ public class SportsApiClient {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
         return mapper.readValue(response.body(), EventsResponse.class);
+    }
+
+    /**
+     * Fetch a single incident  by its event ID.
+     * Calls: GET /api/v2/events/{id}/incidents/
+     */
+    public EventData fetchIncidents(int eventId) throws Exception {
+        String url = BASE_URL + eventId + "/incidents/";
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Authorization", "Token " + API_TOKEN)
+                .header("Accept", "application/json")
+                .GET()
+                .build();
+
+        HttpResponse<String> response = createHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 200) {
+            throw new RuntimeException("API error " + response.statusCode() + ": " + response.body());
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        return mapper.readValue(response.body(), EventData.class);
     }
 
     /**
@@ -814,6 +899,10 @@ public class SportsApiClient {
 
     public static void main(String[] args) throws Exception {
         SportsApiClient client = new SportsApiClient();
+
+        // ── Single incidents ──────────────────────────────
+        EventData eventData = client.fetchIncidents(46355);
+        System.out.println();
 
         // ── Single event ──────────────────────────────
         Event single = client.fetchEvent(46355);

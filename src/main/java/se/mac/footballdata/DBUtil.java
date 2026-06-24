@@ -7,6 +7,7 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.*;
 import org.bson.Document;
 import se.mac.footballdata.sportsapi.db.EventDB;
+import se.mac.footballdata.sportsapi.db.IncidentDB;
 import se.mac.footballdata.sportsapi.db.OddsDB;
 import se.mac.footballdata.sportsapi.db.RefereeDB;
 
@@ -96,4 +97,19 @@ public class DBUtil {
         System.out.println("Newly inserted: " + result.getUpserts().size());
     }
 
+    public static void updateIncidentsCollection(MongoDatabase database, ArrayList<IncidentDB> incidentDBList) {
+        MongoCollection<IncidentDB> collection =
+                database.getCollection("incidents", IncidentDB.class);
+        collection.createIndex(Indexes.compoundIndex(
+                Indexes.ascending("eventId"),
+                Indexes.ascending("minute") // ToDo check
+        ), new IndexOptions().unique(true));
+
+        try {
+            collection.insertMany(incidentDBList, new InsertManyOptions().ordered(false));
+            System.out.println("Inserted incidentDBList: " + incidentDBList);
+        } catch (MongoException ex) {
+            System.out.println("Error when inserting incidentDBList: " + ex);
+        }
+    }
 }
