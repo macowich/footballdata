@@ -2,12 +2,12 @@ package se.mac.footballdata.sportsapi.db;
 
 import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoException;
-import com.mongodb.bulk.BulkWriteResult;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.*;
+import com.mongodb.client.model.IndexOptions;
+import com.mongodb.client.model.InsertManyOptions;
 import org.bson.Document;
 import org.bson.codecs.configuration.CodecProvider;
 import org.bson.codecs.configuration.CodecRegistry;
@@ -243,28 +243,7 @@ public class SportsApiLoader {
         SportsApiClient.RefereesResponse refs = sportsApiClient.fetchReferees(leagueId);
         List<RefereeDB> refereeDBList = createRefereeDB(refs.results, leagueId);
 
-        MongoCollection<RefereeDB> collection =
-                database.getCollection("referees", RefereeDB.class);
-        collection.createIndex(new Document("refereeId", 1), new IndexOptions().unique(true));
-
-        // Build bulk write list
-        ReplaceOptions replaceOptions = new ReplaceOptions().upsert(true);
-        List<ReplaceOneModel<RefereeDB>> operations = new ArrayList<>();
-
-        for (RefereeDB ref : refereeDBList) {
-            operations.add(new ReplaceOneModel<>(
-                    Filters.eq("refereeId", ref.refereeId),
-                    ref,
-                    replaceOptions
-            ));
-        }
-
-        // Execute parallel bulk operations
-        BulkWriteResult result = collection.bulkWrite(operations, new BulkWriteOptions().ordered(false));
-
-        System.out.println("Upsert complete.");
-        System.out.println("Modified existing: " + result.getModifiedCount());
-        System.out.println("Newly inserted: " + result.getUpserts().size());
+        DBUtil.updateRefereeCollection(database, refereeDBList);
     }
 
     private static List<RefereeDB> createRefereeDB(List<SportsApiClient.Referee> refereeList, int leagueId) {

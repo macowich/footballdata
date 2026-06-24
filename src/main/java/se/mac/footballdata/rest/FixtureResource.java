@@ -40,5 +40,11 @@ public class FixtureResource {
         return repository.findByDate(searchDate);
     }
 
+    @GET
+    @Path("/team/{team}")
+    public List<Fixture> teams(@PathParam("team") String team) {
+        return repository.findByTeam(team);
+    }
+
 }
 
