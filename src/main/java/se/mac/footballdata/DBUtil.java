@@ -6,10 +6,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.*;
 import org.bson.Document;
-import se.mac.footballdata.sportsapi.db.EventDB;
-import se.mac.footballdata.sportsapi.db.IncidentDB;
-import se.mac.footballdata.sportsapi.db.OddsDB;
-import se.mac.footballdata.sportsapi.db.RefereeDB;
+import se.mac.footballdata.sportsapi.db.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -112,4 +109,18 @@ public class DBUtil {
             System.out.println("Error when inserting incidentDBList: " + ex);
         }
     }
+
+    public static void updateLineupsCollection(MongoDatabase database, ArrayList<LineupDB> lineupDBList) {
+        MongoCollection<LineupDB> collection =
+                database.getCollection("lineups", LineupDB.class);
+        collection.createIndex(new Document("eventId", 1), new IndexOptions().unique(true));
+
+        try {
+            collection.insertMany(lineupDBList, new InsertManyOptions().ordered(false));
+            System.out.println("Inserted lineupDBList: " + lineupDBList);
+        } catch (MongoException ex) {
+            System.out.println("Error when inserting lineupDBList: " + ex);
+        }
+    }
+
 }

@@ -3,11 +3,14 @@ package se.mac.footballdata;
 import se.mac.footballdata.rest.model.Event;
 import se.mac.footballdata.rest.model.League;
 import se.mac.footballdata.rest.model.Team;
+import se.mac.footballdata.sportsapi.SportsApiClient;
+import se.mac.footballdata.sportsapi.db.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -210,5 +213,173 @@ public class Util {
         t.btts = bttsCounter;
         t.cleanSheets = cleanSheetsCounter;
         return t;
+    }
+
+    // Util
+    public static void updateRedcards(EventDB db, List<IncidentDB> incidentList) {
+        int redcardsHome = 0;
+        int redcardsAway = 0;
+        for (IncidentDB incidentDB : incidentList) {
+            if (incidentDB.cardType != null) {
+                if (incidentDB.cardType.equalsIgnoreCase("red")) {
+                    if (incidentDB.home) {
+                        redcardsHome++;
+                    } else {
+                        redcardsAway++;
+                    }
+                }
+            }
+        }
+        db.hr = redcardsHome;
+        db.ar = redcardsAway;
+    }
+
+    public static List<EventDB> createEventDB(List<SportsApiClient.Event> eventList) {
+        return eventList.stream()
+                .map(Util::createEventDB)
+                .toList();
+    }
+
+    public static EventDB createEventDB(SportsApiClient.Event event) {
+        EventDB eventDB = new EventDB();
+        eventDB.eventId = event.id;
+        eventDB.leagueId = event.leagueId;
+        eventDB.seasonId = event.seasonId;
+        eventDB.date = event.eventDate.toString().substring(0, 10);
+        eventDB.time = event.eventDate.toString().substring(11, 16);
+        eventDB.round = event.roundNumber;
+        eventDB.hometeam = event.homeTeam;
+        eventDB.awayteam = event.awayTeam;
+        eventDB.homeScore = event.homeScore;
+        eventDB.awayScore = event.awayScore;
+        eventDB.homeScoreHt = event.homeScoreHt;
+        eventDB.awayScoreHt = event.awayScoreHt;
+        if (event.refereeId != null)
+            eventDB.refereeId = event.refereeId;
+        return eventDB;
+    }
+
+    public static List<IncidentDB> createIncidentDB(List<SportsApiClient.Incident> incidents, int eventId) {
+        ArrayList<IncidentDB> incidentDBList = new ArrayList<>();
+
+        for (SportsApiClient.Incident i : incidents) {
+            IncidentDB incidentDB = new IncidentDB();
+            incidentDB.eventId = eventId;
+            incidentDB.type = i.type;
+            incidentDB.text = i.text;
+            incidentDB.home = i.is_home != null ? i.is_home : false;
+            incidentDB.player = i.player;
+            incidentDB.playerId = i.player_id != null ? i.player_id : 0;
+            incidentDB.cardType = i.card_type;
+            incidentDB.goalType = i.goal_type;
+            incidentDB.assist = i.assist;
+            incidentDB.minute = i.minute;
+            incidentDB.playerIn = i.player_in;
+            incidentDB.playerOut = i.player_out;
+            incidentDBList.add(incidentDB);
+        }
+        return incidentDBList;
+    }
+
+    public static LineupDB createLineupDB(SportsApiClient.Lineups lineups, int eventId) {
+        LineupDB lineupDB = new LineupDB();
+        lineupDB.eventId = eventId;
+        lineupDB.homeTeam = lineups.home.team_name;
+        lineupDB.awayTeam = lineups.away.team_name;
+        lineupDB.homeTeamId = lineups.home.team_id;
+        lineupDB.awayTeamId = lineups.away.team_id;
+        lineupDB.homeFormation = lineups.home.formation;
+        lineupDB.awayFormation = lineups.away.formation;
+        for (SportsApiClient.Player p : lineups.home.players) {
+            lineupDB.homePlayers.add(createPlayerDB(p));
+        }
+        for (SportsApiClient.Player p : lineups.away.players) {
+            lineupDB.awayPlayers.add(createPlayerDB(p));
+        }
+        for (SportsApiClient.Player p : lineups.home.substitutes) {
+            lineupDB.homeSubstitutes.add(createPlayerDB(p));
+        }
+        for (SportsApiClient.Player p : lineups.away.substitutes) {
+            lineupDB.awaySubstitutes.add(createPlayerDB(p));
+        }
+        return lineupDB;
+    }
+
+    private static PlayerDB createPlayerDB(SportsApiClient.Player p) {
+        PlayerDB playerDB = new PlayerDB();
+        playerDB.playerId = p.id;
+        playerDB.name = p.name;
+        playerDB.position = p.position;
+        playerDB.jerseyNumber = p.jerseyNumber;
+        return playerDB;
+    }
+    public static OddsDB createOddsDB(List<SportsApiClient.OddsLine> results, int eventId) {
+        OddsDB oddsDB = new OddsDB();
+        oddsDB.eventId = eventId;
+
+        for (SportsApiClient.OddsLine ol : results) {
+            if (ol.market.equals("1x2")) {
+                if (ol.outcome.equals("HOME")) {
+                    oddsDB.homeWin = ol.decimalOdds;
+                } else if (ol.outcome.equals("DRAW")) {
+                    oddsDB.draw = ol.decimalOdds;
+                } else if (ol.outcome.equals("AWAY")) {
+                    oddsDB.awayWin = ol.decimalOdds;
+                }
+            } else if (ol.market.equals("over_under_25")) {
+                if (ol.outcome.startsWith("over")) {
+                    oddsDB.over25Goals = ol.decimalOdds;
+                } else {
+                    oddsDB.under25Goals = ol.decimalOdds;
+                }
+            } else if (ol.market.equals("btts")) {
+                if (ol.outcome.startsWith("yes")) {
+                    oddsDB.bttsYes = ol.decimalOdds;
+                } else {
+                    oddsDB.bttsNo = ol.decimalOdds;
+                }
+            }
+            System.out.println("  " + ol);
+        }
+        return oddsDB;
+    }
+
+    public static List<FixtureDB> createFixtureDB(List<SportsApiClient.Event> eventList) {
+        return eventList.stream()
+                .map(Util::createFixtureDB)
+                .toList();
+    }
+
+    public static FixtureDB createFixtureDB(SportsApiClient.Event event) {
+        FixtureDB fixtureDB = new FixtureDB();
+        fixtureDB.eventId = event.id;
+        fixtureDB.leagueId = event.leagueId;
+        fixtureDB.seasonId = event.seasonId;
+        fixtureDB.date = event.eventDate.toString().substring(0, 10);
+        fixtureDB.time = event.eventDate.toString().substring(11, 16);
+        fixtureDB.hometeam = event.homeTeam;
+        fixtureDB.awayteam = event.awayTeam;
+        if (event.refereeId != null)
+            fixtureDB.refereeId = event.refereeId;
+        return fixtureDB;
+    }
+
+    public static List<RefereeDB> createRefereeDB(List<SportsApiClient.Referee> refereeList, int leagueId) {
+        return refereeList.stream()
+                .map(referee -> createRefereeDB(referee, leagueId))
+                .toList();
+    }
+
+    public static RefereeDB createRefereeDB(SportsApiClient.Referee referee, int leagueId) {
+        RefereeDB refereeDB = new RefereeDB();
+        refereeDB.refereeId = referee.id;
+        refereeDB.name = referee.name;
+        refereeDB.leagueId = leagueId;
+        refereeDB.matches = referee.matches;
+        refereeDB.totalYellowCards = referee.totalYellowCards;
+        refereeDB.totalRedCards = referee.totalRedCards;
+        refereeDB.avgYellowPerMatch = referee.avgYellowPerMatch;
+        refereeDB.avgRedPerMatch = referee.avgRedPerMatch;
+        return refereeDB;
     }
 }

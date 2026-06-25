@@ -18,6 +18,7 @@ public class SportsApiClient {
     private static final String BASE_URL = "https://sports.bzzoiro.com/api/v2/events/";
     private static final String BASE_URL_REFEREES = "https://sports.bzzoiro.com/api/v2/referees/";
     private static final String BASE_URL_PLAYERS = "https://sports.bzzoiro.com/api/v2/players/";
+    private static final String BASE_URL_TEAMS = "https://sports.bzzoiro.com/api/v2/teams/";
     private static final String BASE_URL_PREDICTIONS = "https://sports.bzzoiro.com/api/v2/predictions/";
     private static final String BASE_URL_ODDS        = "https://sports.bzzoiro.com/api/v2/odds/";
     private static final String API_TOKEN = "bb387466704c69d4660a51d47153ce12f6a1c433";
@@ -619,6 +620,55 @@ public class SportsApiClient {
         }
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class LineupResponse {
+        public int event_id;
+        public String lineup_status;
+        public boolean beta;
+        public Lineups lineups;
+        public UnavailablePlayers unavailable_players;
+        public String updated_at;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Lineups {
+        public TeamLineup home;
+        public TeamLineup away;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class TeamLineup {
+        public int team_id;
+        public String team_name;
+        public String formation;
+        public Integer confidence;
+        public List<Player> players;
+        public List<Player> substitutes;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class UnavailablePlayers {
+        public List<Player> home;
+        public List<Player> away;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class TeamsResponse {
+        public int count;
+        public String next;
+        public String previous;
+        public List<Team> results;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Team {
+        public int id;
+        public String name;
+        public String short_name;
+        public String country;
+        public Integer venue_id; // nullable
+    }
+
     // ──────────────────────────────────────────────
     // HTTP client
     // ──────────────────────────────────────────────
@@ -703,6 +753,30 @@ public class SportsApiClient {
     }
 
     /**
+     * Fetch a single lineup by its event ID.
+     * Calls: GET /api/v2/events/{id}/incidents/
+     */
+    public LineupResponse fetchLineups(int eventId) throws Exception {
+        String url = BASE_URL + eventId + "/lineups/";
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Authorization", "Token " + API_TOKEN)
+                .header("Accept", "application/json")
+                .GET()
+                .build();
+
+        HttpResponse<String> response = createHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 200) {
+            throw new RuntimeException("API error " + response.statusCode() + ": " + response.body());
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        return mapper.readValue(response.body(), LineupResponse .class);
+    }
+
+    /**
      * Fetch referees for a given league.
      * Calls: GET /api/v2/referees/?league_id={leagueId}
      */
@@ -781,6 +855,33 @@ public class SportsApiClient {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
         return mapper.readValue(response.body(), PlayerCareer.class);
+    }
+
+    /**
+     * Fetch teams for a given league.
+     * Calls: GET /api/v2/teams/?league_id={leagueId}
+     */
+    public TeamsResponse fetchTeams(int leagueId) throws Exception {
+        String url = BASE_URL_TEAMS + "?league_id=" + leagueId;
+
+        HttpClient client = HttpClient.newBuilder().build();
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Authorization", "Token " + API_TOKEN)
+                .header("Accept", "application/json")
+                .GET()
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 200) {
+            throw new RuntimeException("API error " + response.statusCode() + ": " + response.body());
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        return mapper.readValue(response.body(), TeamsResponse.class);
     }
 
     /**
@@ -901,16 +1002,20 @@ public class SportsApiClient {
         SportsApiClient client = new SportsApiClient();
 
         // ── Single incidents ──────────────────────────────
-        EventData eventData = client.fetchIncidents(46355);
+       // EventData eventData = client.fetchIncidents(46355);
+       // System.out.println();
+
+        // ── Lineups ──────────────────────────────
+        LineupResponse lineupResponse = client.fetchLineups(46355);
         System.out.println();
 
         // ── Single event ──────────────────────────────
-        Event single = client.fetchEvent(46355);
+       /* Event single = client.fetchEvent(46355);
         System.out.println("Single event fetch: id=" + single.id);
         System.out.println(single);
         System.out.println();
-
-
+*/
+/*
         // ── Event list ────────────────────────────────
         EventsResponse response = client.fetchEvents("2026-04-04", "2026-04-17", 26);
         System.out.printf("Total events: %d%n%n", response.count);
@@ -939,6 +1044,8 @@ public class SportsApiClient {
             System.out.println();
         }
 
+
+ */
       /*
 
         // ── Referees ──────────────────────────────────

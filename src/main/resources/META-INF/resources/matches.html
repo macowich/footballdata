@@ -58,7 +58,8 @@
     border: 1px solid var(--border2);
     border-radius: 20px;
     width: 100%; max-width: 560px;
-    overflow: hidden;
+    max-height: 90vh;
+    overflow-y: auto;
     animation: modalIn .22s cubic-bezier(.34,1.56,.64,1);
     position: relative;
   }
@@ -151,6 +152,10 @@
     padding: 0 24px 0;
     border-bottom: 1px solid var(--border);
     margin-top: 16px;
+    position: sticky;
+    top: 0;
+    background: var(--surface);
+    z-index: 10;
   }
   .modal-tab-btn {
     padding: 8px 16px; border: none; background: transparent;
@@ -252,36 +257,87 @@
   .inc-icon-card-red { background: rgba(239,68,68,.12); border-color: rgba(239,68,68,.25); }
   .inc-icon-substitution { background: rgba(99,102,241,.1); border-color: rgba(99,102,241,.2); }
 
+  /* Lineups tab */
+  .modal-lineups { padding: 20px 24px 8px; }
 
-  .lineup-grid {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+  .lineup-formation-row {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 18px; margin-bottom: 16px; gap: 8px;
   }
-  .lineup-team-header {
-    font-family: 'Figtree', sans-serif; font-size: 12px; font-weight: 700;
-    letter-spacing: .06em; text-transform: uppercase; color: var(--muted);
-    margin-bottom: 10px;
+  .lineup-formation-side { display: flex; flex-direction: column; gap: 3px; }
+  .lineup-formation-side-away { align-items: flex-end; }
+  .lineup-formation-num {
+    font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700;
+    color: var(--text); letter-spacing: -.01em;
   }
-  .lineup-formation {
-    font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 700;
-    color: var(--text); letter-spacing: -.01em; margin-bottom: 4px;
+  .lineup-formation-lbl { font-family: 'Figtree', sans-serif; font-size: 11px; color: var(--muted); }
+  .lineup-vs {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--muted); letter-spacing: .08em; text-transform: uppercase;
   }
-  .lineup-formation-label {
-    font-family: 'Figtree', sans-serif; font-size: 11px; color: var(--muted);
-    margin-bottom: 14px;
+
+  .lineup-cols {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+    border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
   }
+  .lineup-col { padding: 12px 14px; }
+  .lineup-col-away { border-left: 1px solid var(--border); background: var(--surface2); }
+
+  .lineup-pos-label {
+    font-family: 'JetBrains Mono', monospace; font-size: 9px;
+    font-weight: 500; letter-spacing: 1.2px; text-transform: uppercase;
+    color: var(--muted); padding: 10px 0 5px; border-bottom: 1px solid var(--border);
+    margin-bottom: 4px;
+  }
+
+  .lineup-player-row {
+    display: flex; align-items: center; gap: 7px;
+    padding: 5px 0; border-bottom: 1px solid rgba(0,0,0,.04);
+  }
+  .lineup-player-row:last-child { border-bottom: none; }
+  .lineup-player-row-away { flex-direction: row-reverse; }
+
+  .lineup-jersey {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    font-weight: 600; color: var(--muted); min-width: 18px; text-align: center; flex-shrink: 0;
+  }
+  .lineup-jersey.empty { opacity: .3; }
+
+  .lineup-player-name {
+    font-family: 'Figtree', sans-serif; font-size: 13px; font-weight: 500;
+    color: var(--text); flex: 1;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .lineup-player-row-away .lineup-player-name { text-align: right; }
+
+  .lineup-pos-badge {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600;
+    padding: 1px 5px; border-radius: 4px; flex-shrink: 0; border: 1px solid transparent;
+  }
+  .pos-G { background: rgba(234,179,8,.12);  color: #ca8a04;      border-color: rgba(234,179,8,.25); }
+  .pos-D { background: rgba(59,130,246,.10); color: #3b82f6;      border-color: rgba(59,130,246,.2); }
+  .pos-M { background: rgba(34,197,94,.10);  color: var(--green); border-color: rgba(34,197,94,.2); }
+  .pos-F { background: rgba(239,68,68,.10);  color: #ef4444;      border-color: rgba(239,68,68,.2); }
+
+  .lineup-player-row-sub { opacity: .8; }
+  .lineup-jersey.sub { color: var(--muted); }
+  .lineup-player-name.sub { color: var(--muted); }
+
+  .lineup-subs-header {
+    display: flex; align-items: center; gap: 6px;
+    padding: 10px 14px 8px;
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 500;
+    letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted);
+    border-top: 1.5px dashed var(--border);
+    margin-top: 4px;
+  }
+
   .lineup-empty {
-    text-align: center; padding: 32px 0;
-    color: var(--muted); font-size: 13px;
+    text-align: center; padding: 32px 0; color: var(--muted); font-size: 13px;
   }
   .lineup-empty .lineup-empty-icon { font-size: 28px; margin-bottom: 8px; }
   .lineup-empty strong { display: block; color: var(--text); font-size: 14px; margin-bottom: 4px; }
-
-  /* Pitch visual */
-  .pitch-wrap {
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 12px; padding: 16px 12px; margin-bottom: 16px;
-  }
-  .pitch-svg { width: 100%; display: block; }
 
   .modal-footer {
     padding: 12px 24px 20px;
@@ -530,9 +586,9 @@
 
       <!-- Modal tabs -->
       <div class="modal-tabs">
-        <button class="modal-tab-btn" :class="{ active: modalTab === 'stats' }" @click="modalTab = 'stats'">Statistik</button>
+        <button class="modal-tab-btn" :class="{ active: modalTab === 'stats' }" @click="switchModalTab('stats')">Statistik</button>
         <button class="modal-tab-btn" :class="{ active: modalTab === 'incidents' }" @click="switchModalTab('incidents')">Händelser</button>
-        <button class="modal-tab-btn" :class="{ active: modalTab === 'lineups' }" @click="modalTab = 'lineups'">Uppställningar</button>
+        <button class="modal-tab-btn" :class="{ active: modalTab === 'lineups' }" @click="switchModalTab('lineups')">Uppställningar</button>
       </div>
 
       <!-- Stats tab -->
@@ -655,47 +711,76 @@
 
       <!-- Lineups tab -->
       <div v-if="modalTab === 'lineups'" class="modal-lineups">
-        <div v-if="detail">
-          <div class="lineup-grid">
-            <!-- Home lineup -->
-            <div>
-              <div class="lineup-team-header">{{ detail.homeTeam }}</div>
-              <div v-if="detail.homeFormation">
-                <div class="lineup-formation">{{ detail.homeFormation }}</div>
-                <div class="lineup-formation-label">Formation</div>
-              </div>
-              <div class="pitch-wrap" v-if="detail.homeFormation">
-                <svg class="pitch-svg" viewBox="0 0 100 150" xmlns="http://www.w3.org/2000/svg">
-                  <!-- Pitch markings -->
-                  <rect x="5" y="5" width="90" height="140" rx="2" fill="none" stroke="rgba(0,0,0,.1)" stroke-width=".8"/>
-                  <line x1="5" y1="75" x2="95" y2="75" stroke="rgba(0,0,0,.1)" stroke-width=".8"/>
-                  <circle cx="50" cy="75" r="12" fill="none" stroke="rgba(0,0,0,.1)" stroke-width=".8"/>
-                  <!-- Home penalty area (bottom) -->
-                  <rect x="25" y="110" width="50" height="30" fill="none" stroke="rgba(0,0,0,.1)" stroke-width=".8"/>
-                  <!-- Away penalty area (top) -->
-                  <rect x="25" y="10" width="50" height="30" fill="none" stroke="rgba(0,0,0,.1)" stroke-width=".8"/>
-                  <!-- Formation dots derived from formation string -->
-                  <circle cx="50" cy="135" r="5" fill="var(--accent)" opacity=".85"/>
-                  <text x="50" y="138" text-anchor="middle" font-size="4" fill="white" font-family="sans-serif">GK</text>
-                </svg>
-              </div>
-              <div class="lineup-empty" v-else>
-                <div class="lineup-empty-icon">👕</div>
-                <strong>Uppställning saknas</strong>
-                Inte tillgänglig via API
+        <div class="state-box" v-if="lineupLoading" style="padding:32px">
+          <div class="icon">⏳</div>
+          <strong>Hämtar uppställningar…</strong>
+        </div>
+        <div class="state-box" v-else-if="!lineup" style="padding:32px">
+          <div class="icon">👕</div>
+          <strong>Uppställning saknas</strong>
+          Inte tillgänglig via API.
+        </div>
+        <div v-else>
+          <!-- Formation row -->
+          <div class="lineup-formation-row">
+            <div class="lineup-formation-side">
+              <span class="lineup-formation-num">{{ lineup.homeFormation }}</span>
+              <span class="lineup-formation-lbl">{{ lineup.homeTeam }}</span>
+            </div>
+            <span class="lineup-vs">vs</span>
+            <div class="lineup-formation-side lineup-formation-side-away">
+              <span class="lineup-formation-num">{{ lineup.awayFormation }}</span>
+              <span class="lineup-formation-lbl">{{ lineup.awayTeam }}</span>
+            </div>
+          </div>
+
+          <!-- Two-column player lists -->
+          <div class="lineup-cols">
+            <!-- Home -->
+            <div class="lineup-col">
+              <template v-for="group in groupByPosition(lineup.homePlayers)" :key="group.pos">
+                <div class="lineup-pos-label">{{ group.label }}</div>
+                <div class="lineup-player-row" v-for="p in group.players" :key="p.playerId">
+                  <span class="lineup-jersey" v-if="p.jerseyNumber">{{ p.jerseyNumber }}</span>
+                  <span class="lineup-jersey empty" v-else>—</span>
+                  <span class="lineup-player-name">{{ p.name }}</span>
+                  <span class="lineup-pos-badge" :class="'pos-' + p.position">{{ p.position }}</span>
+                </div>
+              </template>
+            </div>
+            <!-- Away -->
+            <div class="lineup-col lineup-col-away">
+              <template v-for="group in groupByPosition(lineup.awayPlayers)" :key="group.pos">
+                <div class="lineup-pos-label">{{ group.label }}</div>
+                <div class="lineup-player-row lineup-player-row-away" v-for="p in group.players" :key="p.playerId">
+                  <span class="lineup-pos-badge" :class="'pos-' + p.position">{{ p.position }}</span>
+                  <span class="lineup-player-name">{{ p.name }}</span>
+                  <span class="lineup-jersey" v-if="p.jerseyNumber">{{ p.jerseyNumber }}</span>
+                  <span class="lineup-jersey empty" v-else>—</span>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Substitutes -->
+          <div class="lineup-subs-header">
+            <span>🔄</span> Avbytare
+          </div>
+          <div class="lineup-cols">
+            <!-- Home subs -->
+            <div class="lineup-col">
+              <div class="lineup-player-row lineup-player-row-sub" v-for="p in lineup.homeSubstitutes" :key="p.playerId">
+                <span class="lineup-jersey sub">{{ p.jerseyNumber || '—' }}</span>
+                <span class="lineup-player-name sub">{{ p.name }}</span>
+                <span class="lineup-pos-badge" :class="'pos-' + p.position">{{ p.position }}</span>
               </div>
             </div>
-            <!-- Away lineup -->
-            <div>
-              <div class="lineup-team-header">{{ detail.awayTeam }}</div>
-              <div v-if="detail.awayFormation">
-                <div class="lineup-formation">{{ detail.awayFormation }}</div>
-                <div class="lineup-formation-label">Formation</div>
-              </div>
-              <div class="lineup-empty" v-else>
-                <div class="lineup-empty-icon">👕</div>
-                <strong>Uppställning saknas</strong>
-                Inte tillgänglig via API
+            <!-- Away subs -->
+            <div class="lineup-col lineup-col-away">
+              <div class="lineup-player-row lineup-player-row-away lineup-player-row-sub" v-for="p in lineup.awaySubstitutes" :key="p.playerId">
+                <span class="lineup-pos-badge" :class="'pos-' + p.position">{{ p.position }}</span>
+                <span class="lineup-player-name sub">{{ p.name }}</span>
+                <span class="lineup-jersey sub">{{ p.jerseyNumber || '—' }}</span>
               </div>
             </div>
           </div>
@@ -851,6 +936,42 @@ createApp({
       if (tab === 'incidents' && incidents.value.length === 0 && !incidentsLoading.value && currentEventId.value) {
         fetchIncidents(currentEventId.value);
       }
+      if (tab === 'lineups' && !lineup.value && !lineupLoading.value && currentEventId.value) {
+        fetchLineup(currentEventId.value);
+      }
+    }
+
+    const lineup = ref(null);
+    const lineupLoading = ref(false);
+
+    async function fetchLineup(eventId) {
+      lineupLoading.value = true;
+      lineup.value = null;
+      try {
+        const res = await fetch(`http://localhost:8080/events/lineups/${eventId}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        lineup.value = await res.json();
+      } catch(e) {
+        lineup.value = null;
+      } finally {
+        lineupLoading.value = false;
+      }
+    }
+
+    const positionOrder = { G: 0, D: 1, M: 2, F: 3 };
+    const positionLabel = { G: 'Målvakt', D: 'Försvar', M: 'Mittfält', F: 'Anfall' };
+
+    function groupByPosition(players) {
+      if (!players) return [];
+      const groups = {};
+      for (const p of players) {
+        const pos = p.position || '?';
+        if (!groups[pos]) groups[pos] = [];
+        groups[pos].push(p);
+      }
+      return Object.entries(groups)
+        .sort(([a], [b]) => (positionOrder[a] ?? 9) - (positionOrder[b] ?? 9))
+        .map(([pos, players]) => ({ pos, label: positionLabel[pos] || pos, players }));
     }
 
     const scoreHome = computed(() => {
@@ -901,6 +1022,7 @@ createApp({
       modalTab.value = 'stats';
       incidents.value = [];
       currentEventId.value = id;
+      lineup.value = null;
       try {
         const res = await fetch(`${BASE}/${id}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -954,7 +1076,7 @@ createApp({
     onBeforeMount(fetchLeagues);
     onMounted(fetchMatches);
 
-    return { leagues, matches, loading, error, search, selectedLeague, fetchLeagues, fetchMatches, selectLeague, modalOpen, modalLoading, detail, openModal, closeModal, pct, halfView, scoreHome, scoreAway, currentResult, oddClass, oddModalClass, modalTab, switchModalTab, incidents, incidentsLoading, incidentIcon, incidentsWithScore };
+    return { leagues, matches, loading, error, search, selectedLeague, fetchLeagues, fetchMatches, selectLeague, modalOpen, modalLoading, detail, openModal, closeModal, pct, halfView, scoreHome, scoreAway, currentResult, oddClass, oddModalClass, modalTab, switchModalTab, incidents, incidentsLoading, incidentIcon, incidentsWithScore, lineup, lineupLoading, groupByPosition, positionLabel };
   }
 }).mount('#app');
 </script>

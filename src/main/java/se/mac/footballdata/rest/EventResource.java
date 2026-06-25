@@ -36,6 +36,9 @@ public class EventResource {
     @Inject
     OddsRepository oddsRepository;
 
+    @Inject
+    LineupRepository lineupRepository;
+
     @GET
     @Path("/league/{league}")
     public List<Event> events(@PathParam("league") String league) {
@@ -79,6 +82,12 @@ public class EventResource {
     @Path("/incidents/{eventId}")
     public List<Incident> getIncidents(@PathParam("eventId") String eventId) {
         return incidentsRepository.findByEventId(Integer.parseInt(eventId));
+    }
+
+    @GET
+    @Path("/lineups/{eventId}")
+    public Lineup getLineups(@PathParam("eventId") String eventId) {
+        return lineupRepository.findByEventId(Integer.parseInt(eventId));
     }
 
 }
