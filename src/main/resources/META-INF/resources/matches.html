@@ -403,6 +403,13 @@
   .odd-long  { background: var(--surface2);    color: var(--muted);  border: 1px solid var(--border); }
   .odd-none  { color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 12px; }
 
+  /* Outcome highlight — ring around the chip that actually came in */
+  .odd-outcome {
+    outline: 2px solid #22c55e;
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
   /* Odds section inside modal */
   .modal-odds-section { padding: 0 24px 20px; }
   .modal-odds-title {
@@ -523,16 +530,16 @@
               </td>
               <td style="font-family:var(--mono);font-size:13px">{{ item.homeTeam }} – {{ item.awayTeam }}</td>
               <td style="font-family:var(--mono);font-size:13px;font-weight:700">{{ item.fullTimeHomeGoals }} – {{ item.fullTimeAwayGoals }}</td>
-              <td><span v-if="item.odds?.homeWin" :class="['odd-val', oddClass(item.odds?.homeWin, item.odds)]">{{ item.odds.homeWin }}</span><span v-else class="odd-none">—</span></td>
-              <td><span v-if="item.odds?.draw"    :class="['odd-val', oddClass(item.odds?.draw,    item.odds)]">{{ item.odds.draw }}</span><span v-else class="odd-none">—</span></td>
-              <td><span v-if="item.odds?.awayWin" :class="['odd-val', oddClass(item.odds?.awayWin, item.odds)]">{{ item.odds.awayWin }}</span><span v-else class="odd-none">—</span></td>
-              <td><span v-if="item.odds?.over25Goals" :class="['odd-val', item.odds.over25Goals <= 1.9 ? 'odd-fav' : 'odd-mid']">{{ item.odds.over25Goals }}</span><span v-else class="odd-none">—</span></td>
-              <td><span v-if="item.odds?.under25Goals" :class="['odd-val', item.odds.under25Goals <= 1.9 ? 'odd-fav' : 'odd-mid']">{{ item.odds.under25Goals }}</span><span v-else class="odd-none">—</span></td>
+              <td><span v-if="item.odds?.homeWin" :class="['odd-val', oddClass(item.odds?.homeWin, item.odds), matchResult(item) === 'H' ? 'odd-outcome' : '']">{{ item.odds.homeWin }}</span><span v-else class="odd-none">—</span></td>
+              <td><span v-if="item.odds?.draw"    :class="['odd-val', oddClass(item.odds?.draw,    item.odds), matchResult(item) === 'D' ? 'odd-outcome' : '']">{{ item.odds.draw }}</span><span v-else class="odd-none">—</span></td>
+              <td><span v-if="item.odds?.awayWin" :class="['odd-val', oddClass(item.odds?.awayWin, item.odds), matchResult(item) === 'A' ? 'odd-outcome' : '']">{{ item.odds.awayWin }}</span><span v-else class="odd-none">—</span></td>
+              <td><span v-if="item.odds?.over25Goals" :class="['odd-val', item.odds.over25Goals <= 1.9 ? 'odd-fav' : 'odd-mid', (item.fullTimeHomeGoals + item.fullTimeAwayGoals) > 2.5 ? 'odd-outcome' : '']">{{ item.odds.over25Goals }}</span><span v-else class="odd-none">—</span></td>
+              <td><span v-if="item.odds?.under25Goals" :class="['odd-val', item.odds.under25Goals <= 1.9 ? 'odd-fav' : 'odd-mid', (item.fullTimeHomeGoals + item.fullTimeAwayGoals) <= 2.5 ? 'odd-outcome' : '']">{{ item.odds.under25Goals }}</span><span v-else class="odd-none">—</span></td>
               <td>
                 <span v-if="item.odds?.bttsYes" style="display:inline-flex;gap:4px;align-items:center">
-                  <span :class="['odd-val', item.odds.bttsYes <= item.odds.bttsNo ? 'odd-fav' : 'odd-long']">{{ item.odds.bttsYes }}</span>
+                  <span :class="['odd-val', item.odds.bttsYes <= item.odds.bttsNo ? 'odd-fav' : 'odd-long', (item.fullTimeHomeGoals > 0 && item.fullTimeAwayGoals > 0) ? 'odd-outcome' : '']">{{ item.odds.bttsYes }}</span>
                   <span style="color:var(--muted);font-size:11px">/</span>
-                  <span :class="['odd-val', item.odds.bttsNo < item.odds.bttsYes ? 'odd-fav' : 'odd-long']">{{ item.odds.bttsNo }}</span>
+                  <span :class="['odd-val', item.odds.bttsNo < item.odds.bttsYes ? 'odd-fav' : 'odd-long', !(item.fullTimeHomeGoals > 0 && item.fullTimeAwayGoals > 0) ? 'odd-outcome' : '']">{{ item.odds.bttsNo }}</span>
                 </span>
                 <span v-else class="odd-none">—</span>
               </td>
@@ -1006,6 +1013,13 @@ createApp({
       return 'odd-mid';
     }
 
+    // Returns 'H', 'D', or 'A' for the actual full-time result of a match row
+    function matchResult(item) {
+      const h = item.fullTimeHomeGoals, a = item.fullTimeAwayGoals;
+      if (h == null || a == null) return null;
+      return h > a ? 'H' : a > h ? 'A' : 'D';
+    }
+
     function oddModalClass(val, odds) {
       if (!val || !odds) return '';
       const min = Math.min(odds.homeWin ?? 99, odds.draw ?? 99, odds.awayWin ?? 99);
@@ -1076,7 +1090,7 @@ createApp({
     onBeforeMount(fetchLeagues);
     onMounted(fetchMatches);
 
-    return { leagues, matches, loading, error, search, selectedLeague, fetchLeagues, fetchMatches, selectLeague, modalOpen, modalLoading, detail, openModal, closeModal, pct, halfView, scoreHome, scoreAway, currentResult, oddClass, oddModalClass, modalTab, switchModalTab, incidents, incidentsLoading, incidentIcon, incidentsWithScore, lineup, lineupLoading, groupByPosition, positionLabel };
+    return { leagues, matches, loading, error, search, selectedLeague, fetchLeagues, fetchMatches, selectLeague, modalOpen, modalLoading, detail, openModal, closeModal, pct, halfView, scoreHome, scoreAway, currentResult, oddClass, oddModalClass, modalTab, switchModalTab, incidents, incidentsLoading, incidentIcon, incidentsWithScore, lineup, lineupLoading, groupByPosition, positionLabel, matchResult };
   }
 }).mount('#app');
 </script>
