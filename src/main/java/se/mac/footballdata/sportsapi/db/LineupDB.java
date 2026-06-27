@@ -12,10 +12,10 @@ public class LineupDB {
     public int awayTeamId;
     public String homeFormation;
     public String awayFormation;
-    public List<PlayerDB> homePlayers = new ArrayList<>();
-    public List<PlayerDB> awayPlayers = new ArrayList<>();
-    public List<PlayerDB> homeSubstitutes = new ArrayList<>();
-    public List<PlayerDB> awaySubstitutes = new ArrayList<>();
+    public List<LineupPlayerDB> homePlayers = new ArrayList<>();
+    public List<LineupPlayerDB> awayPlayers = new ArrayList<>();
+    public List<LineupPlayerDB> homeSubstitutes = new ArrayList<>();
+    public List<LineupPlayerDB> awaySubstitutes = new ArrayList<>();
 
     public LineupDB() {
         // Empty

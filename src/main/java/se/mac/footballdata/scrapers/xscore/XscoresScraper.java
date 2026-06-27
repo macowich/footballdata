@@ -17,6 +17,7 @@ import se.mac.footballdata.scrapers.xscore.model.Incident;
 import se.mac.footballdata.scrapers.xscore.model.MatchData;
 import se.mac.footballdata.scrapers.xscore.model.OutcomeWrapper;
 import se.mac.footballdata.sportsapi.db.EventDB;
+import se.mac.footballdata.sportsapi.db.IncidentDB;
 import se.mac.footballdata.sportsapi.db.OddsDB;
 
 import java.io.BufferedReader;
@@ -49,25 +50,66 @@ public class XscoresScraper {
     //private static final String BASE_PATH_FK = "C:\\FKApps\\data\\xscore\\";
 
     public static void main(String[] args) throws Exception {
-        /*List<String> urlList = loadResultpage(BASE_PATH + "results\\Superettan - Results _ Football Sweden.html");
-        fetchDataFiles(urlList.getFirst());
+        /*
+        List<String> urlList = loadResultpage(BASE_PATH + "results\\Superettan - Results _ Football Sweden.html");
         for (String url : urlList) {
             fetchDataFiles(url);
         }*/
 
         int leagueId = 1000; // Superettan
-
         List<MatchData> matchDataList = loadAllMatchData();
         List<EventDB> eventDBList = matchDataList.stream()
                 .map(match -> createEventDB(match, leagueId))
                 .toList();
+        ArrayList<IncidentDB> incidentDBList = new ArrayList<>();
+        for (MatchData matchData: matchDataList) {
+            List<IncidentDB> incidentList = createIncidentDBList(matchData);
+            incidentDBList.addAll(incidentList);
+        }
 
         List<OddsDB> oddsDBList = matchDataList.stream()
                 .map(XscoresScraper::createOddsDB)
                 .filter(Objects::nonNull)
                 .toList();
 
-        updateDatabase(eventDBList, oddsDBList);
+        updateDatabase(eventDBList, oddsDBList, incidentDBList);
+    }
+
+    private static List<IncidentDB> createIncidentDBList(MatchData matchData) {
+        ArrayList<IncidentDB> incidentDBList = new ArrayList<>();
+
+        for (Incident i : matchData.incidents) {
+            IncidentDB incidentDB = new IncidentDB();
+            incidentDB.eventId = Math.toIntExact(matchData.id);
+            incidentDB.type = i.typeName != null ? getType(i.typeName) : "";
+            incidentDB.text = i.reason;
+            incidentDB.home = i.side.equalsIgnoreCase("home");
+            incidentDB.player = i.playerName;
+            incidentDB.playerId = i.playerId != null ? i.playerId : 0;
+            incidentDB.cardType = i.typeName != null ? getCardType(i.typeName) : "";
+            incidentDB.goalType = incidentDB.type.equalsIgnoreCase("goal") ? "regular" : "";
+            incidentDB.assist = null;
+            incidentDB.minute = i.elapsed;
+            incidentDB.playerIn = "unknown";
+            incidentDB.playerOut = incidentDB.type.equalsIgnoreCase("substitution") ? i.playerName : "";
+            incidentDBList.add(incidentDB);
+        }
+        return incidentDBList;
+    }
+
+    private static String getType(String typeName) {
+        if (typeName.equalsIgnoreCase("Yellow card")) return "card";
+        else if (typeName.equalsIgnoreCase("Red card")) return "card";
+        else if (typeName.equalsIgnoreCase("Substitution out")) return "substitution";
+        else if (typeName.equalsIgnoreCase("Regular goal")) return "goal";
+
+        return "";
+    }
+
+    private static String getCardType(String typeName) {
+        if (typeName.equalsIgnoreCase("Yellow card")) return "yellow";
+        else if (typeName.equalsIgnoreCase("Red card")) return "red";
+        return "";
     }
 
     private static List<MatchData> loadAllMatchData() throws IOException {
@@ -83,7 +125,7 @@ public class XscoresScraper {
         return matchDataList;
     }
 
-    private static void updateDatabase(List<EventDB> eventDBList, List<OddsDB> oddsDBList) {
+    private static void updateDatabase(List<EventDB> eventDBList, List<OddsDB> oddsDBList, List<IncidentDB> incidentDBList) {
         CodecProvider pojoCodecProvider =
                 PojoCodecProvider.builder().automatic(true).build();
 
@@ -99,6 +141,7 @@ public class XscoresScraper {
                     .withCodecRegistry(pojoCodecRegistry);
 
             DBUtil.updateEventsCollection(database, eventDBList);
+            DBUtil.updateIncidentsCollection(database, incidentDBList);
             DBUtil.updateOddsCollection(database, oddsDBList);
         }
     }

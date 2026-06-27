@@ -291,28 +291,42 @@ public class Util {
         lineupDB.homeFormation = lineups.home.formation;
         lineupDB.awayFormation = lineups.away.formation;
         for (SportsApiClient.Player p : lineups.home.players) {
-            lineupDB.homePlayers.add(createPlayerDB(p));
+            lineupDB.homePlayers.add(createLineupPlayerDB(p));
         }
         for (SportsApiClient.Player p : lineups.away.players) {
-            lineupDB.awayPlayers.add(createPlayerDB(p));
+            lineupDB.awayPlayers.add(createLineupPlayerDB(p));
         }
         for (SportsApiClient.Player p : lineups.home.substitutes) {
-            lineupDB.homeSubstitutes.add(createPlayerDB(p));
+            lineupDB.homeSubstitutes.add(createLineupPlayerDB(p));
         }
         for (SportsApiClient.Player p : lineups.away.substitutes) {
-            lineupDB.awaySubstitutes.add(createPlayerDB(p));
+            lineupDB.awaySubstitutes.add(createLineupPlayerDB(p));
         }
         return lineupDB;
     }
 
-    private static PlayerDB createPlayerDB(SportsApiClient.Player p) {
-        PlayerDB playerDB = new PlayerDB();
+    public static LineupPlayerDB createLineupPlayerDB(SportsApiClient.Player p) {
+        LineupPlayerDB playerDB = new LineupPlayerDB();
         playerDB.playerId = p.id;
         playerDB.name = p.name;
         playerDB.position = p.position;
-        playerDB.jerseyNumber = p.jerseyNumber;
+        playerDB.jerseyNumber = p.jerseyNumber != null ? p.jerseyNumber : 0;
         return playerDB;
     }
+
+    public static PlayerDB createPlayerDB(SportsApiClient.Player p, int leagueId) {
+        PlayerDB playerDB = new PlayerDB();
+        playerDB.leagueId = leagueId;
+        playerDB.teamId = p.currentTeamId;
+        playerDB.playerId = p.id;
+        playerDB.name = p.name;
+        playerDB.position = p.position;
+        playerDB.jerseyNumber = p.jerseyNumber != null ? p.jerseyNumber : 0;
+        playerDB.rating = p.rating != null ? p.rating : 0;
+        playerDB.nationality = p.nationality;
+        return playerDB;
+    }
+
     public static OddsDB createOddsDB(List<SportsApiClient.OddsLine> results, int eventId) {
         OddsDB oddsDB = new OddsDB();
         oddsDB.eventId = eventId;

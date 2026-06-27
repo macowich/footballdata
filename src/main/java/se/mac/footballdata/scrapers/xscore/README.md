@@ -9,6 +9,9 @@ Ctrl S spara i C:\data\xscore\results
 Ta bort alla med leagueId = 1000
 db.events.deleteMany({'leagueId':1000})
 
+Lista
+db.events.find({"leagueId": 1000}).pretty()
+
 Ta bort hela collection
 db.odds.drop()
 db.events.drop()

@@ -64,6 +64,36 @@ public class DBUtil {
     }
 
     /**
+     * Updates players collection in db
+     *
+     * @param database      Database
+     * @param playerDBList List of {@link PlayerDB}
+     */
+    public static void updatePlayersCollection(MongoDatabase database, List<PlayerDB> playerDBList) {
+        MongoCollection<PlayerDB> collection =
+                database.getCollection("players", PlayerDB.class);
+        collection.createIndex(new Document("playerId", 1), new IndexOptions().unique(true));
+
+        ReplaceOptions replaceOptions = new ReplaceOptions().upsert(true);
+        List<ReplaceOneModel<PlayerDB>> operations = new ArrayList<>();
+
+        for (PlayerDB player : playerDBList) {
+            operations.add(new ReplaceOneModel<>(
+                    Filters.eq("playerId", player.playerId),
+                    player,
+                    replaceOptions
+            ));
+        }
+
+        // Execute parallel bulk operations
+        BulkWriteResult result = collection.bulkWrite(operations, new BulkWriteOptions().ordered(false));
+
+        System.out.println("Upsert of player collection complete.");
+        System.out.println("Modified existing: " + result.getModifiedCount());
+        System.out.println("Newly inserted: " + result.getUpserts().size());
+    }
+
+    /**
      * Updates referees collection in db
      *
      * @param database      Database
@@ -94,7 +124,7 @@ public class DBUtil {
         System.out.println("Newly inserted: " + result.getUpserts().size());
     }
 
-    public static void updateIncidentsCollection(MongoDatabase database, ArrayList<IncidentDB> incidentDBList) {
+    public static void updateIncidentsCollection(MongoDatabase database, List<IncidentDB> incidentDBList) {
         MongoCollection<IncidentDB> collection =
                 database.getCollection("incidents", IncidentDB.class);
         collection.createIndex(Indexes.compoundIndex(
@@ -110,7 +140,7 @@ public class DBUtil {
         }
     }
 
-    public static void updateLineupsCollection(MongoDatabase database, ArrayList<LineupDB> lineupDBList) {
+    public static void updateLineupsCollection(MongoDatabase database, List<LineupDB> lineupDBList) {
         MongoCollection<LineupDB> collection =
                 database.getCollection("lineups", LineupDB.class);
         collection.createIndex(new Document("eventId", 1), new IndexOptions().unique(true));

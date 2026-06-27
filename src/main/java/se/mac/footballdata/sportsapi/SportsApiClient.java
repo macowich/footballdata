@@ -1001,6 +1001,12 @@ public class SportsApiClient {
     public static void main(String[] args) throws Exception {
         SportsApiClient client = new SportsApiClient();
 
+        TeamsResponse teamsResponse = client.fetchTeams(26);
+        int teamId = teamsResponse.results.getFirst().id;
+        PlayersResponse playersResponse = client.fetchPlayers(teamId);
+        Player player = playersResponse.results.getFirst();
+        System.out.println(player.toString());
+
         // ── Single incidents ──────────────────────────────
        // EventData eventData = client.fetchIncidents(46355);
        // System.out.println();

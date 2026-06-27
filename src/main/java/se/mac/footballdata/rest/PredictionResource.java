@@ -13,6 +13,7 @@ import se.mac.footballdata.rest.model.Event;
 import se.mac.footballdata.rest.model.Fixture;
 import se.mac.footballdata.rest.model.Team;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -46,30 +47,32 @@ public class PredictionResource {
     }
 
     void loadPredictions() {
-        //String startDate = LocalDate.now().toString();
-        String startDate = "2026-07-04";
+        String startDate = LocalDate.now().toString();
+       // String startDate = "2026-07-04";
         List<Fixture> fixtureList = fixtureRepository.findByDate(startDate);
-        Fixture f = fixtureList.getFirst();
-        if (f == null) return;
+        for (Fixture f : fixtureList) {
+            //Fixture f = fixtureList.getFirst();
+            //if (f == null) return;
 
-        List<Event> homeTeamResult = eventRepository.findByTeam(f.hometeam);
-        List<Event> awayTeamResult = eventRepository.findByTeam(f.awayteam);
-        Team homeTeam = createTeamFromEvent(f.hometeam, homeTeamResult);
-        Team awayTeam = createTeamFromEvent(f.awayteam, awayTeamResult);
+            List<Event> homeTeamResult = eventRepository.findByTeam(f.hometeam);
+            List<Event> awayTeamResult = eventRepository.findByTeam(f.awayteam);
+            Team homeTeam = createTeamFromEvent(f.hometeam, homeTeamResult);
+            Team awayTeam = createTeamFromEvent(f.awayteam, awayTeamResult);
 
-        ResultPredictor resultPredictor = new ResultPredictor();
+            ResultPredictor resultPredictor = new ResultPredictor();
 
-        // goalsHomeTeam, concededHomeTeam, goalsHomeLeague, concededHomeLeague,
-        // goalsAwayTeam, concededAwayTeam, concededHomeLeague, goalsHomeLeague
-        resultPredictor.calculateOutcomeProbability(homeTeam.goalsHomeTeam, homeTeam.concededHomeTeam, homeTeam.goalsHomeLeague,
-                homeTeam.concededHomeLeague,
-                awayTeam.goalsAwayTeam, awayTeam.concededAwayTeam, awayTeam.concededHomeLeague, awayTeam.goalsHomeLeague);
+            // goalsHomeTeam, concededHomeTeam, goalsHomeLeague, concededHomeLeague,
+            // goalsAwayTeam, concededAwayTeam, concededHomeLeague, goalsHomeLeague
+            resultPredictor.calculateOutcomeProbability(homeTeam.goalsHomeTeam, homeTeam.concededHomeTeam, homeTeam.goalsHomeLeague,
+                    homeTeam.concededHomeLeague,
+                    awayTeam.goalsAwayTeam, awayTeam.concededAwayTeam, awayTeam.concededHomeLeague, awayTeam.goalsHomeLeague);
 
-        printResults(0, 0, resultPredictor.getResultList(), resultPredictor.getHomeResultMap(),
-                resultPredictor.getAwayResultMap(), resultPredictor.getOddsInfoMap());
+            printResults(0, 0, resultPredictor.getResultList(), resultPredictor.getHomeResultMap(),
+                    resultPredictor.getAwayResultMap(), resultPredictor.getOddsInfoMap());
 
-        Prediction p = createPrediction(f, resultPredictor.getOddsInfoMap());
-        predictionRepository.saveOrOverwrite(p);
+            Prediction p = createPrediction(f, resultPredictor.getOddsInfoMap());
+            predictionRepository.saveOrOverwrite(p);
+        }
     }
 
     static Prediction createPrediction(Fixture f, Map<String, Float> oddsInfoMap) {

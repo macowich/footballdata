@@ -63,6 +63,9 @@ public class EventResource {
         Optional<Referee> r = refereeRepository.findByRefereeId(event.refereeId);
         r.ifPresent(referee -> event.referee = referee.name);
 
+        Optional<Odds> o = oddsRepository.findByEventId(event.eventId);
+        o.ifPresent(odds -> event.odds = odds);
+
         return event;
     }
 

@@ -23,7 +23,7 @@
 
   .back-link {
     display: inline-flex; align-items: center; gap: 6px;
-    font-family: var(--mono); font-size: 12px;
+    font-family: var(--mono),serif; font-size: 12px;
     color: var(--muted); text-decoration: none;
     margin-bottom: 28px;
     transition: color .15s;
@@ -185,7 +185,7 @@
         <button class="tab-btn" :class="{ active: tab === 'overview' }" @click="tab = 'overview'">Översikt</button>
         <button class="tab-btn" :class="{ active: tab === 'results'  }" @click="switchTab('results')">Resultat</button>
         <button class="tab-btn" :class="{ active: tab === 'fixtures' }" @click="switchTab('fixtures')">Kommande</button>
-        <button class="tab-btn" :class="{ active: tab === 'squad'    }" @click="tab = 'squad'">Trupp</button>
+        <button class="tab-btn" :class="{ active: tab === 'squad'    }" @click="switchTab('squad')">Trupp</button>
       </div>
 
       <!-- OVERVIEW -->
@@ -365,12 +365,57 @@
 
       <!-- SQUAD -->
       <div v-if="tab === 'squad'">
-        <div class="squad-card">
-          <div class="squad-icon">👕</div>
-          <strong>Truppdata saknas</strong>
-          Spelardata är inte tillgänglig via API:et ännu.
+        <div class="state-box" v-if="squadLoading">
+          <div class="icon">⏳</div>
+          <strong>Hämtar trupp…</strong>
+        </div>
+        <div class="error-banner" v-if="squadError">⚠ {{ squadError }}</div>
+        <div class="state-box" v-if="!squadLoading && squad.length === 0 && !squadError">
+          <div class="icon">👕</div>
+          <strong>Inga spelare hittades</strong>
+          Truppdata är inte tillgänglig för detta lag.
+        </div>
+        <div class="results-table-wrap fade-in" v-if="squad.length > 0">
+          <table>
+            <thead>
+            <tr>
+              <th style="width:48px">#</th>
+              <th>Spelare</th>
+              <th>Position</th>
+              <th>Nationalitet</th>
+              <th style="text-align:right">Rating</th>
+            </tr>
+            </thead>
+            <tbody>
+            <template v-for="group in squadByPosition" :key="group.label">
+              <tr style="background:var(--surface2)">
+                <td colspan="5" style="padding:6px 16px 5px;border-bottom:1px solid var(--border);border-top:2px solid var(--border)">
+                  <span style="font-family:var(--mono),serif;font-size:10px;font-weight:500;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted)">{{ group.label }}</span>
+                </td>
+              </tr>
+              <tr class="row-hover" v-for="p in group.players" :key="p.playerId">
+                <td style="font-family:var(--mono),serif;font-size:12px;color:var(--muted);text-align:center">
+                  {{ p.jerseyNumber || '—' }}
+                </td>
+                <td style="font-size:14px;font-weight:600">{{ p.name }}</td>
+                <td>
+                    <span style="display:inline-block;padding:2px 9px;border-radius:5px;font-family:var(--mono),serif;font-size:11px;font-weight:600"
+                          :style="posStyle(p.position)">{{ posLabel(p.position) }}</span>
+                </td>
+                <td style="font-size:13px;color:var(--muted)">{{ p.nationality }}</td>
+                <td style="text-align:right">
+                    <span v-if="p.rating > 0"
+                          style="font-family:var(--mono),serif;font-size:13px;font-weight:700;padding:2px 9px;border-radius:5px"
+                          :style="ratingStyle(p.rating)">{{ p.rating }}</span>
+                  <span v-else style="color:var(--muted);font-family:var(--mono),serif;font-size:12px">—</span>
+                </td>
+              </tr>
+            </template>
+            </tbody>
+          </table>
         </div>
       </div>
+
 
     </template>
 
@@ -379,7 +424,7 @@
 </div>
 
 <script>
-const { createApp, ref, onMounted } = Vue;
+const { createApp, ref, onMounted, computed } = Vue;
 
 createApp({
   setup() {
@@ -401,6 +446,44 @@ createApp({
     const fixturesLoading = ref(false);
     const fixturesError   = ref('');
     const fixturesFetched = ref(false);
+
+    const squad        = ref([]);
+    const squadLoading = ref(false);
+    const squadError   = ref('');
+    const squadFetched = ref(false);
+
+    const POS_ORDER = { G: 0, D: 1, M: 2, F: 3 };
+    const POS_LABELS = { G: 'Målvakt', D: 'Försvarare', M: 'Mittfältare', F: 'Anfallare' };
+    const POS_STYLES = {
+      G: 'background:rgba(59,130,246,.12);color:#3b82f6;border:1px solid rgba(59,130,246,.2)',
+      D: 'background:rgba(34,197,94,.10);color:#22c55e;border:1px solid rgba(34,197,94,.2)',
+      M: 'background:rgba(249,115,22,.12);color:#f97316;border:1px solid rgba(249,115,22,.2)',
+      F: 'background:rgba(239,68,68,.12);color:#ef4444;border:1px solid rgba(239,68,68,.2)',
+    };
+
+    const squadByPosition = computed(() => {
+      const groups = {};
+      for (const p of squad.value) {
+        const pos = p.position || 'X';
+        if (!groups[pos]) groups[pos] = [];
+        groups[pos].push(p);
+      }
+      return Object.entries(groups)
+              .sort(([a], [b]) => (POS_ORDER[a] ?? 9) - (POS_ORDER[b] ?? 9))
+              .map(([pos, players]) => ({
+                label: POS_LABELS[pos] ?? pos,
+                players: players.sort((a, b) => (a.jerseyNumber || 99) - (b.jerseyNumber || 99)),
+              }));
+    });
+
+    function posLabel(pos) { return pos || '?'; }
+    function posStyle(pos) { return POS_STYLES[pos] || 'background:var(--surface2);color:var(--muted);border:1px solid var(--border)'; }
+    function ratingStyle(r) {
+      if (r >= 74) return 'background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)';
+      if (r >= 68) return 'background:var(--accent-light);color:var(--accent);border:1px solid #e8c0a8';
+      return 'background:var(--surface2);color:var(--muted);border:1px solid var(--border)';
+    }
+
 
     function pct(val, total) {
       if (!total) return 0;
@@ -473,10 +556,27 @@ createApp({
       }
     }
 
+    async function fetchSquad() {
+      if (squadFetched.value) return;
+      squadLoading.value = true; squadError.value = '';
+      try {
+        const res = await fetch(`${BASE}/players/team/${encodeURIComponent(teamName.value)}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        squad.value = await res.json();
+        squadFetched.value = true;
+      } catch(e) {
+        squadError.value = `Kunde inte hämta trupp: ${e.message}`;
+      } finally {
+        squadLoading.value = false;
+      }
+    }
+
+
     function switchTab(name) {
       tab.value = name;
       if (name === 'results') fetchResults();
       if (name === 'fixtures') fetchFixtures();
+      if (name === 'squad') fetchSquad();
     }
 
     onMounted(fetchTeam);
@@ -485,8 +585,10 @@ createApp({
       teamName, team, loading, error, tab,
       results, resultsLoading, resultsError,
       fixtures, fixturesLoading, fixturesError,
-      fetchTeam, switchTab,
+      fetchTeam, fetchSquad, switchTab,
+      squad, squadLoading, squadError, squadByPosition,
       pct, teamNameSplit, outcomeLabel, outcomeStyle,
+      posLabel, posStyle, ratingStyle
     };
   }
 }).mount('#app');

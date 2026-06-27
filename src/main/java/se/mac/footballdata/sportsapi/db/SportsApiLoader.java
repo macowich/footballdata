@@ -21,6 +21,7 @@ import se.mac.footballdata.sportsapi.stats.EventStatsClient;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static com.mongodb.client.model.Aggregates.*;
@@ -29,6 +30,7 @@ import static com.mongodb.client.model.Projections.*;
 import static com.mongodb.client.model.Sorts.descending;
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
+import static se.mac.footballdata.DBUtil.updatePlayersCollection;
 import static se.mac.footballdata.Util.*;
 
 public class SportsApiLoader {
@@ -53,8 +55,8 @@ public class SportsApiLoader {
                     .getDatabase("sportsdb")
                     .withCodecRegistry(pojoCodecRegistry);
 
-             //handleFixturesData(database, 26);
-            handleLeague(database, 26);
+            handleFixturesData(database, 55);
+            //handleLeague(database, 26);
             //handleLeague(database, 55);
 
         } catch (Exception e) {
@@ -64,7 +66,28 @@ public class SportsApiLoader {
 
     static void handleLeague(MongoDatabase database, int leagueId) throws Exception {
         handleEventsData(database, leagueId);
+        //handlePlayersData(database, leagueId);
         //handleRefereeData(database, leagueId);
+    }
+
+    private static void handlePlayersData(MongoDatabase database, int leagueId) throws Exception {
+        SportsApiClient.TeamsResponse response = sportsApiClient.fetchTeams(leagueId);
+        System.out.printf("Total teams: %d%n%n", response.count);
+        //SportsApiClient.PlayersResponse playersResponse = sportsApiClient.fetchPlayers(response.results.getFirst().id);
+        //PlayerDB playerDB = createPlayerDB(playersResponse.results.getFirst(), leagueId);
+        int t = 0;
+
+        ArrayList<PlayerDB> playerDBList = new ArrayList<>();
+        for (SportsApiClient.Team team : response.results) {
+            SportsApiClient.PlayersResponse playersResponse = sportsApiClient.fetchPlayers(team.id);
+            for (SportsApiClient.Player p : playersResponse.results) {
+                PlayerDB playerDB = createPlayerDB(p, leagueId);
+                playerDB.teamName = team.name; // ToDo remove
+                playerDBList.add(playerDB);
+            }
+        }
+
+        updatePlayersCollection(database, playerDBList);
     }
 
     static void handleFixturesData(MongoDatabase database, int leagueId) throws Exception {
@@ -73,17 +96,12 @@ public class SportsApiLoader {
         collection.createIndex(new Document("eventId", 1), new IndexOptions().unique(true));
 
         String currentDate = LocalDate.now().toString();
-        System.out.println("Loading fixtures for league" + leagueId + " from " + currentDate);
+        String toDate = String.valueOf(LocalDate.now().plusDays(7));
+        System.out.println("Loading fixtures for league" + leagueId + " from " + currentDate + " to " + toDate);
         SportsApiClient.EventsResponse response = sportsApiClient.
-                fetchEvents(currentDate, "2026-07-04", leagueId, "notstarted");
-
-        for (SportsApiClient.Event event : response.results) {
-            System.out.println(event.id);
-            System.out.println(event);
-        }
+                fetchEvents(currentDate, toDate, leagueId, "notstarted");
 
         List<SportsApiClient.Event> eventList = new ArrayList<>(response.results);
-
         List<FixtureDB> fixtureDBList = createFixtureDB(eventList);
         for (FixtureDB db : fixtureDBList) {
             loadFixtureOdds(db);
@@ -104,7 +122,7 @@ public class SportsApiLoader {
         loadEvents("2026-05-05", "2026-05-19", leagueId, eventList);
         loadEvents("2026-05-20", "2026-05-31", leagueId, eventList);
         loadEvents("2026-06-01", "2026-06-13", leagueId, eventList);
-        loadEvents("2026-06-14", "2026-06-23", leagueId, eventList);
+        loadEvents("2026-06-14", "2026-06-26", leagueId, eventList);
         List<EventDB> eventDBList = createEventDB(eventList);
 
         ArrayList<IncidentDB> incidentDBList = new ArrayList<>();
