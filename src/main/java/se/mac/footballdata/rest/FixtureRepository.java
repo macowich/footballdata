@@ -3,7 +3,6 @@ package se.mac.footballdata.rest;
 import io.quarkus.mongodb.panache.PanacheMongoRepository;
 import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;
-import se.mac.footballdata.rest.model.Event;
 import se.mac.footballdata.rest.model.Fixture;
 
 import java.util.List;
@@ -21,5 +20,9 @@ public class FixtureRepository implements PanacheMongoRepository<Fixture> {
                 Sort.by("date").descending(),
                 team
         ).list();
+    }
+
+    public Fixture findByEventId(int eventId) {
+        return find("eventId", eventId).singleResult();
     }
 }

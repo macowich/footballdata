@@ -19,6 +19,10 @@ public class Event extends PanacheMongoEntity {
 
     public String referee;
 
+    public String homeCoach;
+
+    public String awayCoach;
+
     public Integer refereeId;
 
     public Integer round;

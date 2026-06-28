@@ -18,6 +18,7 @@ public class SportsApiClient {
     private static final String BASE_URL = "https://sports.bzzoiro.com/api/v2/events/";
     private static final String BASE_URL_REFEREES = "https://sports.bzzoiro.com/api/v2/referees/";
     private static final String BASE_URL_PLAYERS = "https://sports.bzzoiro.com/api/v2/players/";
+    private static final String BASE_URL_MANAGERS = "https://sports.bzzoiro.com/api/v2/managers/";
     private static final String BASE_URL_TEAMS = "https://sports.bzzoiro.com/api/v2/teams/";
     private static final String BASE_URL_PREDICTIONS = "https://sports.bzzoiro.com/api/v2/predictions/";
     private static final String BASE_URL_ODDS        = "https://sports.bzzoiro.com/api/v2/odds/";
@@ -669,6 +670,29 @@ public class SportsApiClient {
         public Integer venue_id; // nullable
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Manager {
+        public int id;
+        public String name;
+        public String short_name;
+        public String country;
+        public String tactical_profile;
+        public String preferred_formation;
+        public int current_team_id;
+        public int matches_total;
+        public int wins;
+        public int draws;
+        public int losses;
+        public double win_pct;
+        public double avg_goals_scored;
+        public double avg_goals_conceded;
+        public double avg_possession;
+        public double clean_sheet_pct;
+        public double btts_pct;
+        public double over_25_pct;
+        public String stats_updated_at;
+    }
+
     // ──────────────────────────────────────────────
     // HTTP client
     // ──────────────────────────────────────────────
@@ -858,6 +882,33 @@ public class SportsApiClient {
     }
 
     /**
+     * Fetch a single manager
+     * Calls: GET /api/v2/managers/{id}/
+     */
+    public Manager fetchManager(int managerId) throws Exception {
+        String url = BASE_URL_MANAGERS + managerId + "/";
+
+        HttpClient client = HttpClient.newBuilder().build();
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Authorization", "Token " + API_TOKEN)
+                .header("Accept", "application/json")
+                .GET()
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 200) {
+            throw new RuntimeException("API error " + response.statusCode() + ": " + response.body());
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        return mapper.readValue(response.body(), Manager.class);
+    }
+
+    /**
      * Fetch teams for a given league.
      * Calls: GET /api/v2/teams/?league_id={leagueId}
      */
@@ -909,6 +960,33 @@ public class SportsApiClient {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
         return mapper.readValue(response.body(), EventOdds.class);
+    }
+
+    /**
+     * Fetch prediction for a single event.
+     * Calls: GET /api/v2/events/{eventId}/prediction/
+     */
+    public Prediction fetchPrediction(int eventId) throws Exception {
+        String url = BASE_URL + eventId + "/prediction/";
+
+        HttpClient client = HttpClient.newBuilder().build();
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Authorization", "Token " + API_TOKEN)
+                .header("Accept", "application/json")
+                .GET()
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 200) {
+            throw new RuntimeException("API error " + response.statusCode() + ": " + response.body());
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        return mapper.readValue(response.body(), Prediction.class);
     }
 
     /**
@@ -1001,27 +1079,32 @@ public class SportsApiClient {
     public static void main(String[] args) throws Exception {
         SportsApiClient client = new SportsApiClient();
 
+        /*
         TeamsResponse teamsResponse = client.fetchTeams(26);
         int teamId = teamsResponse.results.getFirst().id;
         PlayersResponse playersResponse = client.fetchPlayers(teamId);
         Player player = playersResponse.results.getFirst();
         System.out.println(player.toString());
-
+*/
         // ── Single incidents ──────────────────────────────
        // EventData eventData = client.fetchIncidents(46355);
        // System.out.println();
 
         // ── Lineups ──────────────────────────────
+        /*
         LineupResponse lineupResponse = client.fetchLineups(46355);
         System.out.println();
 
         // ── Single event ──────────────────────────────
-       /* Event single = client.fetchEvent(46355);
+        Event single = client.fetchEvent(46355);
         System.out.println("Single event fetch: id=" + single.id);
         System.out.println(single);
         System.out.println();
-*/
-/*
+
+        Manager manager = client.fetchManager(584);
+        System.out.println();
+        */
+
         // ── Event list ────────────────────────────────
         EventsResponse response = client.fetchEvents("2026-04-04", "2026-04-17", 26);
         System.out.printf("Total events: %d%n%n", response.count);
@@ -1050,8 +1133,6 @@ public class SportsApiClient {
             System.out.println();
         }
 
-
- */
       /*
 
         // ── Referees ──────────────────────────────────
@@ -1115,6 +1196,8 @@ public class SportsApiClient {
         }
 
 
+        Prediction prediction = client.fetchPrediction(46388);
+        System.out.println("Prediction: " + prediction);
 /*
         // ── Predictions ───────────────────────────────
         System.out.println("\n=== Predictions (league 27, 2026-06-11 to 2026-06-12) ===");

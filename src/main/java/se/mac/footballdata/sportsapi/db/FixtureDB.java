@@ -15,6 +15,9 @@ public class FixtureDB {
     public double over25Goals;
     public double under25Goals;
 
+    public HeadToHeadDB headToHead;
+    public MatchPredictionDB matchPrediction;
+
     public FixtureDB() {
 
     }

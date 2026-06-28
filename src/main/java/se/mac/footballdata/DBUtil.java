@@ -66,7 +66,7 @@ public class DBUtil {
     /**
      * Updates players collection in db
      *
-     * @param database      Database
+     * @param database     Database
      * @param playerDBList List of {@link PlayerDB}
      */
     public static void updatePlayersCollection(MongoDatabase database, List<PlayerDB> playerDBList) {
@@ -151,6 +151,35 @@ public class DBUtil {
         } catch (MongoException ex) {
             System.out.println("Error when inserting lineupDBList: " + ex);
         }
+    }
+
+    /**
+     * Updates fixtures collection in db
+     *
+     * @param database      Database
+     * @param fixtureDBList List of {@link FixtureDB}
+     */
+    public static void updateFixturesCollection(MongoDatabase database, List<FixtureDB> fixtureDBList) {
+        MongoCollection<FixtureDB> collection =
+                database.getCollection("fixtures", FixtureDB.class);
+        collection.createIndex(new Document("eventId", 1), new IndexOptions().unique(true));
+
+        // Build bulk write list
+        ReplaceOptions replaceOptions = new ReplaceOptions().upsert(true);
+        List<ReplaceOneModel<FixtureDB>> operations = new ArrayList<>();
+
+        for (FixtureDB fix : fixtureDBList) {
+            operations.add(new ReplaceOneModel<>(
+                    Filters.eq("eventId", fix.eventId),
+                    fix,
+                    replaceOptions
+            ));
+        }
+
+        BulkWriteResult result = collection.bulkWrite(operations, new BulkWriteOptions().ordered(false));
+        System.out.println("Upsert of fixtures collection complete.");
+        System.out.println("Modified existing: " + result.getModifiedCount());
+        System.out.println("Newly inserted: " + result.getUpserts().size());
     }
 
 }

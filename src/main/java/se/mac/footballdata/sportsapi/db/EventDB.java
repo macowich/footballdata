@@ -9,6 +9,9 @@ public class EventDB {
     public int round;
     public String hometeam;
     public String awayteam;
+    public String homeCoach;
+    public String awayCoach;
+    public String weather;
     public int homeScore;
     public int awayScore;
     public int homeScoreHt;

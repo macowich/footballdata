@@ -2,6 +2,8 @@ package se.mac.footballdata.rest.model;
 
 import io.quarkus.mongodb.panache.PanacheMongoEntity;
 import io.quarkus.mongodb.panache.common.MongoEntity;
+import se.mac.footballdata.sportsapi.db.HeadToHeadDB;
+import se.mac.footballdata.sportsapi.db.MatchPredictionDB;
 
 @MongoEntity(collection = "fixtures")
 public class Fixture extends PanacheMongoEntity
@@ -31,15 +33,9 @@ public class Fixture extends PanacheMongoEntity
 
    public double under25Goals;
 
-   public String b365h;
+   public HeadToHeadDB headToHead;
 
-   public String b365d;
-
-   public String b365a;
-
-   public String b365_u25;
-
-   public String b365_o25;
+   public MatchPredictionDB matchPrediction;
 
    public Fixture()
    {

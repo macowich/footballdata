@@ -254,10 +254,31 @@ public class Util {
         eventDB.awayScore = event.awayScore;
         eventDB.homeScoreHt = event.homeScoreHt;
         eventDB.awayScoreHt = event.awayScoreHt;
-        if (event.refereeId != null)
+        if (event.refereeId != null) {
             eventDB.refereeId = event.refereeId;
+        }
+        eventDB.weather = formatWeather(event);
         return eventDB;
     }
+
+    public static String formatWeather(SportsApiClient.Event event) {
+        if (event == null || event.weather == null) {
+            return "";
+        }
+
+        String desc = event.weather.description;
+        if (desc == null || desc.isBlank()) {
+            return "";
+        }
+
+        return String.format(
+                "Weather: %s, %.1f°C, wind %.1f km/h%n",
+                desc,
+                event.weather.temperatureC,
+                event.weather.windSpeed
+        );
+    }
+
 
     public static List<IncidentDB> createIncidentDB(List<SportsApiClient.Incident> incidents, int eventId) {
         ArrayList<IncidentDB> incidentDBList = new ArrayList<>();
@@ -373,9 +394,43 @@ public class Util {
         fixtureDB.time = event.eventDate.toString().substring(11, 16);
         fixtureDB.hometeam = event.homeTeam;
         fixtureDB.awayteam = event.awayTeam;
-        if (event.refereeId != null)
+        if (event.refereeId != null) {
             fixtureDB.refereeId = event.refereeId;
+        }
+        if (event.headToHead != null) {
+            fixtureDB.headToHead = createHeadToHeadDB(event.headToHead);
+        }
         return fixtureDB;
+    }
+
+    private static HeadToHeadDB createHeadToHeadDB(SportsApiClient.HeadToHead headToHead) {
+        HeadToHeadDB db = new HeadToHeadDB();
+        db.totalMatches = headToHead.totalMatches;
+        db.homeWins = headToHead.homeWins;
+        db.draws = headToHead.draws;
+        db.awayWins = headToHead.awayWins;
+        db.homeGoals = headToHead.homeGoals;
+        db.awayGoals = headToHead.awayGoals;
+        db.avgTotalGoals = Util.round(headToHead.avgTotalGoals, 2);
+        db.homeWinRate = Util.round(headToHead.homeWinRate, 2);
+        db.awayWinRate = Util.round(headToHead.awayWinRate, 2);
+        if (headToHead.recentMatches != null) {
+            db.recentMatches = createRecentMatches(headToHead.recentMatches);
+        }
+        return db;
+    }
+
+    private static List<RecentMatchDB> createRecentMatches(List<SportsApiClient.RecentMatch> recentMatches) {
+        ArrayList<RecentMatchDB> matchesList = new ArrayList<>();
+        for (SportsApiClient.RecentMatch m : recentMatches) {
+            RecentMatchDB db = new RecentMatchDB();
+            db.date = m.date.toString().substring(0, 10);
+            db.home = m.home;
+            db.away = m.away;
+            db.score = m.score;
+            matchesList.add(db);
+        }
+        return matchesList;
     }
 
     public static List<RefereeDB> createRefereeDB(List<SportsApiClient.Referee> refereeList, int leagueId) {
