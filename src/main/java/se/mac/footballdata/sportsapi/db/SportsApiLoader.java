@@ -1,14 +1,10 @@
 package se.mac.footballdata.sportsapi.db;
 
 import com.mongodb.MongoClientSettings;
-import com.mongodb.MongoException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.IndexOptions;
-import com.mongodb.client.model.InsertManyOptions;
-import org.bson.Document;
 import org.bson.codecs.configuration.CodecProvider;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
@@ -21,7 +17,6 @@ import se.mac.footballdata.sportsapi.stats.EventStatsClient;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static com.mongodb.client.model.Aggregates.*;
@@ -55,7 +50,7 @@ public class SportsApiLoader {
                     .getDatabase("sportsdb")
                     .withCodecRegistry(pojoCodecRegistry);
 
-            handleFixturesData(database, 55);
+            handleFixturesData(database, 26);
             //handleLeague(database, 26);
             //handleLeague(database, 55);
 
@@ -91,10 +86,6 @@ public class SportsApiLoader {
     }
 
     static void handleFixturesData(MongoDatabase database, int leagueId) throws Exception {
-        MongoCollection<FixtureDB> collection =
-                database.getCollection("fixtures", FixtureDB.class);
-        collection.createIndex(new Document("eventId", 1), new IndexOptions().unique(true));
-
         String currentDate = LocalDate.now().toString();
         String toDate = String.valueOf(LocalDate.now().plusDays(7));
         System.out.println("Loading fixtures for league" + leagueId + " from " + currentDate + " to " + toDate);
@@ -105,14 +96,10 @@ public class SportsApiLoader {
         List<FixtureDB> fixtureDBList = createFixtureDB(eventList);
         for (FixtureDB db : fixtureDBList) {
             loadFixtureOdds(db);
+            loadPredictions(db);
         }
 
-        try {
-            collection.insertMany(fixtureDBList, new InsertManyOptions().ordered(false));
-            System.out.println("Inserted fixtures: " + fixtureDBList);
-        } catch (MongoException ex) {
-            System.out.println("Error when inserting fixtures: " + ex);
-        }
+        DBUtil.updateFixturesCollection(database, fixtureDBList);
     }
 
     static void handleEventsData(MongoDatabase database, int leagueId) throws Exception {
@@ -131,6 +118,7 @@ public class SportsApiLoader {
         ArrayList<OddsDB> oddsList = new ArrayList<>();
         for (EventDB db : eventDBList) {
             loadEventStats(db);
+            loadManagers(db, eventList);
             OddsDB oddsDB = loadEventOdds(db.eventId);
             if (oddsDB != null) {
                 oddsList.add(oddsDB);
@@ -148,10 +136,26 @@ public class SportsApiLoader {
 
         }
 
-       DBUtil.updateEventsCollection(database, eventDBList);
-       DBUtil.updateIncidentsCollection(database, incidentDBList);
-       DBUtil.updateLineupsCollection(database, lineupDBList);
-       DBUtil.updateOddsCollection(database, oddsList);
+        DBUtil.updateEventsCollection(database, eventDBList);
+        DBUtil.updateIncidentsCollection(database, incidentDBList);
+        DBUtil.updateLineupsCollection(database, lineupDBList);
+        DBUtil.updateOddsCollection(database, oddsList);
+    }
+
+    private static void loadManagers(EventDB db, List<SportsApiClient.Event> eventList) {
+        for (SportsApiClient.Event event : eventList) {
+            if (event.id == db.eventId) {
+                try {
+                    SportsApiClient.Manager manager = sportsApiClient.fetchManager(event.homeCoachId);
+                    db.homeCoach = manager.name;
+                    manager = sportsApiClient.fetchManager(event.awayCoachId);
+                    db.awayCoach = manager.name;
+                } catch (Exception e) {
+                    System.out.println("Error when loading manager for id " + db.eventId);
+                }
+                break;
+            }
+        }
     }
 
     private static void loadFixtureOdds(FixtureDB fixtureDB) throws Exception {
@@ -161,6 +165,11 @@ public class SportsApiLoader {
         fixtureDB.awayWin = eventOdds.odds.awayWin;
         fixtureDB.over25Goals = eventOdds.odds.over25Goals;
         fixtureDB.under25Goals = eventOdds.odds.under25Goals;
+    }
+
+    private static void loadPredictions(FixtureDB db) throws Exception {
+        //SportsApiClient.Prediction response = sportsApiClient.fetchPrediction(db.eventId);
+       // response.markets.overUnder.probOver25
     }
 
     private static void loadEvents(String dateFrom, String dateTo, int leagueId, List<SportsApiClient.Event> eventList) throws Exception {

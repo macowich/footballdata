@@ -1,81 +1,175 @@
 <!DOCTYPE html>
 <html lang="sv">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Fixtures</title>
-<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-<script src="sidemenu-loader.js" data-page="fixtures" defer></script>
-<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="fixtures.css"/>
-<link rel="stylesheet" href="sidemenu.css"/>
-<style>
-  /* ── Layout shell ───────────────────────────────────────────── */
-  body { margin: 0; }
-  #app { display: flex; min-height: 100vh; }
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Fixtures</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script src="sidemenu-loader.js" data-page="fixtures" defer></script>
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="fixtures.css"/>
+  <link rel="stylesheet" href="sidemenu.css"/>
+  <style>
+    body { margin: 0; }
+    #app { display: flex; min-height: 100vh; }
 
-  /* ── Date dropdown ──────────────────────────────────────────── */
-  .date-select-wrap {
-    position: relative;
-    display: flex;
-    align-items: center;
-  }
-  .date-select-wrap .cal-icon {
-    position: absolute;
-    left: 11px;
-    font-size: 15px;
-    pointer-events: none;
-    line-height: 1;
-  }
-  .date-select {
-    appearance: none;
-    -webkit-appearance: none;
-    background: var(--surface, #1a1f2e);
-    border: 1px solid rgba(255,255,255,.1);
-    border-radius: 8px;
-    color: var(--text, #e2e8f0);
-    font-family: 'Figtree', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    padding: 8px 32px 8px 34px;
-    cursor: pointer;
-    outline: none;
-    transition: border-color .15s, background .15s;
-    min-width: 160px;
-  }
-  .date-select:hover { border-color: rgba(255,255,255,.22); }
-  .date-select:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59,130,246,.2); }
-  .date-select option { background: #1a1f2e; color: #e2e8f0; }
-  .date-chevron {
-    position: absolute;
-    right: 10px;
-    font-size: 10px;
-    color: rgba(255,255,255,.4);
-    pointer-events: none;
-  }
-  .clear-date {
-    margin-left: 6px;
-    background: rgba(255,255,255,.06);
-    border: 1px solid rgba(255,255,255,.1);
-    border-radius: 6px;
-    color: rgba(255,255,255,.5);
-    font-size: 13px;
-    padding: 6px 8px;
-    cursor: pointer;
-    transition: background .15s, color .15s;
-    line-height: 1;
-  }
-  .clear-date:hover { background: rgba(255,255,255,.12); color: #fff; }
+    .date-select-wrap { position: relative; display: flex; align-items: center; }
+    .date-select-wrap .cal-icon { position: absolute; left: 11px; font-size: 15px; pointer-events: none; line-height: 1; }
+    .date-select {
+      appearance: none; -webkit-appearance: none;
+      background: var(--surface, #1a1f2e); border: 1px solid rgba(255,255,255,.1);
+      border-radius: 8px; color: var(--text, #e2e8f0);
+      font-family: 'Figtree', sans-serif; font-size: 14px; font-weight: 500;
+      padding: 8px 32px 8px 34px; cursor: pointer; outline: none;
+      transition: border-color .15s, background .15s; min-width: 160px;
+    }
+    .date-select:hover { border-color: rgba(255,255,255,.22); }
+    .date-select:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59,130,246,.2); }
+    .date-select option { background: #1a1f2e; color: #e2e8f0; }
+    .date-chevron { position: absolute; right: 10px; font-size: 10px; color: rgba(255,255,255,.4); pointer-events: none; }
+    .clear-date {
+      margin-left: 6px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+      border-radius: 6px; color: rgba(255,255,255,.5); font-size: 13px;
+      padding: 6px 8px; cursor: pointer; transition: background .15s, color .15s; line-height: 1;
+    }
+    .clear-date:hover { background: rgba(255,255,255,.12); color: #fff; }
 
-  /* Push main content right */
-  .main-content {
-    margin-left: 220px;
-    flex: 1;
-    transition: margin-left .25s cubic-bezier(.4,0,.2,1);
-    min-width: 0;
-  }
-  .main-content.shifted { margin-left: 56px; }
-</style>
+    .main-content { margin-left: 220px; flex: 1; transition: margin-left .25s cubic-bezier(.4,0,.2,1); min-width: 0; }
+    .main-content.shifted { margin-left: 56px; }
+
+    tr.row-hover { cursor: pointer; }
+
+    /* ── Fixture Modal ───────────────────────────── */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(0,0,0,.65);
+      backdrop-filter: blur(4px); display: flex; align-items: center;
+      justify-content: center; z-index: 1000; padding: 24px;
+      animation: backdropIn .18s ease;
+    }
+    @keyframes backdropIn { from { opacity:0 } to { opacity:1 } }
+
+    .fixture-modal {
+      background: var(--surface); border: 1px solid var(--border2);
+      border-radius: 20px; width: 100%; max-width: 560px;
+      max-height: 90vh; overflow-y: auto;
+      animation: modalIn .22s cubic-bezier(.34,1.56,.64,1);
+    }
+    @keyframes modalIn {
+      from { opacity:0; transform:scale(.9) translateY(8px) }
+      to   { opacity:1; transform:scale(1) translateY(0) }
+    }
+
+    .fmodal-header { padding: 22px 24px 0; display: flex; align-items: flex-start; justify-content: space-between; }
+    .fmodal-league { font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:500; letter-spacing:.08em; color:var(--accent); text-transform:uppercase; margin-bottom:3px; }
+    .fmodal-date   { font-family:var(--font); font-size:13px; color:var(--muted); }
+    .fmodal-close  {
+      width:32px; height:32px; border-radius:8px; background:var(--surface2);
+      border:1px solid var(--border); color:var(--muted); font-size:18px;
+      line-height:1; cursor:pointer; display:flex; align-items:center;
+      justify-content:center; transition:all .15s; flex-shrink:0;
+    }
+    .fmodal-close:hover { background:var(--border); color:var(--text); }
+
+    .fmodal-matchup {
+      padding: 24px 24px 20px;
+      display: grid; grid-template-columns: 1fr auto 1fr;
+      align-items: center; gap: 12px;
+    }
+    .fmodal-team { display:flex; flex-direction:column; align-items:center; gap:8px; }
+    .fmodal-team-avatar {
+      width:52px; height:52px; border-radius:14px;
+      background:var(--surface2); border:1.5px solid var(--border2);
+      display:flex; align-items:center; justify-content:center;
+      font-family:'JetBrains Mono',monospace; font-size:20px; font-weight:700; color:var(--accent);
+    }
+    .fmodal-team-name { font-family:var(--font); font-size:14px; font-weight:700; color:var(--text); text-align:center; line-height:1.2; }
+    .fmodal-vs-box { display:flex; flex-direction:column; align-items:center; gap:6px; }
+    .fmodal-vs { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--muted); letter-spacing:.06em; text-transform:uppercase; }
+    .fmodal-kickoff { font-family:'JetBrains Mono',monospace; font-size:22px; font-weight:700; color:var(--text); }
+    .fmodal-date-badge {
+      font-family:var(--font); font-size:12px; color:var(--muted);
+      background:var(--surface2); border:1px solid var(--border);
+      border-radius:6px; padding:3px 9px; white-space:nowrap;
+    }
+
+    .fmodal-odds-row { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; padding:0 24px 20px; }
+    .fmodal-odd-card { background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:10px 12px; display:flex; flex-direction:column; gap:3px; }
+    .fmodal-odd-label { font-family:var(--font); font-size:11px; color:var(--muted); }
+    .fmodal-odd-value { font-family:'JetBrains Mono',monospace; font-size:20px; font-weight:700; color:var(--text); }
+    .fmodal-odd-value.fav  { color:var(--green); }
+    .fmodal-odd-value.long { color:var(--muted); }
+    .fmodal-odd-pct { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted); }
+
+    .fmodal-divider { height:1px; background:var(--border); margin:0 24px; }
+
+    .fmodal-tabs {
+      display:flex; gap:2px; padding:0 24px;
+      border-bottom:1px solid var(--border);
+      position:sticky; top:0; background:var(--surface); z-index:10;
+    }
+    .fmodal-tab-btn {
+      padding:10px 18px; border:none; background:transparent;
+      font-family:'Figtree',sans-serif; font-size:13px; font-weight:600;
+      color:var(--muted); cursor:pointer;
+      border-bottom:2px solid transparent; margin-bottom:-1px;
+      transition:color .15s, border-color .15s;
+    }
+    .fmodal-tab-btn:hover { color:var(--text); }
+    .fmodal-tab-btn.active { color:var(--accent); border-bottom-color:var(--accent); }
+
+    /* H2H */
+    .h2h-section { padding:20px 24px; }
+    .h2h-summary-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:20px; }
+    .h2h-stat-card { background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:12px 14px; display:flex; flex-direction:column; gap:4px; }
+    .h2h-stat-label { font-family:var(--font); font-size:10px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
+    .h2h-stat-value { font-family:'JetBrains Mono',monospace; font-size:22px; font-weight:700; color:var(--text); line-height:1; }
+
+    .h2h-winbar-wrap { margin-bottom:20px; }
+    .h2h-winbar-labels { display:flex; justify-content:space-between; font-family:var(--font); font-size:12px; color:var(--muted); margin-bottom:6px; }
+    .h2h-winbar-labels strong { font-family:'JetBrains Mono',monospace; color:var(--text); }
+    .h2h-winbar-track { display:flex; height:8px; border-radius:99px; overflow:hidden; }
+    .h2h-bar-home { background:var(--accent); transition:width .6s ease; }
+    .h2h-bar-draw { background:var(--border2); transition:width .6s ease; }
+    .h2h-bar-away { background:#3b82f6; transition:width .6s ease; }
+
+    .h2h-recent-title { font-family:var(--font); font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
+    .h2h-match-row { display:grid; grid-template-columns:1fr auto 1fr auto; align-items:center; gap:8px; padding:9px 0; border-bottom:1px solid var(--border); }
+    .h2h-match-row:last-child { border-bottom:none; }
+    .h2h-team-name { font-family:var(--font); font-size:13px; font-weight:600; color:var(--text); }
+    .h2h-team-name.home-name { text-align:right; }
+    .h2h-score {
+      font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:700; color:var(--text);
+      background:var(--surface2); border:1px solid var(--border);
+      border-radius:7px; padding:3px 10px; white-space:nowrap;
+    }
+    .h2h-date { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted); white-space:nowrap; }
+
+    /* Predictions */
+    .pred-section { padding:20px 24px; }
+    .pred-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px; }
+    .pred-card { background:var(--surface2); border:1px solid var(--border); border-radius:12px; padding:16px; }
+    .pred-card-label { font-family:var(--font); font-size:10px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
+    .pred-card-value { font-family:'JetBrains Mono',monospace; font-size:26px; font-weight:700; color:var(--text); line-height:1; margin-bottom:4px; }
+    .pred-card-sub { font-family:var(--font); font-size:12px; color:var(--muted); }
+
+    .pred-bar-section { display:flex; flex-direction:column; gap:14px; }
+    .pred-bar-row { display:flex; flex-direction:column; gap:6px; }
+    .pred-bar-label-row { display:flex; justify-content:space-between; font-family:var(--font); font-size:13px; color:var(--muted); }
+    .pred-bar-label-row strong { font-family:'JetBrains Mono',monospace; font-weight:600; color:var(--text); }
+    .pred-bar-track { height:7px; background:var(--border); border-radius:99px; overflow:hidden; }
+    .pred-bar-fill { height:100%; border-radius:99px; transition:width .6s ease; }
+    .fill-home  { background:var(--accent); }
+    .fill-draw  { background:var(--muted);  }
+    .fill-away  { background:#3b82f6; }
+    .fill-under { background:#22c55e; }
+    .fill-over  { background:#a855f7; }
+
+    .empty-state { text-align:center; padding:40px 0; color:var(--muted); font-size:14px; }
+    .empty-state .icon { font-size:32px; margin-bottom:8px; }
+    .empty-state strong { display:block; color:var(--text); font-size:15px; margin-bottom:4px; }
+
+    .fmodal-footer { padding:12px 24px 20px; display:flex; justify-content:flex-end; }
+  </style>
 </head>
 <body>
 <div id="app">
@@ -85,194 +179,418 @@
 
   <!-- Main Content -->
   <div class="main-content">
-  <div class="wrapper">
+    <div class="wrapper">
 
-    <!-- Header -->
-    <div class="header">
-      <div class="header-top">
-        <div>
-          <div class="title">Fix<span>tures</span></div>
-          <div class="subtitle">Dagens matcher — localhost:8080/lag</div>
+      <!-- Header -->
+      <div class="header">
+        <div class="header-top">
+          <div>
+            <div class="title">Fix<span>tures</span></div>
+            <div class="subtitle">Kommande matcher — localhost:8080/fixtures</div>
+          </div>
+          <div class="count-badge" v-if="!loading">{{ filtered.length }} / {{ items.length }} poster</div>
         </div>
-        <div class="count-badge" v-if="!loading">{{ filtered.length }} / {{ items.length }} poster</div>
-      </div>
-    </div>
-
-    <!-- Error -->
-    <div class="error-banner" v-if="error">
-      ⚠ {{ error }}
-      <button class="btn btn-secondary btn-sm" style="margin-left:auto" @click="fetchAll">Försök igen</button>
-    </div>
-
-    <!-- Toolbar -->
-    <div class="toolbar">
-      <div class="search-wrap">
-        <span class="search-icon">🔍</span>
-        <input v-model="search" placeholder="Sök på namn eller odds…" />
       </div>
 
-      <!-- Date dropdown -->
-      <div class="date-select-wrap">
-        <span class="cal-icon">📆</span>
-        <select class="date-select" v-model="selectedDate">
-          <option value="">Alla datum</option>
-          <option v-for="d in availableDates" :key="d" :value="d">{{ d }}</option>
-        </select>
-        <span class="date-chevron">▼</span>
-      </div>
-      <button v-if="selectedDate" class="clear-date" @click="selectedDate = ''" title="Rensa datum">✕</button>
-
-      <button class="btn btn-secondary" @click="fetchAll" :disabled="loading">
-        {{ loading ? '…' : '↻ Ladda om' }}
-      </button>
-    </div>
-
-    <!-- Table -->
-    <div class="table-wrap fade-in">
-      <!-- Loading -->
-      <div class="state-box" v-if="loading">
-        <div class="icon">⏳</div>
-        <strong>Hämtar data…</strong>
-        Ansluter till API…
+      <!-- Error -->
+      <div class="error-banner" v-if="error">
+        ⚠ {{ error }}
+        <button class="btn btn-secondary btn-sm" style="margin-left:auto" @click="fetchAll">Försök igen</button>
       </div>
 
-      <!-- Empty -->
-      <div class="state-box" v-else-if="filtered.length === 0 && !error">
-        <div class="icon">📭</div>
-        <strong>Inga resultat</strong>
-        {{ search ? 'Inga poster matchar sökningen.' : 'Det finns inga matcher ännu.' }}
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input v-model="search" placeholder="Sök på namn eller odds…" />
+        </div>
+        <div class="date-select-wrap">
+          <span class="cal-icon">📆</span>
+          <select class="date-select" v-model="selectedDate">
+            <option value="">Alla datum</option>
+            <option v-for="d in availableDates" :key="d" :value="d">{{ d }}</option>
+          </select>
+          <span class="date-chevron">▼</span>
+        </div>
+        <button v-if="selectedDate" class="clear-date" @click="selectedDate = ''" title="Rensa datum">✕</button>
+        <button class="btn btn-secondary" @click="fetchAll" :disabled="loading">
+          {{ loading ? '…' : '↻ Ladda om' }}
+        </button>
       </div>
 
       <!-- Table -->
-      <table v-else>
-        <thead>
+      <div class="table-wrap fade-in">
+        <div class="state-box" v-if="loading">
+          <div class="icon">⏳</div>
+          <strong>Hämtar data…</strong>
+          Ansluter till API…
+        </div>
+        <div class="state-box" v-else-if="filtered.length === 0 && !error">
+          <div class="icon">📭</div>
+          <strong>Inga resultat</strong>
+          {{ search ? 'Inga poster matchar sökningen.' : 'Det finns inga matcher ännu.' }}
+        </div>
+        <table v-else>
+          <thead>
           <tr>
-            <th @click="setSort('leagueId')" style="cursor:pointer;user-select:none">League {{ sortIcon('leagueId') }}</th>
-            <th @click="setSort('date')" style="cursor:pointer;user-select:none">Date &amp; Time {{ sortIcon('date') }}</th>
-            <th>Home / Away</th>
-            <th>Referee</th>
-            <th>Home</th>
-            <th>Draw</th>
-            <th>Away</th>
+            <th @click="setSort('leagueId')" style="cursor:pointer;user-select:none">Liga {{ sortIcon('leagueId') }}</th>
+            <th @click="setSort('date')" style="cursor:pointer;user-select:none">Datum &amp; Tid {{ sortIcon('date') }}</th>
+            <th>Hemma / Borta</th>
+            <th>Domare</th>
+            <th>1</th>
+            <th>X</th>
+            <th>2</th>
             <th @click="setSort('under25Goals')" style="cursor:pointer;user-select:none">U2.5 {{ sortIcon('under25Goals') }}</th>
-            <th @click="setSort('over25Goals')" style="cursor:pointer;user-select:none">O2.5 {{ sortIcon('over25Goals') }}</th>
+            <th @click="setSort('over25Goals')" style="cursor:pointer;user-select:none">Ö2.5 {{ sortIcon('over25Goals') }}</th>
           </tr>
-        </thead>
-        <tbody>
-          <tr class="row-hover" v-for="item in filtered" :key="item.id">
+          </thead>
+          <tbody>
+          <tr class="row-hover" v-for="item in filtered" :key="item.id" @click="openModal(item.eventId)">
             <td>{{ getLeagueName(item.leagueId) || '—' }}</td>
-            <td style="white-space: nowrap;">
+            <td style="white-space:nowrap">
               <strong>{{ item.date || '—' }}</strong>
-              <span style="color:var(--muted)">{{ item.time }}</span>
+              <span style="color:var(--muted)"> {{ item.time }}</span>
             </td>
             <td>
               <div><span class="odds-chip green" v-if="item.hometeam">{{ item.hometeam }}</span><span v-else style="color:var(--muted)">—</span></div>
-              <div><span class="odds-chip orange" v-if="item.awayteam">{{ item.awayteam }}</span><span v-else style="color:var(--muted)">—</span></div>
+              <div style="margin-top:3px"><span class="odds-chip orange" v-if="item.awayteam">{{ item.awayteam }}</span><span v-else style="color:var(--muted)">—</span></div>
             </td>
-            <td>{{ item.referee || '—' }}</td>
-            <td>{{ item.homeWin || '—' }}</td>
-            <td>{{ item.draw || '—' }}</td>
-            <td>{{ item.awayWin || '—' }}</td>
-            <td>{{ item.under25Goals || '—' }}</td>
-            <td>{{ item.over25Goals || '—' }}</td>
+            <td style="color:var(--muted);font-size:13px">{{ item.referee || '—' }}</td>
+            <td style="font-family:'JetBrains Mono',monospace;font-size:13px">{{ item.homeWin || '—' }}</td>
+            <td style="font-family:'JetBrains Mono',monospace;font-size:13px">{{ item.draw || '—' }}</td>
+            <td style="font-family:'JetBrains Mono',monospace;font-size:13px">{{ item.awayWin || '—' }}</td>
+            <td style="font-family:'JetBrains Mono',monospace;font-size:13px">{{ item.under25Goals || '—' }}</td>
+            <td style="font-family:'JetBrains Mono',monospace;font-size:13px">{{ item.over25Goals || '—' }}</td>
           </tr>
-        </tbody>
-      </table>
-    </div>
+          </tbody>
+        </table>
+      </div>
 
+    </div>
   </div>
-  </div><!-- /main-content -->
+
+  <!-- ── Fixture Preview Modal ─────────────────────────────────── -->
+  <div class="modal-backdrop" v-if="modalOpen" @click.self="closeModal">
+    <div class="fixture-modal">
+
+      <div class="state-box" v-if="modalLoading" style="padding:48px">
+        <div class="icon">⏳</div>
+        <strong>Hämtar matchinfo…</strong>
+      </div>
+
+      <template v-else-if="fixture">
+
+        <!-- Header -->
+        <div class="fmodal-header">
+          <div>
+            <div class="fmodal-league">{{ getLeagueName(fixture.leagueId) }}</div>
+            <div class="fmodal-date">Kommande match · #{{ fixture.eventId }}</div>
+          </div>
+          <button class="fmodal-close" @click="closeModal">✕</button>
+        </div>
+
+        <!-- Teams matchup -->
+        <div class="fmodal-matchup">
+          <div class="fmodal-team">
+            <div class="fmodal-team-avatar">{{ fixture.hometeam?.[0] }}</div>
+            <div class="fmodal-team-name">{{ fixture.hometeam }}</div>
+          </div>
+          <div class="fmodal-vs-box">
+            <span class="fmodal-vs">vs</span>
+            <span class="fmodal-kickoff">{{ fixture.time }}</span>
+            <span class="fmodal-date-badge">{{ fixture.date }}</span>
+          </div>
+          <div class="fmodal-team">
+            <div class="fmodal-team-avatar">{{ fixture.awayteam?.[0] }}</div>
+            <div class="fmodal-team-name">{{ fixture.awayteam }}</div>
+          </div>
+        </div>
+
+        <!-- Odds row -->
+        <div class="fmodal-odds-row" v-if="fixture.homeWin || fixture.draw || fixture.awayWin">
+          <div class="fmodal-odd-card">
+            <div class="fmodal-odd-label">1 Hemmaseger</div>
+            <div class="fmodal-odd-value" :class="oddClass('home', fixture)">{{ fixture.homeWin ?? '—' }}</div>
+            <div class="fmodal-odd-pct" v-if="fixture.homeWin">{{ impliedPct(fixture.homeWin) }}% sannolikhet</div>
+          </div>
+          <div class="fmodal-odd-card">
+            <div class="fmodal-odd-label">X Oavgjort</div>
+            <div class="fmodal-odd-value" :class="oddClass('draw', fixture)">{{ fixture.draw ?? '—' }}</div>
+            <div class="fmodal-odd-pct" v-if="fixture.draw">{{ impliedPct(fixture.draw) }}% sannolikhet</div>
+          </div>
+          <div class="fmodal-odd-card">
+            <div class="fmodal-odd-label">2 Bortaseger</div>
+            <div class="fmodal-odd-value" :class="oddClass('away', fixture)">{{ fixture.awayWin ?? '—' }}</div>
+            <div class="fmodal-odd-pct" v-if="fixture.awayWin">{{ impliedPct(fixture.awayWin) }}% sannolikhet</div>
+          </div>
+        </div>
+
+        <div class="fmodal-divider"></div>
+
+        <!-- Tabs -->
+        <div class="fmodal-tabs">
+          <button class="fmodal-tab-btn" :class="{ active: modalTab === 'h2h' }" @click="modalTab = 'h2h'">Head to Head</button>
+          <button class="fmodal-tab-btn" :class="{ active: modalTab === 'predictions' }" @click="modalTab = 'predictions'">Predictions</button>
+        </div>
+
+        <!-- H2H tab -->
+        <div v-if="modalTab === 'h2h'" class="h2h-section">
+          <template v-if="fixture.headToHead">
+            <div class="h2h-summary-grid">
+              <div class="h2h-stat-card">
+                <div class="h2h-stat-label">Matcher totalt</div>
+                <div class="h2h-stat-value">{{ fixture.headToHead.totalMatches }}</div>
+              </div>
+              <div class="h2h-stat-card">
+                <div class="h2h-stat-label">Avg mål/match</div>
+                <div class="h2h-stat-value">{{ fixture.headToHead.avgTotalGoals }}</div>
+              </div>
+              <div class="h2h-stat-card">
+                <div class="h2h-stat-label">Mål totalt</div>
+                <div class="h2h-stat-value">{{ fixture.headToHead.homeGoals + fixture.headToHead.awayGoals }}</div>
+              </div>
+            </div>
+
+            <div class="h2h-winbar-wrap">
+              <div class="h2h-winbar-labels">
+                <span>{{ fixture.hometeam }} <strong>{{ fixture.headToHead.homeWins }}V</strong></span>
+                <span>{{ fixture.headToHead.draws }}X</span>
+                <span><strong>{{ fixture.headToHead.awayWins }}V</strong> {{ fixture.awayteam }}</span>
+              </div>
+              <div class="h2h-winbar-track">
+                <div class="h2h-bar-home" :style="{ width: winPct(fixture.headToHead.homeWins, fixture.headToHead.totalMatches) + '%' }"></div>
+                <div class="h2h-bar-draw" :style="{ width: winPct(fixture.headToHead.draws,    fixture.headToHead.totalMatches) + '%' }"></div>
+                <div class="h2h-bar-away" :style="{ width: winPct(fixture.headToHead.awayWins, fixture.headToHead.totalMatches) + '%' }"></div>
+              </div>
+            </div>
+
+            <div class="h2h-recent-title">Senaste möten</div>
+            <div class="h2h-match-row" v-for="m in fixture.headToHead.recentMatches" :key="m.date + m.score">
+              <div class="h2h-team-name home-name">{{ m.home }}</div>
+              <div class="h2h-score">{{ m.score }}</div>
+              <div class="h2h-team-name">{{ m.away }}</div>
+              <div class="h2h-date">{{ m.date }}</div>
+            </div>
+          </template>
+          <div v-else class="empty-state">
+            <div class="icon">📊</div>
+            <strong>Ingen H2H-data</strong>
+            Ingen historik hittades för detta möte.
+          </div>
+        </div>
+
+        <!-- Predictions tab -->
+        <div v-if="modalTab === 'predictions'" class="pred-section">
+          <div v-if="predLoading" class="empty-state">
+            <div class="icon">⏳</div>
+            <strong>Hämtar predictions…</strong>
+          </div>
+          <template v-else-if="prediction">
+            <div class="pred-grid">
+              <div class="pred-card">
+                <div class="pred-card-label">1 Hemmaseger</div>
+                <div class="pred-card-value">{{ prediction.homeWin }}</div>
+                <div class="pred-card-sub">{{ impliedPct(prediction.homeWin) }}% sannolikhet</div>
+              </div>
+              <div class="pred-card">
+                <div class="pred-card-label">X Oavgjort</div>
+                <div class="pred-card-value">{{ prediction.draw }}</div>
+                <div class="pred-card-sub">{{ impliedPct(prediction.draw) }}% sannolikhet</div>
+              </div>
+              <div class="pred-card">
+                <div class="pred-card-label">2 Bortaseger</div>
+                <div class="pred-card-value">{{ prediction.awayWin }}</div>
+                <div class="pred-card-sub">{{ impliedPct(prediction.awayWin) }}% sannolikhet</div>
+              </div>
+              <div class="pred-card">
+                <div class="pred-card-label">Avg mål H2H</div>
+                <div class="pred-card-value" style="font-size:22px">{{ fixture.headToHead?.avgTotalGoals ?? '—' }}</div>
+                <div class="pred-card-sub">per match historiskt</div>
+              </div>
+            </div>
+            <div class="pred-bar-section">
+              <div class="pred-bar-row">
+                <div class="pred-bar-label-row"><span>🏠 Hemmaseger</span><strong>{{ impliedPct(prediction.homeWin) }}%</strong></div>
+                <div class="pred-bar-track"><div class="pred-bar-fill fill-home" :style="{ width: impliedPct(prediction.homeWin) + '%' }"></div></div>
+              </div>
+              <div class="pred-bar-row">
+                <div class="pred-bar-label-row"><span>🤝 Oavgjort</span><strong>{{ impliedPct(prediction.draw) }}%</strong></div>
+                <div class="pred-bar-track"><div class="pred-bar-fill fill-draw" :style="{ width: impliedPct(prediction.draw) + '%' }"></div></div>
+              </div>
+              <div class="pred-bar-row">
+                <div class="pred-bar-label-row"><span>✈️ Bortaseger</span><strong>{{ impliedPct(prediction.awayWin) }}%</strong></div>
+                <div class="pred-bar-track"><div class="pred-bar-fill fill-away" :style="{ width: impliedPct(prediction.awayWin) + '%' }"></div></div>
+              </div>
+              <div class="pred-bar-row" v-if="prediction.u25">
+                <div class="pred-bar-label-row"><span>Under 2.5 mål</span><strong>{{ impliedPct(prediction.u25) }}%</strong></div>
+                <div class="pred-bar-track"><div class="pred-bar-fill fill-under" :style="{ width: impliedPct(prediction.u25) + '%' }"></div></div>
+              </div>
+              <div class="pred-bar-row" v-if="prediction.o25">
+                <div class="pred-bar-label-row"><span>Över 2.5 mål</span><strong>{{ impliedPct(prediction.o25) }}%</strong></div>
+                <div class="pred-bar-track"><div class="pred-bar-fill fill-over" :style="{ width: impliedPct(prediction.o25) + '%' }"></div></div>
+              </div>
+            </div>
+          </template>
+          <div v-else class="empty-state">
+            <div class="icon">🔮</div>
+            <strong>Inga predictions</strong>
+            Prediktionsdata saknas för denna match.
+          </div>
+        </div>
+
+        <div class="fmodal-footer">
+          <button class="btn btn-secondary" @click="closeModal">Stäng</button>
+        </div>
+
+      </template>
+    </div>
+  </div>
+
 </div>
 
 <script>
-const { createApp, ref, computed, onMounted } = Vue;
+  const { createApp, ref, computed, onMounted } = Vue;
 
-createApp({
-  setup() {
-    const API = 'http://localhost:8080/fixtures/all';
-    const items = ref([]);
-    const loading = ref(false);
-    const error = ref('');
-    const search = ref('');
-    const selectedDate = ref('');
-    const leagues = ref([
-      { id: 1,  name: 'Premier League' },
-      { id: 26, name: 'Allsvenskan'    },
-    ]);
+  createApp({
+    setup() {
+      const API          = 'http://localhost:8080/fixtures/all';
+      const FIXTURE_API  = 'http://localhost:8080/fixtures/id';
+      const PRED_API     = 'http://localhost:8080/predictions';
 
-    const getLeagueName = computed(() => {
-      return (id) => {
-        const league = leagues.value.find(item => item.id === id)
-        return league ? league.name : 'Okänd liga'
-      }
-    })
+      const items   = ref([]);
+      const loading = ref(false);
+      const error   = ref('');
+      const search  = ref('');
+      const selectedDate = ref('');
+      const leagues = ref([
+        { id: 1,  name: 'Premier League' },
+        { id: 26, name: 'Allsvenskan'    },
+      ]);
 
-    const availableDates = computed(() => {
-      const dates = [...new Set(items.value.map(i => i.date).filter(Boolean))];
-      return dates.sort((a, b) => new Date(a) - new Date(b));
-    });
+      const modalOpen    = ref(false);
+      const modalLoading = ref(false);
+      const fixture      = ref(null);
+      const modalTab     = ref('h2h');
+      const prediction   = ref(null);
+      const predLoading  = ref(false);
 
-    const sortKey = ref('');
-    const sortDir = ref(1);
-
-    function setSort(key) {
-      if (sortKey.value === key) sortDir.value *= -1;
-      else { sortKey.value = key; sortDir.value = 1; }
-    }
-
-    function sortIcon(key) {
-      if (sortKey.value !== key) return '\u2195';
-      return sortDir.value === 1 ? '\u2191' : '\u2193';
-    }
-
-    const filtered = computed(() => {
-      const q = search.value.toLowerCase().trim();
-      const d = selectedDate.value;
-      const s = v => String(v ?? '').toLowerCase();
-      let rows = items.value;
-      if (d) {
-        rows = rows.filter(i => i.date === d);
-      }
-      if (q) {
-        rows = rows.filter(i =>
-          s(i.date).includes(q) || s(i.time).includes(q) ||
-          s(i.leagueId).includes(q) || s(i.hometeam).includes(q) ||
-          s(i.awayteam).includes(q) || s(i.referee).includes(q) ||
-          s(i.homeWin).includes(q) || s(i.draw).includes(q) ||
-          s(i.awayWin).includes(q) || s(i.under25goals).includes(q) ||
-          s(i.over25goals).includes(q)
-        );
-      }
-      if (!sortKey.value) return rows;
-      const key = sortKey.value;
-      const dir = sortDir.value;
-      return [...rows].sort((a, b) => {
-        const av = a[key] ?? '', bv = b[key] ?? '';
-        const an = parseFloat(av), bn = parseFloat(bv);
-        if (!isNaN(an) && !isNaN(bn)) return (an - bn) * dir;
-        return String(av).localeCompare(String(bv)) * dir;
+      const getLeagueName = computed(() => (id) => {
+        const l = leagues.value.find(x => x.id === id);
+        return l ? l.name : 'Okänd liga';
       });
-    });
 
-    async function fetchAll() {
-      loading.value = true;
-      error.value = '';
-      try {
-        const res = await fetch(API);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        items.value = await res.json();
-      } catch(e) {
-        error.value = `Kunde inte hämta data: ${e.message}. Kontrollera att API:et körs på ${API}.`;
-      } finally {
-        loading.value = false;
+      const availableDates = computed(() => {
+        const dates = [...new Set(items.value.map(i => i.date).filter(Boolean))];
+        return dates.sort((a, b) => new Date(a) - new Date(b));
+      });
+
+      const sortKey = ref('');
+      const sortDir = ref(1);
+      function setSort(key) {
+        if (sortKey.value === key) sortDir.value *= -1;
+        else { sortKey.value = key; sortDir.value = 1; }
       }
+      function sortIcon(key) {
+        if (sortKey.value !== key) return '\u2195';
+        return sortDir.value === 1 ? '\u2191' : '\u2193';
+      }
+
+      function impliedPct(odds) {
+        const o = parseFloat(odds);
+        if (!o || o <= 0) return 0;
+        return Math.round((1 / o) * 100);
+      }
+      function winPct(wins, total) {
+        if (!total) return 0;
+        return Math.round((wins / total) * 100);
+      }
+      function oddClass(side, f) {
+        if (!f) return '';
+        const vals = [f.homeWin, f.draw, f.awayWin].filter(v => v != null);
+        if (!vals.length) return '';
+        const min = Math.min(...vals);
+        const val = side === 'home' ? f.homeWin : side === 'draw' ? f.draw : f.awayWin;
+        if (val === min) return 'fav';
+        if (val >= 5) return 'long';
+        return '';
+      }
+
+      const filtered = computed(() => {
+        const q = search.value.toLowerCase().trim();
+        const d = selectedDate.value;
+        const s = v => String(v ?? '').toLowerCase();
+        let rows = items.value;
+        if (d) rows = rows.filter(i => i.date === d);
+        if (q) rows = rows.filter(i =>
+                s(i.date).includes(q) || s(i.time).includes(q) ||
+                s(i.leagueId).includes(q) || s(i.hometeam).includes(q) ||
+                s(i.awayteam).includes(q) || s(i.referee).includes(q) ||
+                s(i.homeWin).includes(q) || s(i.draw).includes(q) ||
+                s(i.awayWin).includes(q)
+        );
+        if (!sortKey.value) return rows;
+        const key = sortKey.value, dir = sortDir.value;
+        return [...rows].sort((a, b) => {
+          const av = a[key] ?? '', bv = b[key] ?? '';
+          const an = parseFloat(av), bn = parseFloat(bv);
+          if (!isNaN(an) && !isNaN(bn)) return (an - bn) * dir;
+          return String(av).localeCompare(String(bv)) * dir;
+        });
+      });
+
+      async function fetchAll() {
+        loading.value = true; error.value = '';
+        try {
+          const res = await fetch(API);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          items.value = await res.json();
+        } catch(e) {
+          error.value = `Kunde inte hämta data: ${e.message}. Kontrollera att API:et körs på ${API}.`;
+        } finally {
+          loading.value = false;
+        }
+      }
+
+      async function fetchPrediction(eventId) {
+        predLoading.value = true; prediction.value = null;
+        try {
+          const res = await fetch(`${PRED_API}/${eventId}`);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          prediction.value = await res.json();
+        } catch(e) {
+          prediction.value = null;
+        } finally {
+          predLoading.value = false;
+        }
+      }
+
+      async function openModal(eventId) {
+        modalOpen.value = true; modalLoading.value = true;
+        fixture.value = null; prediction.value = null; modalTab.value = 'h2h';
+        try {
+          const res = await fetch(`${FIXTURE_API}/${eventId}`);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          fixture.value = await res.json();
+          fetchPrediction(eventId);
+        } catch(e) {
+          modalOpen.value = false;
+        } finally {
+          modalLoading.value = false;
+        }
+      }
+
+      function closeModal() { modalOpen.value = false; fixture.value = null; prediction.value = null; }
+
+      onMounted(fetchAll);
+
+      return {
+        items, loading, error, search, selectedDate, availableDates,
+        filtered, fetchAll, sortKey, sortDir, setSort, sortIcon, getLeagueName,
+        modalOpen, modalLoading, fixture, modalTab, prediction, predLoading,
+        openModal, closeModal, impliedPct, winPct, oddClass,
+      };
     }
-
-    onMounted(fetchAll);
-
-    return { items, loading, error, search, selectedDate, availableDates, filtered, fetchAll, sortKey, sortDir, setSort, sortIcon, getLeagueName };
-  }
-}).mount('#app');
+  }).mount('#app');
 </script>
 </body>
 </html>

@@ -9,7 +9,7 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         EventStatsClient client = new EventStatsClient();
-        EventStats event = client.fetchEventStats(46322);
+        EventStats event = client.fetchEventStats(46388);
 
         System.out.println("Event ID: " + event.eventId);
         System.out.println();

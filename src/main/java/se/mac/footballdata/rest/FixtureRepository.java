@@ -5,6 +5,7 @@ import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;
 import se.mac.footballdata.rest.model.Event;
 import se.mac.footballdata.rest.model.Fixture;
+import se.mac.footballdata.rest.model.Lineup;
 
 import java.util.List;
 
@@ -21,5 +22,9 @@ public class FixtureRepository implements PanacheMongoRepository<Fixture> {
                 Sort.by("date").descending(),
                 team
         ).list();
+    }
+
+    public Fixture findByEventId(int eventId) {
+        return find("eventId", eventId).singleResult();
     }
 }

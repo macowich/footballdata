@@ -382,7 +382,7 @@
               <th style="width:48px">#</th>
               <th>Spelare</th>
               <th>Position</th>
-              <th>Nationalitet</th>
+              <th style="text-align:center;width:48px">🌍</th>
               <th style="text-align:right">Rating</th>
             </tr>
             </thead>
@@ -402,7 +402,19 @@
                     <span style="display:inline-block;padding:2px 9px;border-radius:5px;font-family:var(--mono),serif;font-size:11px;font-weight:600"
                           :style="posStyle(p.position)">{{ posLabel(p.position) }}</span>
                 </td>
-                <td style="font-size:13px;color:var(--muted)">{{ p.nationality }}</td>
+                <td style="text-align:center">
+                  <img
+                          v-if="nationalityCode(p.nationality)"
+                          :src="`https://flagcdn.com/20x15/${nationalityCode(p.nationality)}.png`"
+                          :srcset="`https://flagcdn.com/40x30/${nationalityCode(p.nationality)}.png 2x`"
+                          :title="p.nationality"
+                          :alt="p.nationality"
+                          style="width:20px;height:15px;border-radius:2px;display:inline-block;vertical-align:middle"
+                   alt="flags"/>
+                  <span v-else style="font-family:var(--mono),serif;font-size:11px;color:var(--muted)"
+                        :title="p.nationality">{{ p.nationality ? p.nationality.slice(0,3).toUpperCase() : '—' }}
+                  </span>
+                </td>
                 <td style="text-align:right">
                     <span v-if="p.rating > 0"
                           style="font-family:var(--mono),serif;font-size:13px;font-weight:700;padding:2px 9px;border-radius:5px"
@@ -581,6 +593,93 @@ createApp({
 
     onMounted(fetchTeam);
 
+    const NATIONALITY_CODES = {
+      'Sweden': 'se', 'Sverige': 'se',
+      'Norway': 'no', 'Norge': 'no',
+      'Denmark': 'dk', 'Danmark': 'dk',
+      'Finland': 'fi',
+      'Iceland': 'is', 'Island': 'is',
+      'England': 'gb-eng', 'Scotland': 'gb-sct', 'Wales': 'gb-wls', 'Great Britain': 'gb',
+      'Germany': 'de', 'Deutschland': 'de',
+      'France': 'fr',
+      'Spain': 'es',
+      'Portugal': 'pt',
+      'Italy': 'it',
+      'Netherlands': 'nl', 'Holland': 'nl',
+      'Belgium': 'be',
+      'Switzerland': 'ch',
+      'Austria': 'at',
+      'Poland': 'pl',
+      'Czech Republic': 'cz', 'Czechia': 'cz',
+      'Slovakia': 'sk',
+      'Hungary': 'hu',
+      'Romania': 'ro',
+      'Croatia': 'hr',
+      'Serbia': 'rs',
+      'Bosnia and Herzegovina': 'ba', 'Bosnia': 'ba',
+      'Slovenia': 'si',
+      'Albania': 'al',
+      'Kosovo': 'xk',
+      'Montenegro': 'me',
+      'North Macedonia': 'mk',
+      'Greece': 'gr',
+      'Turkey': 'tr',
+      'Russia': 'ru',
+      'Ukraine': 'ua',
+      'Belarus': 'by',
+      'Lithuania': 'lt',
+      'Latvia': 'lv',
+      'Estonia': 'ee',
+      'Bulgaria': 'bg',
+      'Moldova': 'md',
+      'Georgia': 'ge',
+      'Armenia': 'am',
+      'Azerbaijan': 'az',
+      'Brazil': 'br',
+      'Argentina': 'ar',
+      'Colombia': 'co',
+      'Uruguay': 'uy',
+      'Chile': 'cl',
+      'Peru': 'pe',
+      'Ecuador': 'ec',
+      'Paraguay': 'py',
+      'Bolivia': 'bo',
+      'Venezuela': 've',
+      'Mexico': 'mx',
+      'USA': 'us', 'United States': 'us',
+      'Canada': 'ca',
+      'Costa Rica': 'cr',
+      'Honduras': 'hn',
+      'Jamaica': 'jm',
+      'Senegal': 'sn',
+      'Nigeria': 'ng',
+      'Ghana': 'gh',
+      'Ivory Coast': 'ci', "Côte d'Ivoire": 'ci',
+      'Cameroon': 'cm',
+      'Mali': 'ml',
+      'Guinea': 'gn',
+      'Morocco': 'ma',
+      'Algeria': 'dz',
+      'Tunisia': 'tn',
+      'Egypt': 'eg',
+      'South Africa': 'za',
+      'Japan': 'jp',
+      'South Korea': 'kr',
+      'China': 'cn',
+      'Australia': 'au',
+      'Iran': 'ir',
+      'Saudi Arabia': 'sa',
+    };
+
+    function nationalityCode(nationality) {
+      if (!nationality) return null;
+      if (NATIONALITY_CODES[nationality]) return NATIONALITY_CODES[nationality];
+      const lower = nationality.toLowerCase();
+      for (const [key, code] of Object.entries(NATIONALITY_CODES)) {
+        if (key.toLowerCase() === lower) return code;
+      }
+      return null;
+    }
     return {
       teamName, team, loading, error, tab,
       results, resultsLoading, resultsError,
@@ -588,7 +687,7 @@ createApp({
       fetchTeam, fetchSquad, switchTab,
       squad, squadLoading, squadError, squadByPosition,
       pct, teamNameSplit, outcomeLabel, outcomeStyle,
-      posLabel, posStyle, ratingStyle
+      posLabel, posStyle, ratingStyle, nationalityCode
     };
   }
 }).mount('#app');

@@ -339,6 +339,8 @@
   .lineup-empty .lineup-empty-icon { font-size: 28px; margin-bottom: 8px; }
   .lineup-empty strong { display: block; color: var(--text); font-size: 14px; margin-bottom: 4px; }
 
+
+
   .modal-footer {
     padding: 12px 24px 20px;
     display: flex; align-items: center; justify-content: space-between;
@@ -741,6 +743,8 @@
             </div>
           </div>
 
+
+
           <!-- Two-column player lists -->
           <div class="lineup-cols">
             <!-- Home -->
@@ -788,6 +792,27 @@
                 <span class="lineup-pos-badge" :class="'pos-' + p.position">{{ p.position }}</span>
                 <span class="lineup-player-name sub">{{ p.name }}</span>
                 <span class="lineup-jersey sub">{{ p.jerseyNumber || '—' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Coaches -->
+          <div v-if="detail?.homeCoach || detail?.awayCoach" class="lineup-subs-header">
+            <span>🧥</span> Tränare
+          </div>
+          <div v-if="detail?.homeCoach || detail?.awayCoach" class="lineup-cols">
+            <div class="lineup-col">
+              <div v-if="detail?.homeCoach" class="lineup-player-row">
+                <span class="lineup-jersey empty">—</span>
+                <span class="lineup-player-name" style="font-weight:600">{{ detail.homeCoach }}</span>
+                <span class="lineup-pos-badge" style="background:rgba(200,80,26,.10);color:var(--accent);border:1px solid rgba(200,80,26,.2)">HC</span>
+              </div>
+            </div>
+            <div class="lineup-col lineup-col-away">
+              <div v-if="detail?.awayCoach" class="lineup-player-row lineup-player-row-away">
+                <span class="lineup-pos-badge" style="background:rgba(249,115,22,.10);color:#f97316;border:1px solid rgba(249,115,22,.2)">AC</span>
+                <span class="lineup-player-name" style="font-weight:600">{{ detail.awayCoach }}</span>
+                <span class="lineup-jersey empty">—</span>
               </div>
             </div>
           </div>
