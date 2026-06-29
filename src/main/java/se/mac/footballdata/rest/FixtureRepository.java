@@ -4,6 +4,7 @@ import io.quarkus.mongodb.panache.PanacheMongoRepository;
 import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;
 import se.mac.footballdata.rest.model.Fixture;
+import se.mac.footballdata.rest.model.Lineup;
 
 import java.util.List;
 
