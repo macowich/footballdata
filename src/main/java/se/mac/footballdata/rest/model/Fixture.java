@@ -4,6 +4,7 @@ import io.quarkus.mongodb.panache.PanacheMongoEntity;
 import io.quarkus.mongodb.panache.common.MongoEntity;
 import se.mac.footballdata.sportsapi.db.HeadToHeadDB;
 import se.mac.footballdata.sportsapi.db.MatchPredictionDB;
+import se.mac.footballdata.sportsapi.db.OddsDB;
 
 @MongoEntity(collection = "fixtures")
 public class Fixture extends PanacheMongoEntity
@@ -23,15 +24,7 @@ public class Fixture extends PanacheMongoEntity
 
    public String referee;
 
-   public double homeWin;
-
-   public double draw;
-
-   public double awayWin;
-
-   public double over25Goals;
-
-   public double under25Goals;
+   public OddsDB odds;
 
    public HeadToHeadDB headToHead;
 

@@ -240,8 +240,9 @@
             <th>1</th>
             <th>X</th>
             <th>2</th>
-            <th @click="setSort('under25Goals')" style="cursor:pointer;user-select:none">U2.5 {{ sortIcon('under25Goals') }}</th>
             <th @click="setSort('over25Goals')" style="cursor:pointer;user-select:none">Ö2.5 {{ sortIcon('over25Goals') }}</th>
+            <th @click="setSort('under25Goals')" style="cursor:pointer;user-select:none">U2.5 {{ sortIcon('under25Goals') }}</th>
+            <th @click="setSort('bttsYes')" style="cursor:pointer;user-select:none">BTTS J/N {{ sortIcon('bttsYes') }}</th>
           </tr>
           </thead>
           <tbody>
@@ -256,11 +257,17 @@
               <div style="margin-top:3px"><span class="odds-chip orange" v-if="item.awayteam">{{ item.awayteam }}</span><span v-else style="color:var(--muted)">—</span></div>
             </td>
             <td style="color:var(--muted);font-size:13px">{{ item.referee || '—' }}</td>
-            <td style="font-family:'JetBrains Mono',monospace;font-size:13px">{{ item.homeWin || '—' }}</td>
-            <td style="font-family:'JetBrains Mono',monospace;font-size:13px">{{ item.draw || '—' }}</td>
-            <td style="font-family:'JetBrains Mono',monospace;font-size:13px">{{ item.awayWin || '—' }}</td>
-            <td style="font-family:'JetBrains Mono',monospace;font-size:13px">{{ item.under25Goals || '—' }}</td>
-            <td style="font-family:'JetBrains Mono',monospace;font-size:13px">{{ item.over25Goals || '—' }}</td>
+            <td style="font-family:'JetBrains Mono',monospace;font-size:13px">{{ item.odds?.homeWin || '—' }}</td>
+            <td style="font-family:'JetBrains Mono',monospace;font-size:13px">{{ item.odds?.draw || '—' }}</td>
+            <td style="font-family:'JetBrains Mono',monospace;font-size:13px">{{ item.odds?.awayWin || '—' }}</td>
+            <td style="font-family:'JetBrains Mono',monospace;font-size:13px">{{ item.odds?.over25Goals || '—' }}</td>
+            <td style="font-family:'JetBrains Mono',monospace;font-size:13px">{{ item.odds?.under25Goals || '—' }}</td>
+            <td>
+              <span v-if="item.odds?.bttsYes" style="display:inline-flex;gap:4px;align-items:center;font-family:'JetBrains Mono',monospace;font-size:13px">
+                {{ item.odds.bttsYes }} / {{ item.odds.bttsNo }}
+              </span>
+              <span v-else style="color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:12px">—</span>
+            </td>
           </tr>
           </tbody>
         </table>
@@ -307,23 +314,23 @@
         </div>
 
         <!-- Odds row -->
-        <div v-if="fixture.homeWin || fixture.draw || fixture.awayWin">
+        <div v-if="fixture.odds?.homeWin || fixture.odds?.draw || fixture.odds?.awayWin">
           <div style="padding: 0 24px 8px; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted);">Odds</div>
             <div class="fmodal-odds-row">
             <div class="fmodal-odd-card">
               <div class="fmodal-odd-label">1 Hemmaseger</div>
-              <div class="fmodal-odd-value" :class="oddClass('home', fixture)">{{ fixture.homeWin ?? '—' }}</div>
-              <div class="fmodal-odd-pct" v-if="fixture.homeWin">{{ impliedPct(fixture.homeWin) }}% sannolikhet</div>
+              <div class="fmodal-odd-value" :class="oddClass('home', fixture.odds)">{{ fixture.odds?.homeWin ?? '—' }}</div>
+              <div class="fmodal-odd-pct" v-if="fixture.odds?.homeWin">{{ impliedPct(fixture.odds.homeWin) }}% sannolikhet</div>
             </div>
             <div class="fmodal-odd-card">
               <div class="fmodal-odd-label">X Oavgjort</div>
-              <div class="fmodal-odd-value" :class="oddClass('draw', fixture)">{{ fixture.draw ?? '—' }}</div>
-              <div class="fmodal-odd-pct" v-if="fixture.draw">{{ impliedPct(fixture.draw) }}% sannolikhet</div>
+              <div class="fmodal-odd-value" :class="oddClass('draw', fixture.odds)">{{ fixture.odds?.draw ?? '—' }}</div>
+              <div class="fmodal-odd-pct" v-if="fixture.odds?.draw">{{ impliedPct(fixture.odds.draw) }}% sannolikhet</div>
             </div>
             <div class="fmodal-odd-card">
               <div class="fmodal-odd-label">2 Bortaseger</div>
-              <div class="fmodal-odd-value" :class="oddClass('away', fixture)">{{ fixture.awayWin ?? '—' }}</div>
-              <div class="fmodal-odd-pct" v-if="fixture.awayWin">{{ impliedPct(fixture.awayWin) }}% sannolikhet</div>
+              <div class="fmodal-odd-value" :class="oddClass('away', fixture.odds)">{{ fixture.odds?.awayWin ?? '—' }}</div>
+              <div class="fmodal-odd-pct" v-if="fixture.odds?.awayWin">{{ impliedPct(fixture.odds.awayWin) }}% sannolikhet</div>
             </div>
           </div>
         </div>
@@ -389,17 +396,17 @@
               <div class="pred-card">
                 <div class="pred-card-label">🏠 Hemmaseger</div>
                 <div class="pred-card-value">{{ fixture.matchPrediction.probHome }}%</div>
-                <div class="pred-card-sub">odds {{ fixture.homeWin ?? '—' }}</div>
+                <div class="pred-card-sub">odds {{ fixture.odds?.homeWin ?? '—' }}</div>
               </div>
               <div class="pred-card">
                 <div class="pred-card-label">🤝 Oavgjort</div>
                 <div class="pred-card-value">{{ fixture.matchPrediction.probDraw }}%</div>
-                <div class="pred-card-sub">odds {{ fixture.draw ?? '—' }}</div>
+                <div class="pred-card-sub">odds {{ fixture.odds?.draw ?? '—' }}</div>
               </div>
               <div class="pred-card">
                 <div class="pred-card-label">✈️ Bortaseger</div>
                 <div class="pred-card-value">{{ fixture.matchPrediction.probAway }}%</div>
-                <div class="pred-card-sub">odds {{ fixture.awayWin ?? '—' }}</div>
+                <div class="pred-card-sub">odds {{ fixture.odds?.awayWin ?? '—' }}</div>
               </div>
               <div class="pred-card">
                 <div class="pred-card-label">🎯 Troligast resultat</div>
@@ -510,12 +517,12 @@
         if (!total) return 0;
         return Math.round((wins / total) * 100);
       }
-      function oddClass(side, f) {
-        if (!f) return '';
-        const vals = [f.homeWin, f.draw, f.awayWin].filter(v => v != null);
+      function oddClass(side, odds) {
+        if (!odds) return '';
+        const vals = [odds.homeWin, odds.draw, odds.awayWin].filter(v => v != null);
         if (!vals.length) return '';
         const min = Math.min(...vals);
-        const val = side === 'home' ? f.homeWin : side === 'draw' ? f.draw : f.awayWin;
+        const val = side === 'home' ? odds.homeWin : side === 'draw' ? odds.draw : odds.awayWin;
         if (val === min) return 'fav';
         if (val >= 5) return 'long';
         return '';
@@ -531,13 +538,15 @@
                 s(i.date).includes(q) || s(i.time).includes(q) ||
                 s(i.leagueId).includes(q) || s(i.hometeam).includes(q) ||
                 s(i.awayteam).includes(q) || s(i.referee).includes(q) ||
-                s(i.homeWin).includes(q) || s(i.draw).includes(q) ||
-                s(i.awayWin).includes(q)
+                s(i.odds?.homeWin).includes(q) || s(i.odds?.draw).includes(q) ||
+                s(i.odds?.awayWin).includes(q)
         );
         if (!sortKey.value) return rows;
         const key = sortKey.value, dir = sortDir.value;
         return [...rows].sort((a, b) => {
-          const av = a[key] ?? '', bv = b[key] ?? '';
+          const oddsKeys = ['homeWin', 'draw', 'awayWin', 'under25Goals', 'over25Goals', 'bttsYes', 'bttsNo'];
+          const getVal = (item, k) => oddsKeys.includes(k) ? (item.odds?.[k] ?? '') : (item[k] ?? '');
+          const av = getVal(a, key), bv = getVal(b, key);
           const an = parseFloat(av), bn = parseFloat(bv);
           if (!isNaN(an) && !isNaN(bn)) return (an - bn) * dir;
           return String(av).localeCompare(String(bv)) * dir;

@@ -160,11 +160,15 @@ public class SportsApiLoader {
 
     private static void loadFixtureOdds(FixtureDB fixtureDB) throws Exception {
         SportsApiClient.EventOdds eventOdds = sportsApiClient.fetchEventOdds(fixtureDB.eventId);
-        fixtureDB.homeWin = eventOdds.odds.homeWin;
-        fixtureDB.draw = eventOdds.odds.draw;
-        fixtureDB.awayWin = eventOdds.odds.awayWin;
-        fixtureDB.over25Goals = eventOdds.odds.over25Goals;
-        fixtureDB.under25Goals = eventOdds.odds.under25Goals;
+        OddsDB oddsDB = new OddsDB();
+        oddsDB.homeWin = eventOdds.odds.homeWin;
+        oddsDB.draw = eventOdds.odds.draw;
+        oddsDB.awayWin = eventOdds.odds.awayWin;
+        oddsDB.over25Goals = eventOdds.odds.over25Goals;
+        oddsDB.under25Goals = eventOdds.odds.under25Goals;
+        oddsDB.bttsYes = eventOdds.odds.bttsYes;
+        oddsDB.bttsNo = eventOdds.odds.bttsNo;
+        fixtureDB.odds = oddsDB;
     }
 
     private static void loadPredictions(FixtureDB db) throws Exception {
