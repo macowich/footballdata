@@ -513,7 +513,7 @@ createApp({
     function outcomeLabel(m) {
       const isHome = m.homeTeam === teamName.value;
       const hg = m.fullTimeHomeGoals, ag = m.fullTimeAwayGoals;
-      if (hg === ag) return 'X';
+      if (hg === ag) return 'O';
       if (isHome) return hg > ag ? 'V' : 'F';
       return ag > hg ? 'V' : 'F';
     }

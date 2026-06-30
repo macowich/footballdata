@@ -76,6 +76,7 @@ public class Util {
         int over1Counter = 0;
         int bttsCounter = 0;
         int cleanSheetsCounter = 0;
+        StringBuilder formStr = new StringBuilder();
 
         for (Event match : matches) {
             //TODO
@@ -101,6 +102,17 @@ public class Util {
                 if (match.fullTimeAwayGoals == 0) {
                     cleanSheetsCounter++;
                 }
+
+                if (formStr.length() < 5) {
+                    if (match.fullTimeHomeGoals > match.fullTimeAwayGoals) {
+                        formStr.append("V");
+                    } else if (match.fullTimeHomeGoals < match.fullTimeAwayGoals) {
+                        formStr.append("F");
+                    } else {
+                        formStr.append("O");
+                    }
+                }
+
             } else if (name.equals(match.awayTeam)) {
                 awayGoals += match.fullTimeAwayGoals;
                 awayGoalsConceeded += match.fullTimeHomeGoals;
@@ -118,6 +130,16 @@ public class Util {
                 }
                 if (match.fullTimeHomeGoals == 0) {
                     cleanSheetsCounter++;
+                }
+
+                if (formStr.length() < 5) {
+                    if (match.fullTimeAwayGoals > match.fullTimeHomeGoals) {
+                        formStr.append("V");
+                    } else if (match.fullTimeAwayGoals < match.fullTimeHomeGoals) {
+                        formStr.append("F");
+                    } else {
+                        formStr.append("O");
+                    }
                 }
             }
         }
@@ -212,6 +234,7 @@ public class Util {
         t.over2 = over2Counter;
         t.btts = bttsCounter;
         t.cleanSheets = cleanSheetsCounter;
+        t.form = formStr.toString();
         return t;
     }
 

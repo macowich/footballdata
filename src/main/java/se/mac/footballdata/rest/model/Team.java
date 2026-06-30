@@ -34,6 +34,6 @@ public class Team
    public double avgCorners;// Average
    public double avgCornersHome;
    public double avgCornersAway;
-
+   public String form;
 
 }
