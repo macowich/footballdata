@@ -11,6 +11,7 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,6 +31,26 @@ public class Util {
             55, new League(55, "Finland"),
             1000, new League(1000, "Superettan")
     );
+
+    public static Map<Integer, String> arenas = new HashMap<>();
+    static {
+        arenas.put(427, "Strawberry Arena (Solna) Kapacitet: 50000");
+        arenas.put(388, "Nordic Wellness Arena (Gothenburg) Kapacitet: 6300");
+        arenas.put(422, "Stora Valla (Degerfors) Kapacitet: 7500");
+        arenas.put(416, "3Arena (Stockholm) Kapacitet: 32000");
+        arenas.put(421, "Örjans Vall (Halmstad) Kapacitet: 15500");
+        arenas.put(417, "Grimsta IP (Stockholm) Kapacitet: 7343");
+        arenas.put(419, "Borås Arena (Boras) Kapacitet: 17800");
+        arenas.put(418, "Gamla Ullevi (Gothenburg) Kapacitet: 18416");
+        arenas.put(423, "PlatinumCars Arena (Norrkoping) Kapacitet: 17234");
+        arenas.put(425, "Finnvedsvallen (Varnamo) Kapacitet: 5000");
+        arenas.put(426, "Studenternas IP (Uppsala) Kapacitet: 11167");
+        arenas.put(711, "Guldfageln Arena (Kalmar) Kapacitet: 12500");
+        arenas.put(133, "Eleda Stadium (Malmo) Kapacitet: 22500");
+        arenas.put(420, "Strandvallen (Hallevik) Kapacitet: 6500");
+        arenas.put(424, "Spiris Arena (Vaxjo) Kapacitet: 12000");
+        arenas.put(712, "Hitachi Energy Arena (Vasteras) Kapacitet: 8900");
+    }
 
     public static String getLeagueName(String code) {
         return switch (code) {
@@ -281,6 +302,7 @@ public class Util {
             eventDB.refereeId = event.refereeId;
         }
         eventDB.weather = formatWeather(event);
+        eventDB.venue = Util.arenas.get(event.venueId);
         return eventDB;
     }
 
@@ -423,6 +445,7 @@ public class Util {
         if (event.headToHead != null) {
             fixtureDB.headToHead = createHeadToHeadDB(event.headToHead);
         }
+        fixtureDB.venue = Util.arenas.get(event.venueId);
         return fixtureDB;
     }
 

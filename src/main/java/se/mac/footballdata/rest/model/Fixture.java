@@ -14,6 +14,8 @@ public class Fixture extends PanacheMongoEntity
 
    public int leagueId;
 
+   public String venue;
+
    public String date;
 
    public String time;
@@ -21,6 +23,8 @@ public class Fixture extends PanacheMongoEntity
    public String hometeam;
 
    public String awayteam;
+
+   public int refereeId;
 
    public String referee;
 

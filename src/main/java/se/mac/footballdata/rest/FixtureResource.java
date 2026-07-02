@@ -4,9 +4,11 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import se.mac.footballdata.rest.model.Fixture;
+import se.mac.footballdata.rest.model.Referee;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 
 @Path("/fixtures")
 @Produces(MediaType.APPLICATION_JSON)
@@ -18,6 +20,9 @@ public class FixtureResource {
 
     @Inject
     FixtureRepository repository;
+
+    @Inject
+    RefereeRepository refereeRepository;
 
     @GET
     @Path("/all")
@@ -34,7 +39,12 @@ public class FixtureResource {
     @GET
     @Path("/id/{eventId}")
     public Fixture getFixture(@PathParam("eventId") String eventId) {
-        return repository.findByEventId(Integer.parseInt(eventId));
+        Fixture fixture = repository.findByEventId(Integer.parseInt(eventId));
+
+        Optional<Referee> r = refereeRepository.findByRefereeId(fixture.refereeId);
+        r.ifPresent(referee -> fixture.referee = referee.name);
+
+        return fixture;
     }
 }
 

@@ -68,9 +68,6 @@ public class SportsApiLoader {
     private static void handlePlayersData(MongoDatabase database, int leagueId) throws Exception {
         SportsApiClient.TeamsResponse response = sportsApiClient.fetchTeams(leagueId);
         System.out.printf("Total teams: %d%n%n", response.count);
-        //SportsApiClient.PlayersResponse playersResponse = sportsApiClient.fetchPlayers(response.results.getFirst().id);
-        //PlayerDB playerDB = createPlayerDB(playersResponse.results.getFirst(), leagueId);
-        int t = 0;
 
         ArrayList<PlayerDB> playerDBList = new ArrayList<>();
         for (SportsApiClient.Team team : response.results) {

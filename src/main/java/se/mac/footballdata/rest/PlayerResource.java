@@ -6,17 +6,9 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-import se.mac.footballdata.rest.model.Event;
 import se.mac.footballdata.rest.model.Player;
-import se.mac.footballdata.rest.model.Team;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Stream;
-
-import static se.mac.footballdata.Util.createTeamFromEvent;
 
 @Path("/players")
 @Produces(MediaType.APPLICATION_JSON)

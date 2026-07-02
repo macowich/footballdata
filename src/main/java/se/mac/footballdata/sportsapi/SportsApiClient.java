@@ -18,10 +18,11 @@ public class SportsApiClient {
     private static final String BASE_URL = "https://sports.bzzoiro.com/api/v2/events/";
     private static final String BASE_URL_REFEREES = "https://sports.bzzoiro.com/api/v2/referees/";
     private static final String BASE_URL_PLAYERS = "https://sports.bzzoiro.com/api/v2/players/";
+    private static final String BASE_URL_VENUES = "https://sports.bzzoiro.com/api/v2/venues/";
     private static final String BASE_URL_MANAGERS = "https://sports.bzzoiro.com/api/v2/managers/";
     private static final String BASE_URL_TEAMS = "https://sports.bzzoiro.com/api/v2/teams/";
     private static final String BASE_URL_PREDICTIONS = "https://sports.bzzoiro.com/api/v2/predictions/";
-    private static final String BASE_URL_ODDS        = "https://sports.bzzoiro.com/api/v2/odds/";
+    private static final String BASE_URL_ODDS = "https://sports.bzzoiro.com/api/v2/odds/";
     private static final String API_TOKEN = "bb387466704c69d4660a51d47153ce12f6a1c433";
 
     // ──────────────────────────────────────────────
@@ -693,6 +694,31 @@ public class SportsApiClient {
         public String stats_updated_at;
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class StadiumResponse {
+
+        public int count;
+        public String next;
+        public String previous;
+        public List<Arena> results;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Arena {
+        public int id;
+        public String name;
+        public String city;
+        public String country;
+        public String country_code;
+        public int capacity;
+        public double latitude;
+        public double longitude;
+        public int pitch_length_m;
+        public int pitch_width_m;
+        public int built_year;
+        public int home_team_id;
+    }
+
     // ──────────────────────────────────────────────
     // HTTP client
     // ──────────────────────────────────────────────
@@ -797,7 +823,7 @@ public class SportsApiClient {
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
-        return mapper.readValue(response.body(), LineupResponse .class);
+        return mapper.readValue(response.body(), LineupResponse.class);
     }
 
     /**
@@ -1061,6 +1087,33 @@ public class SportsApiClient {
         return merged;
     }
 
+    /**
+     * Fetch arena for a given team.
+     * Calls: GET /api/v2/players/?team_id={teamId}
+     */
+    public StadiumResponse fetchStadium(int teamId) throws Exception {
+        String url = BASE_URL_VENUES + "?team_id=" + teamId;
+
+        HttpClient client = HttpClient.newBuilder().build();
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Authorization", "Token " + API_TOKEN)
+                .header("Accept", "application/json")
+                .GET()
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 200) {
+            throw new RuntimeException("API error " + response.statusCode() + ": " + response.body());
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        return mapper.readValue(response.body(), StadiumResponse.class);
+    }
+
     private HttpClient createHttpClient() {
         HttpClient client = HttpClient.newBuilder()
                 //.proxy(ProxySelector.of(new InetSocketAddress("proxy.sfa.se", 8080)))
@@ -1079,6 +1132,8 @@ public class SportsApiClient {
     public static void main(String[] args) throws Exception {
         SportsApiClient client = new SportsApiClient();
 
+        printArenas(client, 26);
+
         /*
         TeamsResponse teamsResponse = client.fetchTeams(26);
         int teamId = teamsResponse.results.getFirst().id;
@@ -1087,8 +1142,8 @@ public class SportsApiClient {
         System.out.println(player.toString());
 */
         // ── Single incidents ──────────────────────────────
-       // EventData eventData = client.fetchIncidents(46355);
-       // System.out.println();
+        // EventData eventData = client.fetchIncidents(46355);
+        // System.out.println();
 
         // ── Lineups ──────────────────────────────
         /*
@@ -1232,6 +1287,19 @@ public class SportsApiClient {
         }
 
  */
+    }
+
+
+    static void printArenas(SportsApiClient client, int leagueId) throws Exception {
+        TeamsResponse teamsResponse = client.fetchTeams(leagueId);
+        for (Team team : teamsResponse.results) {
+            StadiumResponse stadiumResponse = client.fetchStadium(team.id);
+            if (stadiumResponse.results != null && !stadiumResponse.results.isEmpty()) {
+                Arena arena = stadiumResponse.results.getFirst();
+                System.out.println("arenas.put(" + arena.id + ", \"" + arena.name + " (" + arena.city + ") Kapacitet: " + arena.capacity + "\");");
+            }
+        }
+
     }
 
 }

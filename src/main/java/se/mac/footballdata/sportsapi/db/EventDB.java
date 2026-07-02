@@ -4,6 +4,7 @@ public class EventDB {
     public int eventId;
     public int leagueId;
     public int seasonId;
+    public String venue;
     public String date;
     public String time;
     public int round;

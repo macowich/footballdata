@@ -169,6 +169,25 @@
     .empty-state strong { display:block; color:var(--text); font-size:15px; margin-bottom:4px; }
 
     .fmodal-footer { padding:12px 24px 20px; display:flex; justify-content:flex-end; }
+
+    /* Match information tab */
+    .info-section { padding: 20px 24px; }
+    .info-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 11px 0; border-bottom: 1px solid var(--border);
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { font-family: var(--font); font-size: 13px; color: var(--muted); }
+    .info-value { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; color: var(--text); text-align: right; }
+    .info-subtitle {
+      font-family: var(--font); font-size: 11px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--muted); margin: 20px 0 10px;
+    }
+    .info-subtitle:first-child { margin-top: 0; }
+    .info-odds-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 4px; }
+    .info-odds-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 3px; }
+    .info-odds-label { font-family: var(--font); font-size: 11px; color: var(--muted); }
+    .info-odds-value { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700; color: var(--text); }
   </style>
 </head>
 <body>
@@ -339,8 +358,78 @@
 
         <!-- Tabs -->
         <div class="fmodal-tabs">
+          <button class="fmodal-tab-btn" :class="{ active: modalTab === 'info' }" @click="modalTab = 'info'">Matchinformation</button>
           <button class="fmodal-tab-btn" :class="{ active: modalTab === 'h2h' }" @click="modalTab = 'h2h'">Head to Head</button>
           <button class="fmodal-tab-btn" :class="{ active: modalTab === 'predictions' }" @click="modalTab = 'predictions'">Predictions</button>
+        </div>
+
+        <!-- Match information tab -->
+        <div v-if="modalTab === 'info'" class="info-section">
+          <div class="info-subtitle">Matchdetaljer</div>
+          <div class="info-row">
+            <span class="info-label">Liga</span>
+            <span class="info-value">{{ getLeagueName(fixture.leagueId) }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Datum</span>
+            <span class="info-value">{{ fixture.date || '—' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Avspark</span>
+            <span class="info-value">{{ fixture.time || '—' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Hemmalag</span>
+            <span class="info-value">{{ fixture.hometeam || '—' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Bortalag</span>
+            <span class="info-value">{{ fixture.awayteam || '—' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Domare</span>
+            <span class="info-value">{{ fixture.referee || '—' }}</span>
+          </div>
+          <div class="info-row" v-if="fixture.round != null">
+            <span class="info-label">Omgång</span>
+            <span class="info-value">{{ fixture.round }}</span>
+          </div>
+          <div class="info-row" v-if="fixture.venue">
+            <span class="info-label">Arena</span>
+            <span class="info-value">{{ fixture.venue }}</span>
+          </div>
+
+          <template v-if="fixture.odds">
+            <div class="info-subtitle">Matchodds</div>
+            <div class="info-odds-grid">
+              <div class="info-odds-card">
+                <div class="info-odds-label">1 Hemmaseger</div>
+                <div class="info-odds-value">{{ fixture.odds?.homeWin ?? '—' }}</div>
+              </div>
+              <div class="info-odds-card">
+                <div class="info-odds-label">X Oavgjort</div>
+                <div class="info-odds-value">{{ fixture.odds?.draw ?? '—' }}</div>
+              </div>
+              <div class="info-odds-card">
+                <div class="info-odds-label">2 Bortaseger</div>
+                <div class="info-odds-value">{{ fixture.odds?.awayWin ?? '—' }}</div>
+              </div>
+            </div>
+
+            <div class="info-subtitle">Mål &amp; BTTS</div>
+            <div class="info-row">
+              <span class="info-label">Över 2.5 mål</span>
+              <span class="info-value">{{ fixture.odds?.over25Goals ?? '—' }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Under 2.5 mål</span>
+              <span class="info-value">{{ fixture.odds?.under25Goals ?? '—' }}</span>
+            </div>
+            <div class="info-row" v-if="fixture.odds?.bttsYes || fixture.odds?.bttsNo">
+              <span class="info-label">Båda lag gör mål (Ja / Nej)</span>
+              <span class="info-value">{{ fixture.odds?.bttsYes ?? '—' }} / {{ fixture.odds?.bttsNo ?? '—' }}</span>
+            </div>
+          </template>
         </div>
 
         <!-- H2H tab -->
@@ -470,8 +559,6 @@
     setup() {
       const API          = 'http://localhost:8080/fixtures/all';
       const FIXTURE_API  = 'http://localhost:8080/fixtures/id';
-      const PRED_API     = 'http://localhost:8080/predictions';
-
       const items   = ref([]);
       const loading = ref(false);
       const error   = ref('');
@@ -485,7 +572,7 @@
       const modalOpen    = ref(false);
       const modalLoading = ref(false);
       const fixture      = ref(null);
-      const modalTab     = ref('h2h');
+      const modalTab     = ref('info');
 
       const getLeagueName = computed(() => (id) => {
         const l = leagues.value.find(x => x.id === id);
@@ -569,7 +656,7 @@
       async function openModal(eventId) {
         modalOpen.value = true; modalLoading.value = true;
         fixture.value = null;
-        modalTab.value = 'h2h';
+        modalTab.value = 'info';
         try {
           const res = await fetch(`${FIXTURE_API}/${eventId}`);
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
