@@ -6,6 +6,7 @@ import java.util.List;
 public class LineupDB {
 
     public int eventId;
+    public String status;
     public String homeTeam;
     public String awayTeam;
     public int homeTeamId;

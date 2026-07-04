@@ -1,14 +1,13 @@
 package se.mac.footballdata.rest.model;
 
 import io.quarkus.mongodb.panache.common.MongoEntity;
-import org.bson.types.ObjectId;
+
 import java.util.List;
 
 @MongoEntity(collection = "lineups")
 public class Lineup {
 
-    public ObjectId id;
-
+    public String status;
     public String awayFormation;
     public List<Player> awayPlayers;
     public List<Player> awaySubstitutes;

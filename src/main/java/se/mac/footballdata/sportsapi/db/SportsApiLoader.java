@@ -3,7 +3,6 @@ package se.mac.footballdata.sportsapi.db;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.bson.codecs.configuration.CodecProvider;
 import org.bson.codecs.configuration.CodecRegistry;
@@ -16,15 +15,11 @@ import se.mac.footballdata.sportsapi.stats.EventStatsClient;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import static com.mongodb.client.model.Aggregates.*;
-import static com.mongodb.client.model.Filters.eq;
-import static com.mongodb.client.model.Projections.*;
-import static com.mongodb.client.model.Sorts.descending;
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
+import static se.mac.footballdata.DBUtil.getLatestEventDate;
 import static se.mac.footballdata.DBUtil.updatePlayersCollection;
 import static se.mac.footballdata.Util.*;
 
@@ -51,8 +46,9 @@ public class SportsApiLoader {
                     .withCodecRegistry(pojoCodecRegistry);
 
             handleFixturesData(database, 26);
-            //handleLeague(database, 26);
-            //handleLeague(database, 55);
+            handleFixturesData(database, 55);
+            handleLeague(database, 26);
+            handleLeague(database, 55);
 
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -90,25 +86,36 @@ public class SportsApiLoader {
                 fetchEvents(currentDate, toDate, leagueId, "notstarted");
 
         List<SportsApiClient.Event> eventList = new ArrayList<>(response.results);
+        ArrayList<LineupDB> lineupDBList = new ArrayList<>();
         List<FixtureDB> fixtureDBList = createFixtureDB(eventList);
         for (FixtureDB db : fixtureDBList) {
             loadFixtureOdds(db);
             loadPredictions(db);
+            LineupDB lineupDB = loadEventLineups(db.eventId);
+            if (lineupDB != null) {
+                lineupDBList.add(lineupDB);
+            }
         }
 
         DBUtil.updateFixturesCollection(database, fixtureDBList);
+        DBUtil.updateLineupsCollection(database, lineupDBList);
     }
 
     static void handleEventsData(MongoDatabase database, int leagueId) throws Exception {
-        List<SportsApiClient.Event> eventList = new ArrayList<>();
-        loadEvents("2026-04-04", "2026-04-18", leagueId, eventList);
-        loadEvents("2026-04-19", "2026-05-04", leagueId, eventList);
-        loadEvents("2026-05-05", "2026-05-19", leagueId, eventList);
-        loadEvents("2026-05-20", "2026-05-31", leagueId, eventList);
-        loadEvents("2026-06-01", "2026-06-13", leagueId, eventList);
-        loadEvents("2026-06-14", "2026-06-26", leagueId, eventList);
-        List<EventDB> eventDBList = createEventDB(eventList);
 
+        List<SportsApiClient.Event> eventList = new ArrayList<>();
+        LocalDate startDate = getStartDate(leagueId, database);
+        LocalDate endDate;
+        do {
+            endDate = startDate.plusDays(14);
+            System.out.println("Loading events for league: " + leagueId + " startdate: " + startDate + " enddate: " + endDate);
+            loadEvents(startDate.toString(), endDate.toString(), leagueId, eventList);
+            startDate = endDate;
+        } while (endDate.isBefore(LocalDate.now()));
+
+        if (eventList.isEmpty()) return;
+
+        List<EventDB> eventDBList = createEventDB(eventList);
         ArrayList<IncidentDB> incidentDBList = new ArrayList<>();
         ArrayList<LineupDB> lineupDBList = new ArrayList<>();
 
@@ -130,13 +137,22 @@ public class SportsApiLoader {
             if (lineupDB != null) {
                 lineupDBList.add(lineupDB);
             }
-
         }
 
         DBUtil.updateEventsCollection(database, eventDBList);
         DBUtil.updateIncidentsCollection(database, incidentDBList);
         DBUtil.updateLineupsCollection(database, lineupDBList);
-        DBUtil.updateOddsCollection(database, oddsList);
+        if (!oddsList.isEmpty()) {
+            DBUtil.updateOddsCollection(database, oddsList);
+        }
+    }
+
+    private static LocalDate getStartDate(int leagueId, MongoDatabase database) {
+        String latestDBDate = getLatestEventDate(leagueId, database);
+        if (latestDBDate.isEmpty()) {
+            return LocalDate.parse(leagues.get(leagueId).getStartDate());
+        }
+        return LocalDate.parse(latestDBDate);
     }
 
     private static void loadManagers(EventDB db, List<SportsApiClient.Event> eventList) {
@@ -156,16 +172,10 @@ public class SportsApiLoader {
     }
 
     private static void loadFixtureOdds(FixtureDB fixtureDB) throws Exception {
-        SportsApiClient.EventOdds eventOdds = sportsApiClient.fetchEventOdds(fixtureDB.eventId);
-        OddsDB oddsDB = new OddsDB();
-        oddsDB.homeWin = eventOdds.odds.homeWin;
-        oddsDB.draw = eventOdds.odds.draw;
-        oddsDB.awayWin = eventOdds.odds.awayWin;
-        oddsDB.over25Goals = eventOdds.odds.over25Goals;
-        oddsDB.under25Goals = eventOdds.odds.under25Goals;
-        oddsDB.bttsYes = eventOdds.odds.bttsYes;
-        oddsDB.bttsNo = eventOdds.odds.bttsNo;
-        fixtureDB.odds = oddsDB;
+        SportsApiClient.OddsLineResponse oddsLineResponse = sportsApiClient.fetchOdds(fixtureDB.eventId, "pinnacle");
+        if (!oddsLineResponse.results.isEmpty()) {
+            fixtureDB.odds = createOddsDB(oddsLineResponse.results, fixtureDB.eventId);
+        }
     }
 
     private static void loadPredictions(FixtureDB db) throws Exception {
@@ -189,7 +199,6 @@ public class SportsApiLoader {
         System.out.printf("Total events: %d%n%n", response.count);
 
         for (SportsApiClient.Event event : response.results) {
-            System.out.println(event.id);
             System.out.println(event);
         }
         eventList.addAll(response.results);
@@ -197,7 +206,7 @@ public class SportsApiLoader {
 
     private static void loadEventStats(EventDB eventDB) throws Exception {
         EventStats eventStats = eventStatsClient.fetchEventStats(eventDB.eventId);
-        System.out.println("EventStatus for " + eventDB.eventId + " is loaded " + eventStats.eventId);
+        System.out.println("EventStatus for " + eventDB.eventId + " is loaded ");
         eventDB.hs = eventStats.stats.home.totalShots;
         eventDB.as = eventStats.stats.away.totalShots;
         eventDB.hy = eventStats.stats.home.yellowCards;
@@ -229,7 +238,7 @@ public class SportsApiLoader {
         System.out.println("\n=== Loading lineups (eventId: " + eventId + " ) ===");
         SportsApiClient.LineupResponse lineupResponse = sportsApiClient.fetchLineups(eventId);
         if (lineupResponse.lineups != null) {
-            return createLineupDB(lineupResponse.lineups, eventId);
+            return createLineupDB(lineupResponse.lineup_status, lineupResponse.lineups, eventId);
         }
         return null;
     }
@@ -251,14 +260,15 @@ public class SportsApiLoader {
         DBUtil.updateRefereeCollection(database, refereeDBList);
     }
 
-    private static String getLatestFixtureDate(int leagueId, MongoCollection<FixtureDB> collection) {
-        FixtureDB fixtureDB = collection.aggregate(Arrays.asList(
-                match(eq("leagueId", leagueId)),
-                sort(descending("date")),
-                limit(1),
-                project(fields(include("date"), excludeId()))
-        )).first();
-        return fixtureDB != null ? fixtureDB.date : "";
-    }
-
 }
+
+/*
+
+loadEvents("2026-04-04", "2026-04-18", leagueId, eventList);
+loadEvents("2026-04-19", "2026-05-04", leagueId, eventList);
+loadEvents("2026-05-05", "2026-05-19", leagueId, eventList);
+loadEvents("2026-05-20", "2026-05-31", leagueId, eventList);
+loadEvents("2026-06-01", "2026-06-13", leagueId, eventList);
+loadEvents("2026-06-14", "2026-06-26", leagueId, eventList);
+
+ */

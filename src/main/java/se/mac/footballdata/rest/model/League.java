@@ -4,10 +4,12 @@ public class League {
 
     private int id;
     private String name;
+    private String startDate;
 
-    public League(int id, String name) {
+    public League(int id, String name, String startDate) {
         this.id = id;
         this.name = name;
+        this.startDate = startDate;
     }
 
     public int getId() {
@@ -24,5 +26,13 @@ public class League {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(String startDate) {
+        this.startDate = startDate;
     }
 }

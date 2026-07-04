@@ -25,14 +25,17 @@ public class Util {
         return bd.doubleValue();
     }
 
-    public static Map<Integer, League> leagues = Map.of(
-            1, new League(1, "Premier League"),
-            26, new League(26, "Allsvenskan"),
-            55, new League(55, "Finland"),
-            1000, new League(1000, "Superettan")
-    );
+    public static Map<Integer, League> leagues = new HashMap<>();
+
+    static {
+        leagues.put(1, new League(1, "Premier League", "2026-08-10"));
+        leagues.put(26, new League(26, "Allsvenskan", "2026-04-04"));
+        leagues.put(55, new League(55, "Finland", "2026-04-04"));
+        leagues.put(1000, new League(1000, "Superettan", "2026-04-04"));
+    }
 
     public static Map<Integer, String> arenas = new HashMap<>();
+
     static {
         arenas.put(427, "Strawberry Arena (Solna) Kapacitet: 50000");
         arenas.put(388, "Nordic Wellness Arena (Gothenburg) Kapacitet: 6300");
@@ -347,8 +350,9 @@ public class Util {
         return incidentDBList;
     }
 
-    public static LineupDB createLineupDB(SportsApiClient.Lineups lineups, int eventId) {
+    public static LineupDB createLineupDB(String lineup_status, SportsApiClient.Lineups lineups, int eventId) {
         LineupDB lineupDB = new LineupDB();
+        lineupDB.status = lineup_status;
         lineupDB.eventId = eventId;
         lineupDB.homeTeam = lineups.home.team_name;
         lineupDB.awayTeam = lineups.away.team_name;
@@ -398,28 +402,54 @@ public class Util {
         oddsDB.eventId = eventId;
 
         for (SportsApiClient.OddsLine ol : results) {
-            if (ol.market.equals("1x2")) {
-                if (ol.outcome.equals("HOME")) {
-                    oddsDB.homeWin = ol.decimalOdds;
-                } else if (ol.outcome.equals("DRAW")) {
-                    oddsDB.draw = ol.decimalOdds;
-                } else if (ol.outcome.equals("AWAY")) {
-                    oddsDB.awayWin = ol.decimalOdds;
+            switch (ol.market) {
+                case "1x2" -> {
+                    switch (ol.outcome) {
+                        case "HOME" -> oddsDB.homeWin = ol.decimalOdds;
+                        case "DRAW" -> oddsDB.draw = ol.decimalOdds;
+                        case "AWAY" -> oddsDB.awayWin = ol.decimalOdds;
+                    }
                 }
-            } else if (ol.market.equals("over_under_25")) {
-                if (ol.outcome.startsWith("over")) {
-                    oddsDB.over25Goals = ol.decimalOdds;
-                } else {
-                    oddsDB.under25Goals = ol.decimalOdds;
+                case "over_under_15" -> {
+                    if (ol.outcome.startsWith("over")) {
+                        oddsDB.over15Goals = ol.decimalOdds;
+                    } else {
+                        oddsDB.under15Goals = ol.decimalOdds;
+                    }
                 }
-            } else if (ol.market.equals("btts")) {
-                if (ol.outcome.startsWith("yes")) {
-                    oddsDB.bttsYes = ol.decimalOdds;
-                } else {
-                    oddsDB.bttsNo = ol.decimalOdds;
+                case "over_under_25" -> {
+                    if (ol.outcome.startsWith("over")) {
+                        oddsDB.over25Goals = ol.decimalOdds;
+                    } else {
+                        oddsDB.under25Goals = ol.decimalOdds;
+                    }
+                }
+                case "over_under_35" -> {
+                    if (ol.outcome.startsWith("over")) {
+                        oddsDB.over35Goals = ol.decimalOdds;
+                    } else {
+                        oddsDB.under35Goals = ol.decimalOdds;
+                    }
+                }
+                case "btts" -> {
+                    if (ol.outcome.startsWith("yes")) {
+                        oddsDB.bttsYes = ol.decimalOdds;
+                    } else {
+                        oddsDB.bttsNo = ol.decimalOdds;
+                    }
+                }
+                case "total_corners" -> {
+                    if (ol.outcomeName.equals("Over 9.50")) {
+                        oddsDB.over95Corners = ol.decimalOdds;
+                    } else if (ol.outcomeName.equals("Under 9.50")) {
+                        oddsDB.under95Corners = ol.decimalOdds;
+                    } else if (ol.outcomeName.equals("Over 10.50")) {
+                        oddsDB.over105Corners = ol.decimalOdds;
+                    } else if (ol.outcomeName.equals("Under 10.50")) {
+                        oddsDB.under105Corners = ol.decimalOdds;
+                    }
                 }
             }
-            System.out.println("  " + ol);
         }
         return oddsDB;
     }

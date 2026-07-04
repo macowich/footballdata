@@ -14,6 +14,10 @@ public class OddsDB {
     public double under35Goals;
     public double bttsYes;
     public double bttsNo;
+    public double over95Corners;
+    public double under95Corners;
+    public double over105Corners;
+    public double under105Corners;
 
     public OddsDB() {
         // Empty constructor

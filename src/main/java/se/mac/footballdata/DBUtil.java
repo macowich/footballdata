@@ -9,7 +9,13 @@ import org.bson.Document;
 import se.mac.footballdata.sportsapi.db.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import static com.mongodb.client.model.Aggregates.*;
+import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Projections.*;
+import static com.mongodb.client.model.Sorts.descending;
 
 public class DBUtil {
 
@@ -35,6 +41,7 @@ public class DBUtil {
 
     /**
      * Updates odds collection in db
+     * Algoritm - upsert
      *
      * @param database   Database
      * @param oddsDBList List of OddsDB
@@ -65,6 +72,7 @@ public class DBUtil {
 
     /**
      * Updates players collection in db
+     * Algoritm - upsert
      *
      * @param database     Database
      * @param playerDBList List of {@link PlayerDB}
@@ -95,6 +103,7 @@ public class DBUtil {
 
     /**
      * Updates referees collection in db
+     * Algoritm - upsert
      *
      * @param database      Database
      * @param refereeDBList List of {@link RefereeDB}
@@ -140,17 +149,36 @@ public class DBUtil {
         }
     }
 
+    /**
+     * Updates lineups collection in db
+     * Algoritm - upsert
+     *
+     * @param database      Database
+     * @param lineupDBList List of {@link LineupDB}
+     */
     public static void updateLineupsCollection(MongoDatabase database, List<LineupDB> lineupDBList) {
         MongoCollection<LineupDB> collection =
                 database.getCollection("lineups", LineupDB.class);
         collection.createIndex(new Document("eventId", 1), new IndexOptions().unique(true));
 
-        try {
-            collection.insertMany(lineupDBList, new InsertManyOptions().ordered(false));
-            System.out.println("Inserted lineupDBList: " + lineupDBList);
-        } catch (MongoException ex) {
-            System.out.println("Error when inserting lineupDBList: " + ex);
+        // Build bulk write list
+        ReplaceOptions replaceOptions = new ReplaceOptions().upsert(true);
+        List<ReplaceOneModel<LineupDB>> operations = new ArrayList<>();
+
+        for (LineupDB lineup : lineupDBList) {
+            operations.add(new ReplaceOneModel<>(
+                    Filters.eq("eventId", lineup.eventId),
+                    lineup,
+                    replaceOptions
+            ));
         }
+
+        // Execute parallel bulk operations
+        BulkWriteResult result = collection.bulkWrite(operations, new BulkWriteOptions().ordered(false));
+
+        System.out.println("Upsert of lineup collection complete.");
+        System.out.println("Modified existing: " + result.getModifiedCount());
+        System.out.println("Newly inserted: " + result.getUpserts().size());
     }
 
     /**
@@ -180,6 +208,32 @@ public class DBUtil {
         System.out.println("Upsert of fixtures collection complete.");
         System.out.println("Modified existing: " + result.getModifiedCount());
         System.out.println("Newly inserted: " + result.getUpserts().size());
+    }
+
+    public static String getLatestFixtureDate(int leagueId, MongoDatabase database) {
+        MongoCollection<FixtureDB> collection =
+                database.getCollection("fixtures", FixtureDB.class);
+
+        FixtureDB fixtureDB = collection.aggregate(Arrays.asList(
+                match(eq("leagueId", leagueId)),
+                sort(descending("date")),
+                limit(1),
+                project(fields(include("date"), excludeId()))
+        )).first();
+        return fixtureDB != null ? fixtureDB.date : "";
+    }
+
+    public static String getLatestEventDate(int leagueId, MongoDatabase database) {
+        MongoCollection<EventDB> collection =
+                database.getCollection("events", EventDB.class);
+
+        EventDB eventDB = collection.aggregate(Arrays.asList(
+                match(eq("leagueId", leagueId)),
+                sort(descending("date")),
+                limit(1),
+                project(fields(include("date"), excludeId()))
+        )).first();
+        return eventDB != null ? eventDB.date : "";
     }
 
 }
