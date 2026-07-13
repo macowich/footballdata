@@ -75,7 +75,10 @@
   .main-content.shifted { margin-left: 56px; }
 
   .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  table { min-width: 960px; }
+  table { min-width: 1100px; width: 100%; }
+
+  /* Override the 960px wrapper cap for this page */
+  .wrapper { max-width: 1400px; }
 
   /* Probability bar for odds */
   .prob-bar-wrap {
@@ -224,8 +227,8 @@
             <th class="sortable" @click="setSort('homeWin')">Hemmaseger {{ sortIcon('homeWin') }}</th>
             <th class="sortable" @click="setSort('draw')">Oavgjort {{ sortIcon('draw') }}</th>
             <th class="sortable" @click="setSort('awayWin')">Bortaseger {{ sortIcon('awayWin') }}</th>
-            <th class="sortable" @click="setSort('u25')">U 2.5 {{ sortIcon('u25') }}</th>
             <th class="sortable" @click="setSort('o25')">Ö 2.5 {{ sortIcon('o25') }}</th>
+            <th class="sortable" @click="setSort('u25')">U 2.5 {{ sortIcon('u25') }}</th>
             <th>Favorit</th>
           </tr>
         </thead>
@@ -269,16 +272,6 @@
               </div>
               <div style="font-family:'JetBrains Mono',monospace;font-size:13px;margin-top:2px;color:var(--text)">{{ item.awayWin }}</div>
             </td>
-            <!-- U2.5 -->
-            <td>
-              <div class="prob-bar-wrap">
-                <div class="prob-bar-track">
-                  <div class="prob-bar-fill fill-under" :style="{width: impliedPct(item.u25)+'%'}"></div>
-                </div>
-                <span class="prob-pct">{{ impliedPct(item.u25) }}%</span>
-              </div>
-              <div style="font-family:'JetBrains Mono',monospace;font-size:13px;margin-top:2px;color:var(--text)">{{ item.u25 }}</div>
-            </td>
             <!-- O2.5 -->
             <td>
               <div class="prob-bar-wrap">
@@ -288,6 +281,16 @@
                 <span class="prob-pct">{{ impliedPct(item.o25) }}%</span>
               </div>
               <div style="font-family:'JetBrains Mono',monospace;font-size:13px;margin-top:2px;color:var(--text)">{{ item.o25 }}</div>
+            </td>
+            <!-- U2.5 -->
+            <td>
+              <div class="prob-bar-wrap">
+                <div class="prob-bar-track">
+                  <div class="prob-bar-fill fill-under" :style="{width: impliedPct(item.u25)+'%'}"></div>
+                </div>
+                <span class="prob-pct">{{ impliedPct(item.u25) }}%</span>
+              </div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:13px;margin-top:2px;color:var(--text)">{{ item.u25 }}</div>
             </td>
             <!-- Favourite -->
             <!--<td>
