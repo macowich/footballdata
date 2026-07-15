@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Resultat</title>
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="leagues.js"></script>
 <script src="sidemenu-loader.js" data-page="matches" defer></script>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="fixtures.css"/>
@@ -1078,18 +1079,8 @@ createApp({
       detail.value = null;
     }
 
-    async function fetchLeagues() {
-      loading.value = true;
-      error.value = '';
-      try {
-        const res = await fetch(`${BASE}/league/all`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        leagues.value = await res.json();
-      } catch (e) {
-        error.value = `Kunde inte hämta ligor: ${e.message}. Kontrollera att API:et körs på ${BASE}.`;
-      } finally {
-        loading.value = false;
-      }
+    function fetchLeagues() {
+      window.leaguesReady.then(data => { leagues.value = data; });
     }
 
     async function fetchMatches() {

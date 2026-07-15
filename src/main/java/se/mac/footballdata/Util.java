@@ -32,6 +32,8 @@ public class Util {
         leagues.put(26, new League(26, "Allsvenskan", "2026-04-04"));
         leagues.put(55, new League(55, "Finland", "2026-04-04"));
         leagues.put(1000, new League(1000, "Superettan", "2026-04-04"));
+        leagues.put(1001, new League(1001, "Ettan Norra", "2026-04-04"));
+        leagues.put(1002, new League(1002, "Ettan Södra", "2026-04-04"));
     }
 
     public static Map<Integer, String> arenas = new HashMap<>();
@@ -53,6 +55,18 @@ public class Util {
         arenas.put(420, "Strandvallen (Hallevik) Kapacitet: 6500");
         arenas.put(424, "Spiris Arena (Vaxjo) Kapacitet: 12000");
         arenas.put(712, "Hitachi Energy Arena (Vasteras) Kapacitet: 8900");
+        // Finland
+        arenas.put(398, "Tammela Stadium (Tampere) Kapacitet: 8077");
+        arenas.put(357, "Savon Sanomat Areena (Kuopio) Kapacitet: 5300");
+    }
+
+    public static Integer getLeagueIdByName(String name) throws Exception {
+        for (Map.Entry<Integer, League> entry : leagues.entrySet()) {
+            if (entry.getValue().getName().equalsIgnoreCase(name)) {
+                return entry.getKey();
+            }
+        }
+        throw new Exception("Ingen liga med namn " + name + " hittades");
     }
 
     public static String getLeagueName(String code) {

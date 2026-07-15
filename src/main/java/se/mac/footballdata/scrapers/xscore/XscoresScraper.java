@@ -8,11 +8,8 @@ import com.mongodb.client.MongoDatabase;
 import org.bson.codecs.configuration.CodecProvider;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import se.mac.footballdata.DBUtil;
+import se.mac.footballdata.Util;
 import se.mac.footballdata.scrapers.xscore.model.Incident;
 import se.mac.footballdata.scrapers.xscore.model.MatchData;
 import se.mac.footballdata.scrapers.xscore.model.OutcomeWrapper;
@@ -20,19 +17,12 @@ import se.mac.footballdata.sportsapi.db.EventDB;
 import se.mac.footballdata.sportsapi.db.IncidentDB;
 import se.mac.footballdata.sportsapi.db.OddsDB;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.StringReader;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -47,22 +37,16 @@ public class XscoresScraper {
 
     private final static String DB_CONNECTION_STRING = "mongodb://localhost:27017";
     private static final String BASE_PATH = "C:\\data\\xscore\\";
-    //private static final String BASE_PATH_FK = "C:\\FKApps\\data\\xscore\\";
 
     public static void main(String[] args) throws Exception {
-        /*
-        List<String> urlList = loadResultpage(BASE_PATH + "results\\Superettan - Results _ Football Sweden.html");
-        for (String url : urlList) {
-            fetchDataFiles(url);
-        }*/
 
-        int leagueId = 1000; // Superettan
-        List<MatchData> matchDataList = loadAllMatchData();
+        int leagueId = Util.getLeagueIdByName("Superettan");
+        List<MatchData> matchDataList = loadAllMatchData(1000);
         List<EventDB> eventDBList = matchDataList.stream()
                 .map(match -> createEventDB(match, leagueId))
                 .toList();
         ArrayList<IncidentDB> incidentDBList = new ArrayList<>();
-        for (MatchData matchData: matchDataList) {
+        for (MatchData matchData : matchDataList) {
             List<IncidentDB> incidentList = createIncidentDBList(matchData);
             incidentDBList.addAll(incidentList);
         }
@@ -90,7 +74,13 @@ public class XscoresScraper {
             incidentDB.goalType = incidentDB.type.equalsIgnoreCase("goal") ? "regular" : "";
             incidentDB.assist = null;
             incidentDB.minute = i.elapsed;
-            incidentDB.playerIn = "unknown";
+            if (incidentDB.type.equalsIgnoreCase("substitution")) {
+                if (i.association != null && !i.association.isEmpty()) {
+                    incidentDB.playerIn = i.association.getFirst().playerName;
+                } else {
+                    incidentDB.playerIn = "unknown";
+                }
+            }
             incidentDB.playerOut = incidentDB.type.equalsIgnoreCase("substitution") ? i.playerName : "";
             incidentDBList.add(incidentDB);
         }
@@ -112,13 +102,13 @@ public class XscoresScraper {
         return "";
     }
 
-    private static List<MatchData> loadAllMatchData() throws IOException {
+    private static List<MatchData> loadAllMatchData(int leagueId) throws IOException {
         List<MatchData> matchDataList = new ArrayList<>();
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(
-                Paths.get(BASE_PATH + File.separator + "json"), "*.json")) {
+                Paths.get(BASE_PATH + File.separator + "json" + File.separator + leagueId), "*.json")) {
 
             for (Path entry : stream) {
-                MatchData matchData = loadMatchData(String.valueOf(entry.getFileName()));
+                MatchData matchData = loadMatchData(entry.toFile().getPath());
                 matchDataList.add(matchData);
             }
         }
@@ -142,7 +132,9 @@ public class XscoresScraper {
 
             DBUtil.updateEventsCollection(database, eventDBList);
             DBUtil.updateIncidentsCollection(database, incidentDBList);
-            DBUtil.updateOddsCollection(database, oddsDBList);
+            if (!oddsDBList.isEmpty()) {
+                DBUtil.updateOddsCollection(database, oddsDBList);
+            }
         }
     }
 
@@ -216,78 +208,10 @@ public class XscoresScraper {
     }
 
     static MatchData loadMatchData(String filename) throws IOException {
-        String json = new String(Files.readAllBytes(Paths.get(BASE_PATH + File.separator + "json" + File.separator + filename)));
+        String json = new String(Files.readAllBytes(Path.of(filename)));
         ObjectMapper mapper = new ObjectMapper();
 
         return mapper.readValue(json, MatchData.class);
     }
 
-    static List<String> loadResultpage(String filename) throws Exception {
-        List<String> urlList = new ArrayList<>();
-
-        Document doc = Jsoup.parse(new File(filename), "UTF-8");
-        // 1. Select ALL matching anchor tags into a collection
-        Elements matchLinks = doc.select("a.ind_match_wrapper");
-
-        System.out.println("Total matches found: " + matchLinks.size());
-        System.out.println("-------------------------------------");
-
-        // 2. Loop through the collection
-        for (Element link : matchLinks) {
-            // Extract the URL string
-            String url = link.attr("href");
-            System.out.println("Link: " + url);
-            System.out.println();
-            urlList.add(url);
-        }
-
-        return urlList;
-    }
-
-    private static void fetchDataFiles(String url) throws Exception {
-        System.out.println("-> Reading data from server " + url);
-        String name = url.substring(url.lastIndexOf("/"));
-        name = name + ".json";
-        String outFile = BASE_PATH + "json" + File.separator + name;
-        if (new File(outFile).exists()) {
-            System.out.println("File " + name + " already exists");
-            return;
-        }
-        Thread.sleep(2 * 1000);
-        System.out.println("--> Saving into file " + outFile);
-        saveMatchFile(url, outFile);
-    }
-
-    static void saveMatchFile(String urlStr, String outFile) throws Exception {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(urlStr))
-                .header("Accept", "application/html")
-                .GET()
-                .build();
-
-        String jsonContent = "";
-
-        HttpResponse<String> response = createHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
-        try (BufferedReader reader = new BufferedReader(new StringReader(response.body()))) {
-
-            String line;
-            while ((line = reader.readLine()) != null) {
-                if (line.contains("let matchData")) {
-                    System.out.println(line);
-                    line = line.trim();
-                    jsonContent = line.trim().substring(16, line.length() - 1);
-                    break;
-                }
-            }
-        }
-
-        Path path = Paths.get(outFile);
-        Files.writeString(path, jsonContent);
-    }
-
-    private static HttpClient createHttpClient() {
-        return HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(1000))
-                .build();
-    }
 }

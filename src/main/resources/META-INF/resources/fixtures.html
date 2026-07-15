@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Fixtures</title>
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script src="leagues.js"></script>
   <script src="sidemenu-loader.js" data-page="fixtures" defer></script>
   <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="fixtures.css"/>
@@ -68,7 +69,7 @@
 
     .fmodal-header { padding: 22px 24px 0; display: flex; align-items: flex-start; justify-content: space-between; }
     .fmodal-league { font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:500; letter-spacing:.08em; color:var(--accent); text-transform:uppercase; margin-bottom:3px; }
-    .fmodal-date   { font-family:var(--font); font-size:13px; color:var(--muted); }
+    .fmodal-date   { font-family:var(--font),serif; font-size:13px; color:var(--muted); }
     .fmodal-close  {
       width:32px; height:32px; border-radius:8px; background:var(--surface2);
       border:1px solid var(--border); color:var(--muted); font-size:18px;
@@ -719,22 +720,20 @@
 </div>
 
 <script>
-  const { createApp, ref, computed, onMounted } = Vue;
+  const { createApp, ref, computed, onBeforeMount, onMounted } = Vue;
 
   createApp({
     setup() {
       const API          = 'http://localhost:8080/fixtures/all';
       const FIXTURE_API  = 'http://localhost:8080/fixtures/id';
       const LINEUP_API   = 'http://localhost:8080/events/lineups';
+      const LEAGUE_API   = 'http://localhost:8080/events/league/all';
       const items   = ref([]);
       const loading = ref(false);
       const error   = ref('');
       const search  = ref('');
       const selectedDate = ref('');
-      const leagues = ref([
-        { id: 1,  name: 'Premier League' },
-        { id: 26, name: 'Allsvenskan'    },
-      ]);
+      const leagues = ref([]);
 
       const modalOpen    = ref(false);
       const modalLoading = ref(false);
@@ -809,6 +808,10 @@
           return String(av).localeCompare(String(bv)) * dir;
         });
       });
+
+      function fetchLeagues() {
+        window.leaguesReady.then(data => { leagues.value = data; });
+      }
 
       async function fetchAll() {
         loading.value = true; error.value = '';
@@ -888,11 +891,12 @@
         lineup.value = null;
       }
 
+      onBeforeMount(fetchLeagues);
       onMounted(fetchAll);
 
       return {
         items, loading, error, search, selectedDate, availableDates,
-        filtered, fetchAll, sortKey, sortDir, setSort, sortIcon, getLeagueName,
+        filtered, fetchAll, fetchLeagues, sortKey, sortDir, setSort, sortIcon, getLeagueName,
         modalOpen, modalLoading, fixture, modalTab, switchModalTab,
         openModal, closeModal, impliedPct, winPct, oddClass,
         lineup, lineupLoading, groupByPosition, lineupStatusLabel,

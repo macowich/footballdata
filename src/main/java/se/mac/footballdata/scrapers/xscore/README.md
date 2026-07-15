@@ -2,6 +2,7 @@
 Gå till:
 https://www.xscores.com/soccer/sweden/superettan/superettan/results
 https://www.xscores.com/soccer/sweden/ettan/ettan-norra/results
+https://www.xscores.com/soccer/sweden/ettan/ettan-sodra/results
 Ctrl S spara i C:\data\xscore\results
 
 
