@@ -9,6 +9,9 @@ import se.mac.footballdata.sportsapi.db.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,6 +34,7 @@ public class Util {
         leagues.put(1, new League(1, "Premier League", "2026-08-10"));
         leagues.put(26, new League(26, "Allsvenskan", "2026-04-04"));
         leagues.put(55, new League(55, "Finland", "2026-04-04"));
+        leagues.put(54, new League(54, "Norge", "2026-03-14"));
         leagues.put(1000, new League(1000, "Superettan", "2026-04-04"));
         leagues.put(1001, new League(1001, "Ettan Norra", "2026-04-04"));
         leagues.put(1002, new League(1002, "Ettan Södra", "2026-04-04"));
@@ -58,6 +62,10 @@ public class Util {
         // Finland
         arenas.put(398, "Tammela Stadium (Tampere) Kapacitet: 8077");
         arenas.put(357, "Savon Sanomat Areena (Kuopio) Kapacitet: 5300");
+        // Norge
+        arenas.put(119, "Aspmyra Stadion (Bodø) Kapacitet: 8270");
+        arenas.put(391, "Fredrikstad Stadion (Fredrikstad) Kapacitet: 13300");
+        arenas.put(139, "Brann Stadion (Bergen) Kapacitet: 17686");
     }
 
     public static Integer getLeagueIdByName(String name) throws Exception {
@@ -307,7 +315,7 @@ public class Util {
         eventDB.leagueId = event.leagueId;
         eventDB.seasonId = event.seasonId;
         eventDB.date = event.eventDate.toString().substring(0, 10);
-        eventDB.time = event.eventDate.toString().substring(11, 16);
+        eventDB.time = convertUtcTimeToLocal(String.valueOf(event.eventDate));
         eventDB.round = event.roundNumber;
         eventDB.hometeam = event.homeTeam;
         eventDB.awayteam = event.awayTeam;
@@ -480,7 +488,7 @@ public class Util {
         fixtureDB.leagueId = event.leagueId;
         fixtureDB.seasonId = event.seasonId;
         fixtureDB.date = event.eventDate.toString().substring(0, 10);
-        fixtureDB.time = event.eventDate.toString().substring(11, 16);
+        fixtureDB.time = convertUtcTimeToLocal(String.valueOf(event.eventDate));
         fixtureDB.hometeam = event.homeTeam;
         fixtureDB.awayteam = event.awayTeam;
         if (event.refereeId != null) {
@@ -491,6 +499,18 @@ public class Util {
         }
         fixtureDB.venue = Util.arenas.get(event.venueId);
         return fixtureDB;
+    }
+
+    public static String convertUtcTimeToLocal(String utcTimestamp) {
+        // Parse the timestamp as an OffsetDateTime (accepts missing seconds)
+        OffsetDateTime odt = OffsetDateTime.parse(utcTimestamp);
+
+        // Convert to your timezone
+        ZoneId localZone = ZoneId.of("Europe/Stockholm");
+        ZonedDateTime local = odt.atZoneSameInstant(localZone);
+
+        // Return only HH:mm
+        return local.toLocalTime().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"));
     }
 
     private static HeadToHeadDB createHeadToHeadDB(SportsApiClient.HeadToHead headToHead) {

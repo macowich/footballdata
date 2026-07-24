@@ -48,12 +48,8 @@ public class PredictionResource {
 
     void loadPredictions() {
         String startDate = LocalDate.now().toString();
-       // String startDate = "2026-07-04";
         List<Fixture> fixtureList = fixtureRepository.findByDate(startDate);
         for (Fixture f : fixtureList) {
-            //Fixture f = fixtureList.getFirst();
-            //if (f == null) return;
-
             List<Event> homeTeamResult = eventRepository.findByTeam(f.hometeam);
             List<Event> awayTeamResult = eventRepository.findByTeam(f.awayteam);
             Team homeTeam = createTeamFromEvent(f.hometeam, homeTeamResult);
@@ -61,17 +57,21 @@ public class PredictionResource {
 
             ResultPredictor resultPredictor = new ResultPredictor();
 
-            // goalsHomeTeam, concededHomeTeam, goalsHomeLeague, concededHomeLeague,
-            // goalsAwayTeam, concededAwayTeam, concededHomeLeague, goalsHomeLeague
-            resultPredictor.calculateOutcomeProbability(homeTeam.goalsHomeTeam, homeTeam.concededHomeTeam, homeTeam.goalsHomeLeague,
-                    homeTeam.concededHomeLeague,
-                    awayTeam.goalsAwayTeam, awayTeam.concededAwayTeam, awayTeam.concededHomeLeague, awayTeam.goalsHomeLeague);
+            try {
+                // goalsHomeTeam, concededHomeTeam, goalsHomeLeague, concededHomeLeague,
+                // goalsAwayTeam, concededAwayTeam, concededHomeLeague, goalsHomeLeague
+                resultPredictor.calculateOutcomeProbability(homeTeam.goalsHomeTeam, homeTeam.concededHomeTeam, homeTeam.goalsHomeLeague,
+                        homeTeam.concededHomeLeague,
+                        awayTeam.goalsAwayTeam, awayTeam.concededAwayTeam, awayTeam.concededHomeLeague, awayTeam.goalsHomeLeague);
 
-            printResults(0, 0, resultPredictor.getResultList(), resultPredictor.getHomeResultMap(),
-                    resultPredictor.getAwayResultMap(), resultPredictor.getOddsInfoMap());
+                printResults(0, 0, resultPredictor.getResultList(), resultPredictor.getHomeResultMap(),
+                        resultPredictor.getAwayResultMap(), resultPredictor.getOddsInfoMap());
 
-            Prediction p = createPrediction(f, resultPredictor.getOddsInfoMap());
-            predictionRepository.saveOrOverwrite(p);
+                Prediction p = createPrediction(f, resultPredictor.getOddsInfoMap());
+                predictionRepository.saveOrOverwrite(p);
+            } catch (Exception e) {
+                System.out.println("Kunde inte skapa prediction för " + homeTeam.name + "-" + awayTeam.name);
+            }
         }
     }
 

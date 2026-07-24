@@ -6,6 +6,7 @@ import jakarta.ws.rs.core.MediaType;
 import se.mac.footballdata.rest.model.Fixture;
 import se.mac.footballdata.rest.model.Referee;
 
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
@@ -27,13 +28,13 @@ public class FixtureResource {
     @GET
     @Path("/all")
     public List<Fixture> all() {
-        return repository.listAll();
+        return repository.findByDate(LocalDate.now().toString());
     }
 
     @GET
     @Path("/team/{team}")
     public List<Fixture> teams(@PathParam("team") String team) {
-        return repository.findByTeam(team);
+        return repository.findByTeamAndDate(team, LocalDate.now().toString());
     }
 
     @GET

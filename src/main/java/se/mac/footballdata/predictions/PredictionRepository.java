@@ -2,11 +2,13 @@ package se.mac.footballdata.predictions;
 
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.ReplaceOptions;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import se.mac.footballdata.predictions.model.Prediction;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +34,7 @@ public class PredictionRepository {
 
     public List<Prediction> listAll() {
         List<Prediction> list = new ArrayList<>();
-        getCollection().find().into(list);
+        getCollection().find(Filters.gte("date", LocalDate.now().toString())).into(list);
         return list;
     }
 }

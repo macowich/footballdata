@@ -4,7 +4,6 @@ import io.quarkus.mongodb.panache.PanacheMongoRepository;
 import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;
 import se.mac.footballdata.rest.model.Fixture;
-import se.mac.footballdata.rest.model.Lineup;
 
 import java.util.List;
 
@@ -12,16 +11,21 @@ import java.util.List;
 public class FixtureRepository implements PanacheMongoRepository<Fixture> {
 
     public List<Fixture> findByDate(String date) {
-        return list("date", date);
+        return list("date >= ?1", date);
     }
 
-    public List<Fixture> findByTeam(String team) {
+    public List<Fixture> findByTeamAndDate(String team, String date) {
         return find(
-                "{$or:[{hometeam:?1},{awayteam:?1}]}",
+                "{$and:[" +
+                        "{$or:[{hometeam:?1},{awayteam:?1}]}," +
+                        "{date:{$gte:?2}}" +
+                        "]}",
                 Sort.by("date").descending(),
-                team
+                team,
+                date
         ).list();
     }
+
 
     public Fixture findByEventId(int eventId) {
         return find("eventId", eventId).singleResult();

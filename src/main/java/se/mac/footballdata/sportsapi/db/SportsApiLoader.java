@@ -46,8 +46,10 @@ public class SportsApiLoader {
                     .withCodecRegistry(pojoCodecRegistry);
 
             handleFixturesData(database, 26);
+            handleFixturesData(database, 54);
             handleFixturesData(database, 55);
             handleLeague(database, 26);
+            handleLeague(database, 54);
             handleLeague(database, 55);
 
         } catch (Exception e) {
@@ -178,19 +180,23 @@ public class SportsApiLoader {
         }
     }
 
-    private static void loadPredictions(FixtureDB db) throws Exception {
-        SportsApiClient.Prediction response = sportsApiClient.fetchPrediction(db.eventId);
-        if (response.markets != null) {
-            MatchPredictionDB matchPredictionDB = new MatchPredictionDB();
-            matchPredictionDB.probHome = response.markets.matchResult.probHome;
-            matchPredictionDB.probDraw = response.markets.matchResult.probDraw;
-            matchPredictionDB.probAway = response.markets.matchResult.probAway;
-            matchPredictionDB.probOver15 = response.markets.overUnder.probOver15;
-            matchPredictionDB.probOver25 = response.markets.overUnder.probOver25;
-            matchPredictionDB.probOver35 = response.markets.overUnder.probOver35;
-            matchPredictionDB.probYes = response.markets.btts.probYes;
-            matchPredictionDB.mostLikely = response.markets.score.mostLikely;
-            db.matchPrediction = matchPredictionDB;
+    private static void loadPredictions(FixtureDB db)  {
+        try {
+            SportsApiClient.Prediction response = sportsApiClient.fetchPrediction(db.eventId);
+            if (response.markets != null) {
+                MatchPredictionDB matchPredictionDB = new MatchPredictionDB();
+                matchPredictionDB.probHome = response.markets.matchResult.probHome;
+                matchPredictionDB.probDraw = response.markets.matchResult.probDraw;
+                matchPredictionDB.probAway = response.markets.matchResult.probAway;
+                matchPredictionDB.probOver15 = response.markets.overUnder.probOver15;
+                matchPredictionDB.probOver25 = response.markets.overUnder.probOver25;
+                matchPredictionDB.probOver35 = response.markets.overUnder.probOver35;
+                matchPredictionDB.probYes = response.markets.btts.probYes;
+                matchPredictionDB.mostLikely = response.markets.score.mostLikely;
+                db.matchPrediction = matchPredictionDB;
+            }
+        } catch (Exception ex) {
+            System.out.println("Kunde inte ladda predictions  för: " + db.eventId);
         }
     }
 
