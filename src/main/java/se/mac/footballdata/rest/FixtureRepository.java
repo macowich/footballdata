@@ -11,7 +11,7 @@ import java.util.List;
 public class FixtureRepository implements PanacheMongoRepository<Fixture> {
 
     public List<Fixture> findByDate(String date) {
-        return list("date >= ?1", date);
+        return find("date >= ?1", Sort.by("date").and("time"), date).list();
     }
 
     public List<Fixture> findByTeamAndDate(String team, String date) {
