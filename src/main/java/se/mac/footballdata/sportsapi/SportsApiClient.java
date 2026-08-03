@@ -432,6 +432,7 @@ public class SportsApiClient {
         public OverUnderMarket overUnder;
         public BttsMarket btts;
         public ScoreMarket score;
+        public Corners corners;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -474,6 +475,13 @@ public class SportsApiClient {
     public static class ScoreMarket {
         @JsonProperty("most_likely")
         public String mostLikely;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Corners {
+        public double prob_over_85;
+        public double prob_over_95;
+        public double prob_over_105;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -818,7 +826,7 @@ public class SportsApiClient {
         HttpResponse<String> response = createHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() != 200) {
-            throw new RuntimeException("API error " + response.statusCode() + ": " + response.body());
+            throw new RuntimeException("Kunde inte hämta lineups för event: " + eventId + " Reason: " + response.statusCode() + ": " + response.body());
         }
 
         ObjectMapper mapper = new ObjectMapper();
@@ -1132,7 +1140,7 @@ public class SportsApiClient {
     public static void main(String[] args) throws Exception {
         SportsApiClient client = new SportsApiClient();
 
-        printArenas(client, 54);
+        //printArenas(client, 54);
 
         /*
         TeamsResponse teamsResponse = client.fetchTeams(26);
@@ -1160,6 +1168,7 @@ public class SportsApiClient {
         System.out.println();
         */
 
+        /*
         // ── Event list ────────────────────────────────
         EventsResponse response = client.fetchEvents("2026-04-04", "2026-04-17", 26);
         System.out.printf("Total events: %d%n%n", response.count);
@@ -1187,6 +1196,8 @@ public class SportsApiClient {
 
             System.out.println();
         }
+
+         */
 
       /*
 
@@ -1229,7 +1240,7 @@ public class SportsApiClient {
             System.out.println(season);
         }
 */
-
+/*
         // ── Event Odds ────────────────────────────────
         System.out.println("\n=== Event Odds (event 46355) ===");
         EventOdds eventOdds = client.fetchEventOdds(46355);
@@ -1250,8 +1261,10 @@ public class SportsApiClient {
             System.out.println("  " + ol);
         }
 
+ */
 
-        Prediction prediction = client.fetchPrediction(46388);
+
+        Prediction prediction = client.fetchPrediction(46421);
         System.out.println("Prediction: " + prediction);
 /*
         // ── Predictions ───────────────────────────────

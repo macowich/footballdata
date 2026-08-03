@@ -248,7 +248,6 @@
                 <div class="prob-bar-track">
                   <div class="prob-bar-fill fill-home" :style="{width: impliedPct(item.homeWin)+'%'}"></div>
                 </div>
-                <span class="prob-pct">{{ impliedPct(item.homeWin) }}%</span>
               </div>
               <div style="font-family:'JetBrains Mono',monospace;font-size:13px;margin-top:2px;color:var(--text)">{{ item.homeWin }}</div>
             </td>
@@ -258,7 +257,6 @@
                 <div class="prob-bar-track">
                   <div class="prob-bar-fill fill-draw" :style="{width: impliedPct(item.draw)+'%'}"></div>
                 </div>
-                <span class="prob-pct">{{ impliedPct(item.draw) }}%</span>
               </div>
               <div style="font-family:'JetBrains Mono',monospace;font-size:13px;margin-top:2px;color:var(--text)">{{ item.draw }}</div>
             </td>
@@ -268,7 +266,6 @@
                 <div class="prob-bar-track">
                   <div class="prob-bar-fill fill-away" :style="{width: impliedPct(item.awayWin)+'%'}"></div>
                 </div>
-                <span class="prob-pct">{{ impliedPct(item.awayWin) }}%</span>
               </div>
               <div style="font-family:'JetBrains Mono',monospace;font-size:13px;margin-top:2px;color:var(--text)">{{ item.awayWin }}</div>
             </td>
@@ -278,7 +275,6 @@
                 <div class="prob-bar-track">
                   <div class="prob-bar-fill fill-over" :style="{width: impliedPct(item.o25)+'%'}"></div>
                 </div>
-                <span class="prob-pct">{{ impliedPct(item.o25) }}%</span>
               </div>
               <div style="font-family:'JetBrains Mono',monospace;font-size:13px;margin-top:2px;color:var(--text)">{{ item.o25 }}</div>
             </td>
@@ -288,7 +284,6 @@
                 <div class="prob-bar-track">
                   <div class="prob-bar-fill fill-under" :style="{width: impliedPct(item.u25)+'%'}"></div>
                 </div>
-                <span class="prob-pct">{{ impliedPct(item.u25) }}%</span>
               </div>
               <div style="font-family:'JetBrains Mono',monospace;font-size:13px;margin-top:2px;color:var(--text)">{{ item.u25 }}</div>
             </td>
@@ -318,7 +313,7 @@ createApp({
     const loading = ref(false);
     const error = ref('');
     const search = ref('');
-    const selectedDate = ref('');
+    const selectedDate = ref(new Date().toLocaleDateString());
     const sortKey = ref('');
     const sortDir = ref(1);
 

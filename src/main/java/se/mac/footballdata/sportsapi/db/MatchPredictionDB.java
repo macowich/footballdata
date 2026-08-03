@@ -8,5 +8,10 @@ public class MatchPredictionDB {
     public double probOver25;
     public double probOver35;
     public double probYes;
+    public double probXPHome;
+    public double probXPAway;
+    public double cornersProbOver85;
+    public double cornersProbOver95;
+    public double cornersProbOver105;
     public String mostLikely;
 }

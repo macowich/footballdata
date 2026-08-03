@@ -51,7 +51,6 @@ public class SportsApiLoader {
             handleLeague(database, 26);
             handleLeague(database, 54);
             handleLeague(database, 55);
-
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -193,6 +192,11 @@ public class SportsApiLoader {
                 matchPredictionDB.probOver35 = response.markets.overUnder.probOver35;
                 matchPredictionDB.probYes = response.markets.btts.probYes;
                 matchPredictionDB.mostLikely = response.markets.score.mostLikely;
+                matchPredictionDB.probXPHome = response.markets.expectedGoals.home;
+                matchPredictionDB.probXPAway = response.markets.expectedGoals.away;
+                matchPredictionDB.cornersProbOver85 = response.markets.corners.prob_over_85;
+                matchPredictionDB.cornersProbOver95 = response.markets.corners.prob_over_95;
+                matchPredictionDB.cornersProbOver105 = response.markets.corners.prob_over_105;
                 db.matchPrediction = matchPredictionDB;
             }
         } catch (Exception ex) {
@@ -251,9 +255,13 @@ public class SportsApiLoader {
 
     private static OddsDB loadEventOdds(int eventId) throws Exception {
         System.out.println("\n=== Loading odds (eventId: " + eventId + " ) ===");
-        SportsApiClient.OddsLineResponse oddsLineResponse = sportsApiClient.fetchOdds(eventId, "pinnacle");
-        if (!oddsLineResponse.results.isEmpty()) {
-            return createOddsDB(oddsLineResponse.results, eventId);
+        try {
+            SportsApiClient.OddsLineResponse oddsLineResponse = sportsApiClient.fetchOdds(eventId, "pinnacle");
+            if (!oddsLineResponse.results.isEmpty()) {
+                return createOddsDB(oddsLineResponse.results, eventId);
+            }
+        } catch(Exception e) {
+            System.out.println("Kunde inte ladda odds för: " + eventId);
         }
         return null;
     }

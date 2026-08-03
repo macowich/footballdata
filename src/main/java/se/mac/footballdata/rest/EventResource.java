@@ -1,23 +1,15 @@
 package se.mac.footballdata.rest;
 
 import jakarta.inject.Inject;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import org.bson.types.ObjectId;
 import se.mac.footballdata.Util;
 import se.mac.footballdata.rest.model.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import static io.quarkus.mongodb.panache.PanacheMongoEntityBase.find;
 
 @Path("/events")
 @Produces(MediaType.APPLICATION_JSON)
@@ -44,7 +36,7 @@ public class EventResource {
     public List<Event> events(@PathParam("league") String league) {
 
         List<Event> eventList = eventRepository.findByLeague(Integer.parseInt(league));
-        for (Event e: eventList) {
+        for (Event e : eventList) {
             Optional<Odds> o = oddsRepository.findByEventId(e.eventId);
             o.ifPresent(odds -> e.odds = odds);
         }

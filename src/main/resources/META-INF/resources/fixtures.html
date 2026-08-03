@@ -732,7 +732,7 @@
       const loading = ref(false);
       const error   = ref('');
       const search  = ref('');
-      const selectedDate = ref('');
+      const selectedDate = ref(new Date().toLocaleDateString());
       const leagues = ref([]);
 
       const modalOpen    = ref(false);
