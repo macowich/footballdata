@@ -4,6 +4,7 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.ReplaceOptions;
+import com.mongodb.client.model.Sorts;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import se.mac.footballdata.predictions.model.Prediction;
@@ -34,7 +35,9 @@ public class PredictionRepository {
 
     public List<Prediction> listAll() {
         List<Prediction> list = new ArrayList<>();
-        getCollection().find(Filters.gte("date", LocalDate.now().toString())).into(list);
+        getCollection().find(Filters.gte("date", LocalDate.now().toString()))
+                .sort(Sorts.orderBy(Sorts.ascending("date"), Sorts.ascending("time")))
+                .into(list);
         return list;
     }
 }

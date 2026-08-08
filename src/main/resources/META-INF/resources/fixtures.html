@@ -129,11 +129,11 @@
     .h2h-section { padding:20px 24px; }
     .h2h-summary-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:20px; }
     .h2h-stat-card { background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:12px 14px; display:flex; flex-direction:column; gap:4px; }
-    .h2h-stat-label { font-family:var(--font); font-size:10px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
+    .h2h-stat-label { font-family:var(--font),serif; font-size:10px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
     .h2h-stat-value { font-family:'JetBrains Mono',monospace; font-size:22px; font-weight:700; color:var(--text); line-height:1; }
 
     .h2h-winbar-wrap { margin-bottom:20px; }
-    .h2h-winbar-labels { display:flex; justify-content:space-between; font-family:var(--font); font-size:12px; color:var(--muted); margin-bottom:6px; }
+    .h2h-winbar-labels { display:flex; justify-content:space-between; font-family:var(--font),serif; font-size:12px; color:var(--muted); margin-bottom:6px; }
     .h2h-winbar-labels strong { font-family:'JetBrains Mono',monospace; color:var(--text); }
     .h2h-winbar-track { display:flex; height:8px; border-radius:99px; overflow:hidden; }
     .h2h-bar-home { background:var(--accent); transition:width .6s ease; }
@@ -727,7 +727,6 @@
       const API          = 'http://localhost:8080/fixtures/all';
       const FIXTURE_API  = 'http://localhost:8080/fixtures/id';
       const LINEUP_API   = 'http://localhost:8080/events/lineups';
-      const LEAGUE_API   = 'http://localhost:8080/events/league/all';
       const items   = ref([]);
       const loading = ref(false);
       const error   = ref('');
