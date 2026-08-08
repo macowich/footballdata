@@ -1140,7 +1140,7 @@ public class SportsApiClient {
     public static void main(String[] args) throws Exception {
         SportsApiClient client = new SportsApiClient();
 
-        //printArenas(client, 54);
+        printArenas(client, 84);
 
         /*
         TeamsResponse teamsResponse = client.fetchTeams(26);

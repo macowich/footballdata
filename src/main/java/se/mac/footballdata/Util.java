@@ -31,13 +31,15 @@ public class Util {
     public static Map<Integer, League> leagues = new HashMap<>();
 
     static {
-        leagues.put(1, new League(1, "Premier League", "2026-08-10"));
+        leagues.put(1, new League(1, "Premier League", "2026-08-21"));
+        leagues.put(12, new League(12, "Championship", "2026-08-14"));
         leagues.put(26, new League(26, "Allsvenskan", "2026-04-04"));
         leagues.put(55, new League(55, "Finland", "2026-04-04"));
         leagues.put(54, new League(54, "Norge", "2026-03-14"));
+        leagues.put(84, new League(84, "Danmark", "2026-07-24"));
         leagues.put(1000, new League(1000, "Superettan", "2026-04-04"));
-        leagues.put(1001, new League(1001, "Ettan Norra", "2026-04-04"));
-        leagues.put(1002, new League(1002, "Ettan Södra", "2026-04-04"));
+        //leagues.put(1001, new League(1001, "Ettan Norra", "2026-04-04"));
+        //leagues.put(1002, new League(1002, "Ettan Södra", "2026-04-04"));
     }
 
     public static Map<Integer, String> arenas = new HashMap<>();
@@ -66,6 +68,18 @@ public class Util {
         arenas.put(119, "Aspmyra Stadion (Bodø) Kapacitet: 8270");
         arenas.put(391, "Fredrikstad Stadion (Fredrikstad) Kapacitet: 13300");
         arenas.put(139, "Brann Stadion (Bergen) Kapacitet: 17686");
+        // Danmark
+        arenas.put(830, "Brøndby Stadium (Brondby) Kapacitet: 29000");
+        arenas.put(122, "Parken (Copenhagen) Kapacitet: 38190");
+        arenas.put(125, "MCH Arena (Herning) Kapacitet: 11809");
+        arenas.put(791, "Right to Dream Park (Farum) Kapacitet: 10100");
+        arenas.put(824, "Hvidovre Stadion (Copenhagen) Kapacitet: 12000");
+        arenas.put(825, "Lyngby Stadium (Lyngby) Kapacitet: 10000");
+        arenas.put(828, "Cepheus Park Randers (Randers) Kapacitet: 12000");
+        arenas.put(829, "JYSK Park (Silkeborg) Kapacitet: 10000");
+        arenas.put(832, "Sydbank Park (Haderslev) Kapacitet: 10000");
+        arenas.put(826, "Vejle Stadium (Vejle) Kapacitet: 11060");
+        arenas.put(831, "Viborg Stadion (Viborg) Kapacitet: 9566");
     }
 
     public static Integer getLeagueIdByName(String name) throws Exception {

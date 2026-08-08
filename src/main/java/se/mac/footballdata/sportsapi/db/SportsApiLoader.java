@@ -48,9 +48,11 @@ public class SportsApiLoader {
             handleFixturesData(database, 26);
             handleFixturesData(database, 54);
             handleFixturesData(database, 55);
+            handleFixturesData(database, 84);
             handleLeague(database, 26);
             handleLeague(database, 54);
             handleLeague(database, 55);
+            handleLeague(database, 84);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -330,7 +330,7 @@ createApp({
     }
 
     function favoriteLabel(item) {
-      const h = parseFloat(item.homewin), d = parseFloat(item.draw), a = parseFloat(item.awayWin);
+      const h = parseFloat(item.homeWin), d = parseFloat(item.draw), a = parseFloat(item.awayWin);
       const min = Math.min(h, d, a);
       if (min === h) return item.hometeam;
       if (min === a) return item.awayteam;

@@ -600,10 +600,6 @@
                 <div class="pred-bar-track"><div class="pred-bar-fill fill-away" :style="{ width: fixture.matchPrediction.probAway + '%' }"></div></div>
               </div>
               <div class="pred-bar-row">
-                <div class="pred-bar-label-row"><span>⚽ Över 1.5 mål</span><strong>{{ fixture.matchPrediction.probOver15 }}%</strong></div>
-                <div class="pred-bar-track"><div class="pred-bar-fill fill-over" :style="{ width: fixture.matchPrediction.probOver15 + '%' }"></div></div>
-              </div>
-              <div class="pred-bar-row">
                 <div class="pred-bar-label-row"><span>⚽ Över 2.5 mål</span><strong>{{ fixture.matchPrediction.probOver25 }}%</strong></div>
                 <div class="pred-bar-track"><div class="pred-bar-fill fill-over" :style="{ width: fixture.matchPrediction.probOver25 + '%' }"></div></div>
               </div>
@@ -614,6 +610,10 @@
               <div class="pred-bar-row">
                 <div class="pred-bar-label-row"><span>🎯 Båda lag gör mål (BTTS)</span><strong>{{ fixture.matchPrediction.probYes }}%</strong></div>
                 <div class="pred-bar-track"><div class="pred-bar-fill fill-under" :style="{ width: fixture.matchPrediction.probYes + '%' }"></div></div>
+              </div>
+              <div class="pred-bar-row">
+                <div class="pred-bar-label-row"><span>🏳️ Över 9.5 Hörnor</span><strong>{{ fixture.matchPrediction.cornersProbOver95 }}%</strong></div>
+                <div class="pred-bar-track"><div class="pred-bar-fill fill-under" :style="{ width: fixture.matchPrediction.cornersProbOver95 + '%' }"></div></div>
               </div>
             </div>
           </template>
