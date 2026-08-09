@@ -310,25 +310,19 @@
             <thead>
               <tr>
                 <th>Datum</th>
-                <th>Hemma</th>
-                <th style="text-align:center">Resultat</th>
-                <th>Borta</th>
-                <th>Utfall</th>
+                <th>Match</th>
+                <th>Resultat</th>
               </tr>
             </thead>
             <tbody>
               <tr class="row-hover" v-for="m in results" :key="m.id">
-                <td style="white-space:nowrap;font-family:var(--mono);font-size:12px;color:var(--muted)">{{ m.date }}</td>
-                <td style="font-size:13px;font-weight:600">{{ m.homeTeam }}</td>
-                <td style="text-align:center;font-family:var(--mono),serif;font-size:15px;font-weight:700;letter-spacing:2px">
-                  {{ m.fullTimeHomeGoals }} – {{ m.fullTimeAwayGoals }}
+                <td style="white-space:nowrap">
+                  <strong>{{ m.date }}</strong>
+                  <span style="color:var(--muted)"> {{ m.time }}</span>
                 </td>
-                <td style="font-size:13px;font-weight:600">{{ m.awayTeam }}</td>
-                <td>
-                  <span
-                    style="display:inline-block;padding:2px 10px;border-radius:5px;font-family:var(--mono),serif;font-size:11px;font-weight:700"
-                    :style="outcomeStyle(m)"
-                  >{{ outcomeLabel(m) }}</span>
+                <td style="font-family:var(--mono);font-size:13px">{{ m.homeTeam }} &ndash; {{ m.awayTeam }}</td>
+                <td style="font-family:var(--mono);font-size:13px;font-weight:700">
+                  {{ m.fullTimeHomeGoals }} – {{ m.fullTimeAwayGoals }}
                 </td>
               </tr>
             </tbody>
@@ -524,21 +518,6 @@ createApp({
       return [name.slice(0, cut), name.slice(cut)];
     }
 
-    function outcomeLabel(m) {
-      const isHome = m.homeTeam === teamName.value;
-      const hg = m.fullTimeHomeGoals, ag = m.fullTimeAwayGoals;
-      if (hg === ag) return 'O';
-      if (isHome) return hg > ag ? 'V' : 'F';
-      return ag > hg ? 'V' : 'F';
-    }
-
-    function outcomeStyle(m) {
-      const label = outcomeLabel(m);
-      if (label === 'V') return { background: 'var(--green-bg)', color: 'var(--green)', border: '1px solid var(--green-border)' };
-      if (label === 'F') return { background: 'var(--red-bg)',   color: 'var(--red)',   border: '1px solid var(--red-border)'   };
-      return { background: 'var(--surface2)', color: 'var(--muted)', border: '1px solid var(--border)' };
-    }
-
     async function fetchTeam() {
       loading.value = true; error.value = '';
       try {
@@ -700,7 +679,7 @@ createApp({
       fixtures, fixturesLoading, fixturesError,
       fetchTeam, fetchSquad, switchTab,
       squad, squadLoading, squadError, squadByPosition,
-      pct, teamNameSplit, outcomeLabel, outcomeStyle,
+      pct, teamNameSplit,
       posLabel, posStyle, ratingStyle, nationalityCode
     };
   }
