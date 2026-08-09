@@ -347,18 +347,21 @@
             <thead>
               <tr>
                 <th>Datum</th>
-                <th>Tid</th>
-                <th>Hemma</th>
-                <th>Borta</th>
+                <th>Match</th>
                 <th>Matchinformation</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="f in fixtures" :key="f.id">
-                <td style="white-space:nowrap;font-family:var(--mono),serif;font-size:12px;color:var(--muted)">{{ f.date }}</td>
-                <td style="font-family:var(--mono),serif;font-size:12px;color:var(--muted)">{{ f.time }}</td>
-                <td style="font-size:13px;font-weight:600" :style="f.hometeam === teamName ? 'color:var(--accent)' : ''">{{ f.hometeam }}</td>
-                <td style="font-size:13px;font-weight:600" :style="f.awayteam === teamName ? 'color:var(--accent)' : ''">{{ f.awayteam }}</td>
+              <tr class="row-hover" v-for="f in fixtures" :key="f.id">
+                <td style="white-space:nowrap">
+                  <strong>{{ f.date }}</strong>
+                  <span style="color:var(--muted)"> {{ f.time }}</span>
+                </td>
+                <td style="font-family:var(--mono);font-size:13px">
+                  <span :style="f.hometeam === teamName ? 'color:var(--accent)' : ''">{{ f.hometeam }}</span>
+                  &ndash;
+                  <span :style="f.awayteam === teamName ? 'color:var(--accent)' : ''">{{ f.awayteam }}</span>
+                </td>
                 <td>
                   <div class="matchinfo-cell">
                     <span class="matchinfo-row"><span class="matchinfo-icon">🏟️</span>{{ f.venue || '—' }}</span>
