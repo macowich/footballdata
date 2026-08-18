@@ -1140,7 +1140,7 @@ public class SportsApiClient {
     public static void main(String[] args) throws Exception {
         SportsApiClient client = new SportsApiClient();
 
-        printArenas(client, 84);
+       // printArenas(client, 84);
 
         /*
         TeamsResponse teamsResponse = client.fetchTeams(26);
@@ -1239,18 +1239,16 @@ public class SportsApiClient {
         for (CareerSeason season : career.seasons) {
             System.out.println(season);
         }
-*/
-/*
+
         // ── Event Odds ────────────────────────────────
         System.out.println("\n=== Event Odds (event 46355) ===");
         EventOdds eventOdds = client.fetchEventOdds(46355);
         System.out.printf("Event ID: %d%n", eventOdds.eventId);
         System.out.println(eventOdds.odds);
-
-
+*/
         // ── Bookmaker Odds Lines ───────────────────────
         System.out.println("\n=== Bookmaker Odds (event 46324, Pinnacle) ===");
-        OddsLineResponse oddsLines = client.fetchOdds(46324, "pinnacle");
+        OddsLineResponse oddsLines = client.fetchOdds(46433, "");
         System.out.printf("Total odds lines: %d%n%n", oddsLines.count);
         String currentMarket = null;
         for (OddsLine ol : oddsLines.results) {
@@ -1261,10 +1259,8 @@ public class SportsApiClient {
             System.out.println("  " + ol);
         }
 
- */
 
-
-        Prediction prediction = client.fetchPrediction(46421);
+        Prediction prediction = client.fetchPrediction(223234);
         System.out.println("Prediction: " + prediction);
 /*
         // ── Predictions ───────────────────────────────

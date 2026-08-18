@@ -61,7 +61,7 @@ public class SportsApiLoader {
     static void handleLeague(MongoDatabase database, int leagueId) throws Exception {
         handleEventsData(database, leagueId);
         //handlePlayersData(database, leagueId);
-        //handleRefereeData(database, leagueId);
+        handleRefereeData(database, leagueId);
     }
 
     private static void handlePlayersData(MongoDatabase database, int leagueId) throws Exception {
@@ -100,8 +100,12 @@ public class SportsApiLoader {
             }
         }
 
-        DBUtil.updateFixturesCollection(database, fixtureDBList);
-        DBUtil.updateLineupsCollection(database, lineupDBList);
+        if (!fixtureDBList.isEmpty()) {
+            DBUtil.updateFixturesCollection(database, fixtureDBList);
+        }
+        if (!lineupDBList.isEmpty()) {
+            DBUtil.updateLineupsCollection(database, lineupDBList);
+        }
     }
 
     static void handleEventsData(MongoDatabase database, int leagueId) throws Exception {
@@ -175,13 +179,13 @@ public class SportsApiLoader {
     }
 
     private static void loadFixtureOdds(FixtureDB fixtureDB) throws Exception {
-        SportsApiClient.OddsLineResponse oddsLineResponse = sportsApiClient.fetchOdds(fixtureDB.eventId, "pinnacle");
+        SportsApiClient.OddsLineResponse oddsLineResponse = sportsApiClient.fetchOdds(fixtureDB.eventId, "");
         if (!oddsLineResponse.results.isEmpty()) {
             fixtureDB.odds = createOddsDB(oddsLineResponse.results, fixtureDB.eventId);
         }
     }
 
-    private static void loadPredictions(FixtureDB db)  {
+    private static void loadPredictions(FixtureDB db) {
         try {
             SportsApiClient.Prediction response = sportsApiClient.fetchPrediction(db.eventId);
             if (response.markets != null) {
@@ -216,9 +220,15 @@ public class SportsApiLoader {
         eventList.addAll(response.results);
     }
 
-    private static void loadEventStats(EventDB eventDB) throws Exception {
-        EventStats eventStats = eventStatsClient.fetchEventStats(eventDB.eventId);
-        System.out.println("EventStatus for " + eventDB.eventId + " is loaded ");
+    private static void loadEventStats(EventDB eventDB) {
+        EventStats eventStats;
+        try {
+            eventStats = eventStatsClient.fetchEventStats(eventDB.eventId);
+        } catch (Exception ex) {
+            System.out.println("Kunde inte ladda EventStats  för: " + eventDB.eventId);
+            return;
+        }
+        System.out.println("EventStats for " + eventDB.eventId + " is loaded ");
         eventDB.hs = eventStats.stats.home.totalShots;
         eventDB.as = eventStats.stats.away.totalShots;
         eventDB.hy = eventStats.stats.home.yellowCards;
@@ -238,7 +248,7 @@ public class SportsApiLoader {
     }
 
     private static List<IncidentDB> loadEventIncidents(int eventId) throws Exception {
-        System.out.println("\n=== Loading incidents (eventId: " + eventId + " ) ===");
+        System.out.println("=== Loading incidents (eventId: " + eventId + " ) ===");
         SportsApiClient.EventData eventData = sportsApiClient.fetchIncidents(eventId);
         if (!eventData.incidents.isEmpty()) {
             return createIncidentDB(eventData.incidents, eventId);
@@ -246,30 +256,34 @@ public class SportsApiLoader {
         return null;
     }
 
-    private static LineupDB loadEventLineups(int eventId) throws Exception {
-        System.out.println("\n=== Loading lineups (eventId: " + eventId + " ) ===");
-        SportsApiClient.LineupResponse lineupResponse = sportsApiClient.fetchLineups(eventId);
-        if (lineupResponse.lineups != null) {
-            return createLineupDB(lineupResponse.lineup_status, lineupResponse.lineups, eventId);
+    private static LineupDB loadEventLineups(int eventId) {
+        System.out.println("=== Loading lineups (eventId: " + eventId + " ) ===");
+        try {
+            SportsApiClient.LineupResponse lineupResponse = sportsApiClient.fetchLineups(eventId);
+            if (lineupResponse.lineups != null) {
+                return createLineupDB(lineupResponse.lineup_status, lineupResponse.lineups, eventId);
+            }
+        } catch (Exception e) {
+            System.out.println("Kunde inte ladda lineups för: " + eventId);
         }
         return null;
     }
 
-    private static OddsDB loadEventOdds(int eventId) throws Exception {
-        System.out.println("\n=== Loading odds (eventId: " + eventId + " ) ===");
+    private static OddsDB loadEventOdds(int eventId) {
+        System.out.println("=== Loading odds (eventId: " + eventId + " ) ===");
         try {
-            SportsApiClient.OddsLineResponse oddsLineResponse = sportsApiClient.fetchOdds(eventId, "pinnacle");
+            SportsApiClient.OddsLineResponse oddsLineResponse = sportsApiClient.fetchOdds(eventId, "");
             if (!oddsLineResponse.results.isEmpty()) {
                 return createOddsDB(oddsLineResponse.results, eventId);
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             System.out.println("Kunde inte ladda odds för: " + eventId);
         }
         return null;
     }
 
     static void handleRefereeData(MongoDatabase database, int leagueId) throws Exception {
-        System.out.println("\n=== Loading referees (league: " + leagueId + " ) ===");
+        System.out.println("=== Loading referees (league: " + leagueId + " ) ===");
         SportsApiClient.RefereesResponse refs = sportsApiClient.fetchReferees(leagueId);
         List<RefereeDB> refereeDBList = createRefereeDB(refs.results, leagueId);
 
