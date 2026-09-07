@@ -45,10 +45,17 @@ public class SportsApiLoader {
                     .getDatabase("sportsdb")
                     .withCodecRegistry(pojoCodecRegistry);
 
+
+            handleFixturesData(database, 1);
+            handleFixturesData(database, 5);
+            handleFixturesData(database, 12);
             handleFixturesData(database, 26);
             handleFixturesData(database, 54);
             handleFixturesData(database, 55);
             handleFixturesData(database, 84);
+            handleLeague(database, 1);
+            handleLeague(database, 5);
+            handleLeague(database, 12);
             handleLeague(database, 26);
             handleLeague(database, 54);
             handleLeague(database, 55);
@@ -83,7 +90,7 @@ public class SportsApiLoader {
 
     static void handleFixturesData(MongoDatabase database, int leagueId) throws Exception {
         String currentDate = LocalDate.now().toString();
-        String toDate = String.valueOf(LocalDate.now().plusDays(7));
+        String toDate = String.valueOf(LocalDate.now().plusDays(3));
         System.out.println("Loading fixtures for league" + leagueId + " from " + currentDate + " to " + toDate);
         SportsApiClient.EventsResponse response = sportsApiClient.
                 fetchEvents(currentDate, toDate, leagueId, "notstarted");
@@ -179,10 +186,27 @@ public class SportsApiLoader {
     }
 
     private static void loadFixtureOdds(FixtureDB fixtureDB) throws Exception {
-        SportsApiClient.OddsLineResponse oddsLineResponse = sportsApiClient.fetchOdds(fixtureDB.eventId, "");
-        if (!oddsLineResponse.results.isEmpty()) {
-            fixtureDB.odds = createOddsDB(oddsLineResponse.results, fixtureDB.eventId);
+        SportsApiClient.EventOdds oddsLineResponse = sportsApiClient.fetchEventOdds(fixtureDB.eventId);
+        if (oddsLineResponse != null) {
+            fixtureDB.odds = createOddsDB2(oddsLineResponse, fixtureDB.eventId);
         }
+    }
+
+    private static OddsDB createOddsDB2(SportsApiClient.EventOdds eventOdds, int eventId) {
+        OddsDB oddsDB = new OddsDB();
+        oddsDB.eventId = eventId;
+        oddsDB.homeWin = eventOdds.odds.homeWin;
+        oddsDB.draw = eventOdds.odds.draw;
+        oddsDB.awayWin = eventOdds.odds.awayWin;
+        oddsDB.over15Goals = eventOdds.odds.over15Goals;
+        oddsDB.under15Goals = eventOdds.odds.under15Goals;
+        oddsDB.over25Goals = eventOdds.odds.over25Goals;
+        oddsDB.under25Goals = eventOdds.odds.under25Goals;
+        oddsDB.over35Goals = eventOdds.odds.over35Goals;
+        oddsDB.under35Goals = eventOdds.odds.under35Goals;
+        oddsDB.bttsYes = eventOdds.odds.bttsYes;
+        oddsDB.bttsNo = eventOdds.odds.bttsNo;
+        return oddsDB;
     }
 
     private static void loadPredictions(FixtureDB db) {

@@ -26,8 +26,8 @@ public class XScoresLoader {
 
     static {
         resultPages.add(BASE_PATH + "results\\Superettan - Results _ Football Sweden.html");
-        resultPages.add(BASE_PATH + "results\\Ettan - Results _ Football Sweden.html");
-        resultPages.add(BASE_PATH + "results\\Ettan Sodra - Results _ Football Sweden.html");
+        //resultPages.add(BASE_PATH + "results\\Ettan - Results _ Football Sweden.html");
+        //resultPages.add(BASE_PATH + "results\\Ettan Sodra - Results _ Football Sweden.html");
     }
 
     public static void main(String[] args) throws Exception {

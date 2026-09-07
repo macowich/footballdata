@@ -33,6 +33,7 @@ public class Util {
     static {
         leagues.put(1, new League(1, "Premier League", "2026-08-21"));
         leagues.put(12, new League(12, "Championship", "2026-08-14"));
+        leagues.put(5, new League(5, "Bundesliga", "2026-08-28"));
         leagues.put(26, new League(26, "Allsvenskan", "2026-04-04"));
         leagues.put(55, new League(55, "Finland", "2026-04-04"));
         leagues.put(54, new League(54, "Norge", "2026-03-14"));
@@ -80,6 +81,95 @@ public class Util {
         arenas.put(832, "Sydbank Park (Haderslev) Kapacitet: 10000");
         arenas.put(826, "Vejle Stadium (Vejle) Kapacitet: 11060");
         arenas.put(831, "Viborg Stadion (Viborg) Kapacitet: 9566");
+
+        // Premier league
+        arenas.put(18, "Emirates Stadium (London) Kapacitet: 60704");
+        arenas.put(3, "Villa Park (Birmingham) Kapacitet: 42640");
+        arenas.put(2, "Vitality Stadium (Bournemouth) Kapacitet: 11307");
+        arenas.put(16, "Brentford Community Stadium (London) Kapacitet: 17250");
+        arenas.put(13, "Stamford Bridge (London) Kapacitet: 40341");
+        arenas.put(198, "Coventry Building Society Arena (Coventry) Kapacitet: 32609");
+        arenas.put(20, "Hill Dickinson Stadium (Liverpool) Kapacitet: 52888");
+        arenas.put(199, "MKM Stadium (Hull) Kapacitet: 25586");
+        arenas.put(195, "Portman Road Stadium (Ipswich) Kapacitet: 29673");
+        arenas.put(19, "Elland Road (Leeds) Kapacitet: 37890");
+        arenas.put(1, "Anfield (Liverpool) Kapacitet: 61276");
+        arenas.put(12, "Etihad Stadium (Manchester) Kapacitet: 53400");
+        arenas.put(17, "Old Trafford (Manchester) Kapacitet: 74879");
+        arenas.put(4, "St James' Park (Newcastle upon Tyne) Kapacitet: 52409");
+        arenas.put(15, "City Ground (Nottingham) Kapacitet: 30445");
+        arenas.put(896, "Boundary Park (Oldham) Kapacitet: 13512");
+        arenas.put(7, "Stadium of Light (Sunderland) Kapacitet: 48707");
+        arenas.put(890, "County Ground (Swindon) Kapacitet: 15728");
+        arenas.put(9, "Tottenham Hotspur Stadium (London) Kapacitet: 62850");
+        arenas.put(209, "The Hawthorns (West Bromwich) Kapacitet: 26445");
+        arenas.put(8, "London Stadium (London) Kapacitet: 62500");
+
+        // Championship
+        arenas.put(864, "Oakwell Ground (Barnsley) Kapacitet: 23287");
+        arenas.put(194, "St. Andrew's @ Knighthead Park (Birmingham) Kapacitet: 29409");
+        arenas.put(210, "Ewood Park (Blackburn) Kapacitet: 31367");
+        arenas.put(714, "Bloomfield Road (Blackpool) Kapacitet: 17338");
+        arenas.put(715, "Toughsheet Community Stadium  (Horwich) Kapacitet: 28723");
+        arenas.put(866, "Valley Parade (Bradford) Kapacitet: 25136");
+        arenas.put(5, "American Express Stadium (Falmer) Kapacitet: 31876");
+        arenas.put(212, "Ashton Gate (Bristol) Kapacitet: 27000");
+        arenas.put(10, "Turf Moor (Burnley) Kapacitet: 21944");
+        arenas.put(870, "Pirelli Stadium (Burton upon Trent) Kapacitet: 6912");
+        arenas.put(196, "The Valley (London) Kapacitet: 27111");
+        arenas.put(898, "Alexandra Stadium (Crewe) Kapacitet: 10153");
+        arenas.put(14, "Selhurst Park (London) Kapacitet: 25456");
+        arenas.put(208, "Pride Park Stadium (Derby) Kapacitet: 33597");
+        arenas.put(720, "Eco-Power Stadium (Doncaster) Kapacitet: 15231");
+        arenas.put(6, "Craven Cottage (London) Kapacitet: 29600");
+        arenas.put(883, "Priestfield Stadium (Gillingham) Kapacitet: 11582");
+        arenas.put(717, "Accu Stadium (Huddersfield) Kapacitet: 24500");
+        arenas.put(213, "King Power Stadium (Leicester) Kapacitet: 32312");
+        arenas.put(865, "Sincil Bank (Lincoln) Kapacitet: 10780");
+        arenas.put(718, "Kenilworth Road (Luton) Kapacitet: 12056");
+        arenas.put(202, "Riverside (Middlesbrough) Kapacitet: 34742");
+        arenas.put(205, "The Den (London) Kapacitet: 20146");
+        arenas.put(723, "Stadium MK (Milton Keynes) Kapacitet: 30500");
+        arenas.put(204, "Carrow Road (Norwich) Kapacitet: 27244");
+        arenas.put(206, "Kassam Stadium (Oxford) Kapacitet: 12500");
+        arenas.put(721, "Weston Homes Stadium (Peterborough) Kapacitet: 15314");
+        arenas.put(725, "Home Park (Plymouth) Kapacitet: 17150");
+        arenas.put(716, "Select Car Leasing Stadium (Reading) Kapacitet: 24161");
+        arenas.put(875, "New York Stadium (Rotherham) Kapacitet: 12000");
+        arenas.put(719, "Glanford Park (Scunthorpe) Kapacitet: 9183");
+        arenas.put(211, "Bramall Lane (Sheffield) Kapacitet: 32050");
+        arenas.put(214, "Hillsborough Stadium (Sheffield) Kapacitet: 34835");
+        arenas.put(200, "St. Mary's Stadium (Southampton) Kapacitet: 32384");
+        arenas.put(207, "bet365 Stadium (Stoke) Kapacitet: 30089");
+        arenas.put(891, "Bescot Stadium (Walsall) Kapacitet: 11300");
+        arenas.put(197, "Vicarage Road (Watford) Kapacitet: 22200");
+
+        arenas.put(79, "Voith-Arena (Heidenheim an der Brenz) Kapacitet: 15000");
+        arenas.put(753, "Fritz-Walter-Stadion (Kaiserslautern) Kapacitet: 49780");
+        arenas.put(92, "RheinEnergieStadion (Cologne) Kapacitet: 50000");
+        arenas.put(752, "Max-Morlock-Stadion (Nuremberg) Kapacitet: 50000");
+        arenas.put(81, "An der alten Försterei (Berlin) Kapacitet: 22012");
+        arenas.put(91, "MEWA Arena (Mainz) Kapacitet: 34000");
+        arenas.put(83, "BayArena (Leverkusen) Kapacitet: 30210");
+        arenas.put(90, "Signal Iduna Park (Dortmund) Kapacitet: 81365");
+        arenas.put(93, "Borussia-Park (Monchengladbach) Kapacitet: 54057");
+        arenas.put(760, "Merck-Stadion am Böllenfalltor (Darmstadt) Kapacitet: 16500");
+        arenas.put(85, "Deutsche Bank Park (Frankfurt) Kapacitet: 58000");
+        arenas.put(88, "WWK ARENA (Augsburg) Kapacitet: 30660");
+        arenas.put(77, "Allianz Arena (Munich) Kapacitet: 75024");
+        arenas.put(759, "Audi Sportpark (Ingolstadt) Kapacitet: 15200");
+        arenas.put(755, "VELTINS-Arena (Gelsenkirchen) Kapacitet: 62271");
+        arenas.put(89, "Millerntor-Stadion (Hamburg - St. Pauli) Kapacitet: 29546");
+        arenas.put(756, "Merkur Spiel-Arena (Dusseldorf) Kapacitet: 54600");
+        arenas.put(94, "Volksparkstadion (Hamburg) Kapacitet: 57000");
+        arenas.put(754, "Heinz-von-Heiden-Arena (Hannover) Kapacitet: 49200");
+        arenas.put(761, "Holstein-Stadion (Kiel) Kapacitet: 15034");
+        arenas.put(78, "Red Bull Arena (Leipzig) Kapacitet: 47069");
+        arenas.put(87, "Europa-Park-Stadion (Freiburg im Breisgau) Kapacitet: 34700");
+        arenas.put(758, "Home Deluxe Arena (Paderborn) Kapacitet: 15000");
+        arenas.put(757, "Sportpark Ronhof Thomas Sommer (Fürth) Kapacitet: 15000");
+        arenas.put(86, "Weserstadion (Bremen) Kapacitet: 42100");
+
     }
 
     public static Integer getLeagueIdByName(String name) throws Exception {

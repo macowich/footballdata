@@ -1140,7 +1140,7 @@ public class SportsApiClient {
     public static void main(String[] args) throws Exception {
         SportsApiClient client = new SportsApiClient();
 
-       // printArenas(client, 84);
+        printArenas(client, 5);
 
         /*
         TeamsResponse teamsResponse = client.fetchTeams(26);
@@ -1157,13 +1157,16 @@ public class SportsApiClient {
         /*
         LineupResponse lineupResponse = client.fetchLineups(46355);
         System.out.println();
-
+*/
         // ── Single event ──────────────────────────────
-        Event single = client.fetchEvent(46355);
+        /*
+        Event single = client.fetchEvent(214007);
         System.out.println("Single event fetch: id=" + single.id);
         System.out.println(single);
         System.out.println();
 
+         */
+/*
         Manager manager = client.fetchManager(584);
         System.out.println();
         */
@@ -1240,15 +1243,18 @@ public class SportsApiClient {
             System.out.println(season);
         }
 
+         */
+
         // ── Event Odds ────────────────────────────────
-        System.out.println("\n=== Event Odds (event 46355) ===");
-        EventOdds eventOdds = client.fetchEventOdds(46355);
+        /*
+        System.out.println("\n=== Event Odds (event 46445) ===");
+        EventOdds eventOdds = client.fetchEventOdds(46445);
         System.out.printf("Event ID: %d%n", eventOdds.eventId);
         System.out.println(eventOdds.odds);
-*/
+
         // ── Bookmaker Odds Lines ───────────────────────
-        System.out.println("\n=== Bookmaker Odds (event 46324, Pinnacle) ===");
-        OddsLineResponse oddsLines = client.fetchOdds(46433, "");
+        System.out.println("\n=== Bookmaker Odds (event 46445, Pinnacle) ===");
+        OddsLineResponse oddsLines = client.fetchOdds(46445, "");
         System.out.printf("Total odds lines: %d%n%n", oddsLines.count);
         String currentMarket = null;
         for (OddsLine ol : oddsLines.results) {
@@ -1260,8 +1266,10 @@ public class SportsApiClient {
         }
 
 
-        Prediction prediction = client.fetchPrediction(223234);
+        Prediction prediction = client.fetchPrediction(214007);
         System.out.println("Prediction: " + prediction);
+
+         */
 /*
         // ── Predictions ───────────────────────────────
         System.out.println("\n=== Predictions (league 27, 2026-06-11 to 2026-06-12) ===");
