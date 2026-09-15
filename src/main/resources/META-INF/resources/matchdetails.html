@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Matchdetaljer</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="sidemenu-loader.js" data-page="matches" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap"
+          rel="stylesheet"/>
+    <link rel="stylesheet" href="fixtures.css"/>
+    <link rel="stylesheet" href="sidemenu.css"/>
+    <style>
+        body {
+            margin: 0;
+        }
+
+        #app {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .main-content {
+            margin-left: 220px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .wrapper {
+            max-width: 900px;
+        }
+
+        .back-link {
+            display: inline-flex;
+            margin: 28px 0 20px;
+            color: var(--muted);
+            font: 12px var(--mono);
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            color: var(--text);
+        }
+
+        .detail-card {
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .detail-header {
+            padding: 24px 24px 0;
+        }
+
+        .league {
+            color: var(--accent);
+            font: 600 11px var(--mono);
+            letter-spacing: .08em;
+            text-transform: uppercase;
+        }
+
+        .date {
+            color: var(--muted);
+            font-size: 13px;
+            margin-top: 4px;
+        }
+
+        .scoreboard {
+            padding: 28px 24px 24px;
+            display: grid;
+            grid-template-columns:1fr auto 1fr;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .team {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .avatar {
+            width: 52px;
+            height: 52px;
+            display: grid;
+            place-items: center;
+            border: 1.5px solid var(--border2);
+            border-radius: 14px;
+            background: var(--surface2);
+            color: var(--accent);
+            font: 700 18px var(--mono);
+        }
+
+        .score-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .score {
+            color: var(--text);
+            font: 700 48px var(--mono);
+            white-space: nowrap;
+        }
+
+        .half {
+            color: var(--muted);
+            font: 11px var(--mono);
+        }
+
+        .result {
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .result.H {
+            color: #22c55e;
+            background: rgba(34, 197, 94, .12);
+        }
+
+        .result.A {
+            color: #ef4444;
+            background: rgba(239, 68, 68, .12);
+        }
+
+        .result.D {
+            color: #94a3b8;
+            background: rgba(148, 163, 184, .12);
+        }
+
+        .match-details-tabs {
+            display: flex;
+            gap: 2px;
+            padding: 0 24px;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            background: var(--surface);
+        }
+
+        .match-details-tab {
+            padding: 11px 16px;
+            border: 0;
+            border-bottom: 2px solid transparent;
+            background: transparent;
+            color: var(--muted);
+            cursor: pointer;
+            font: 600 13px var(--font);
+            transition: color .15s, border-color .15s;
+        }
+
+        .match-details-tab:hover {
+            color: var(--text);
+        }
+
+        .match-details-tab.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        .panel {
+            padding: 20px 24px 24px;
+        }
+
+        .section-title {
+            color: var(--muted);
+            font: 700 11px var(--font);
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .stat {
+            display: grid;
+            grid-template-columns:48px 1fr 48px;
+            gap: 8px;
+            align-items: center;
+            margin: 10px 0;
+        }
+
+        .stat-value {
+            text-align: center;
+            font: 600 13px var(--mono);
+        }
+
+        .stat-label {
+            text-align: center;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .bar {
+            display: flex;
+            height: 6px;
+            overflow: hidden;
+            border-radius: 8px;
+        }
+
+        .home-bar {
+            background: var(--accent);
+        }
+
+        .away-bar {
+            background: #f97316;
+        }
+
+        .odds {
+            display: grid;
+            grid-template-columns:repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 24px;
+        }
+
+        .odd {
+            padding: 10px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+        }
+
+        .odd-label {
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .odd-value {
+            font: 700 18px var(--mono);
+            margin-top: 3px;
+        }
+
+        .incidents-header, .incident { display:grid; grid-template-columns:1fr 52px 1fr; gap:8px; align-items:center; }
+        .incidents-header { margin-bottom:8px; color:var(--muted); font:10px var(--mono); letter-spacing:.08em; text-transform:uppercase; }
+        .incidents-header :last-child { text-align:right; }
+        .incident { min-height:42px; padding:5px 6px; border-radius:8px; }
+        .incident:hover { background:var(--surface2); }
+        .incident-side { display:flex; align-items:center; gap:7px; min-width:0; }
+        .incident-side.home { justify-content:flex-end; text-align:right; }
+        .incident-side.away { justify-content:flex-start; }
+        .incident-content { min-width:0; display:flex; flex-direction:column; gap:1px; }
+        .incident-side.home .incident-content { align-items:flex-end; }
+        .incident-player { font-size:13px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .incident-assist, .sub-out { color:var(--muted); font-size:11px; }
+        .sub-in { color:var(--green); font-size:12px; }
+        .sub-out { color:var(--red); }
+        .incident-minute { color:var(--muted); text-align:center; font:600 12px var(--mono); background:var(--surface2); border:1px solid var(--border); border-radius:6px; padding:3px 5px; }
+        .incident-icon { display:inline-grid; place-items:center; width:26px; height:26px; flex:none; border:1px solid var(--border); border-radius:7px; background:var(--surface2); font-size:13px; }
+        .period { display:flex; align-items:center; gap:8px; margin:10px 0; color:var(--muted); font:10px var(--mono); letter-spacing:.08em; text-transform:uppercase; }
+        .period::before, .period::after { content:''; height:1px; flex:1; background:var(--border); }
+
+        .formations { display:flex; justify-content:space-between; align-items:center; padding:14px 18px; background:var(--surface2); border:1px solid var(--border); border-radius:12px; }
+        .formations > :last-child { text-align:right; }
+        .formation { font:700 20px var(--mono); }
+        .players { display:grid; grid-template-columns:1fr 1fr; margin-top:16px; border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+        .players > div { padding:12px 14px; min-width:0; }
+        .players > div:last-child { border-left:1px solid var(--border); background:var(--surface2); text-align:right; }
+        .position { color:var(--muted); font:10px var(--mono); letter-spacing:.1em; text-transform:uppercase; padding:10px 0 5px; margin-bottom:4px; border-bottom:1px solid var(--border); }
+        .player { padding:6px 0; font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+        .footer {
+            padding: 0 24px 20px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        @media (max-width: 760px) {
+            .main-content {
+                margin-left: 56px;
+            }
+
+            .score {
+                font-size: 32px;
+            }
+
+            .scoreboard {
+                padding-inline: 12px;
+            }
+
+            .team {
+                font-size: 12px;
+            }
+
+            .panel {
+                padding-inline: 14px;
+            }
+
+            .match-details-tabs {
+                padding-inline: 8px;
+                overflow: auto;
+            }
+
+            .match-details-tab {
+                padding-inline: 10px;
+            }
+
+            .incidents-header { display:none; }
+            .players { grid-template-columns:1fr; }
+            .players > div:last-child { border-left:0; border-top:1px solid var(--border); }
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <div id="sidemenu-root"></div>
+    <main class="main-content">
+        <div class="wrapper">
+            <a class="back-link" href="matches.html">← Tillbaka till resultat</a>
+            <div class="state-box" v-if="loading">
+                <div class="icon">⏳</div>
+                <strong>Hämtar matchdetaljer…</strong></div>
+            <div class="error-banner" v-else-if="error">⚠ {{ error }}</div>
+            <section class="detail-card" v-else-if="detail">
+                <header class="detail-header">
+                    <div class="league">{{ detail.league }}</div>
+                    <div class="date">{{ detail.date }} · {{ detail.time }}</div>
+                </header>
+                <div class="scoreboard">
+                    <div class="team">
+                        <div class="avatar">{{ detail.homeTeam?.[0] }}</div>
+                        {{ detail.homeTeam }}
+                    </div>
+                    <div class="score-box">
+                        <div class="score">{{ scoreHome }} – {{ scoreAway }}</div>
+                        <div class="half">HT {{ detail.halfTimeHomeGoals }}–{{ detail.halfTimeAwayGoals }}</div>
+                        <span class="result" :class="resultCode">{{ resultLabel }}</span></div>
+                    <div class="team">
+                        <div class="avatar">{{ detail.awayTeam?.[0] }}</div>
+                        {{ detail.awayTeam }}
+                    </div>
+                </div>
+                <nav class="match-details-tabs">
+                    <button class="match-details-tab" :class="{active:tab==='stats'}" @click="tab='stats'">Statistik
+                    </button>
+                    <button class="match-details-tab" :class="{active:tab==='incidents'}" @click="loadTab('incidents')">
+                        Händelser
+                    </button>
+                    <button class="match-details-tab" :class="{active:tab==='lineups'}" @click="loadTab('lineups')">
+                        Uppställningar
+                    </button>
+                </nav>
+                <div class="panel" v-if="tab==='stats'">
+                    <div class="section-title">Matchstatistik</div>
+                    <div class="stat" v-for="s in stats" :key="s.label"><span
+                            class="stat-value">{{ s.home ?? '—' }}</span>
+                        <div>
+                            <div class="stat-label">{{ s.label }}</div>
+                            <div class="bar"><span class="home-bar" :style="{width:pct(s.home,s.away)+'%'}"></span><span
+                                    class="away-bar" :style="{width:(100-pct(s.home,s.away))+'%'}"></span></div>
+                        </div>
+                        <span class="stat-value">{{ s.away ?? '—' }}</span></div>
+                    <div class="odds" v-if="detail.odds">
+                        <div class="odd">
+                            <div class="odd-label">1 Hemmaseger</div>
+                            <div class="odd-value">{{ detail.odds.homeWin ?? '—' }}</div>
+                        </div>
+                        <div class="odd">
+                            <div class="odd-label">X Oavgjort</div>
+                            <div class="odd-value">{{ detail.odds.draw ?? '—' }}</div>
+                        </div>
+                        <div class="odd">
+                            <div class="odd-label">2 Bortaseger</div>
+                            <div class="odd-value">{{ detail.odds.awayWin ?? '—' }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel" v-else-if="tab==='incidents'">
+                    <div class="section-title">Händelser</div>
+                    <div class="state-box" v-if="incidentsLoading">Hämtar händelser…</div>
+                    <div class="incidents" v-else-if="incidents.length">
+                        <div class="incidents-header">
+                            <span>{{ detail.homeTeam }}</span><span>Min</span><span>{{ detail.awayTeam }}</span>
+                        </div>
+                        <template v-for="inc in incidents" :key="inc.id">
+                            <div v-if="inc.type==='period'" class="period">{{ inc.minute===45 ? 'Halvtid' : 'Slutsignal' }}</div>
+                            <div v-else class="incident">
+                                <div class="incident-side home">
+                                    <template v-if="inc.home">
+                                        <div class="incident-content">
+                                            <template v-if="inc.type==='substitution'">
+                                                <span class="incident-player sub-in">▲ {{ inc.playerIn || '—' }}</span>
+                                                <span class="sub-out">▼ {{ inc.playerOut || '—' }}</span>
+                                            </template>
+                                            <template v-else>
+                                                <span class="incident-player">{{ incidentText(inc) }}</span>
+                                                <span v-if="inc.assist" class="incident-assist">↳ {{ inc.assist }}</span>
+                                            </template>
+                                        </div>
+                                        <span class="incident-icon">{{ incidentIcon(inc) }}</span>
+                                    </template>
+                                </div>
+                                <span class="incident-minute">{{ inc.minute }}'</span>
+                                <div class="incident-side away">
+                                    <template v-if="!inc.home">
+                                        <span class="incident-icon">{{ incidentIcon(inc) }}</span>
+                                        <div class="incident-content">
+                                            <template v-if="inc.type==='substitution'">
+                                                <span class="incident-player sub-in">▲ {{ inc.playerIn || '—' }}</span>
+                                                <span class="sub-out">▼ {{ inc.playerOut || '—' }}</span>
+                                            </template>
+                                            <template v-else>
+                                                <span class="incident-player">{{ incidentText(inc) }}</span>
+                                                <span v-if="inc.assist" class="incident-assist">↳ {{ inc.assist }}</span>
+                                            </template>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                    <div v-else class="state-box">Inga händelser hittades.</div>
+                </div>
+                <div class="panel" v-else>
+                    <div class="section-title">Uppställningar</div>
+                    <div class="state-box" v-if="lineupLoading">Hämtar uppställningar…</div>
+                    <template v-else-if="lineup">
+                        <div class="formations">
+                            <div>
+                                <div class="formation">{{ lineup.homeFormation }}</div>
+                                <small>{{ lineup.homeTeam }}</small></div>
+                            <div>
+                                <div class="formation">{{ lineup.awayFormation }}</div>
+                                <small>{{ lineup.awayTeam }}</small></div>
+                        </div>
+                        <div class="players">
+                            <div>
+                                <template v-for="g in groupPlayers(lineup.homePlayers)" :key="g.position">
+                                    <div class="position">{{ g.label }}</div>
+                                    <div class="player" v-for="p in g.players" :key="p.playerId">{{ p.jerseyNumber ||
+                                        '—' }} {{ p.name }}
+                                    </div>
+                                </template>
+                            </div>
+                            <div>
+                                <template v-for="g in groupPlayers(lineup.awayPlayers)" :key="g.position">
+                                    <div class="position">{{ g.label }}</div>
+                                    <div class="player" v-for="p in g.players" :key="p.playerId">{{ p.name }} {{
+                                        p.jerseyNumber || '—' }}
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+                    <div v-else class="state-box">Ingen uppställning hittades.</div>
+                </div>
+                <footer class="footer">Domare: <strong>{{ detail.referee || '—' }}</strong></footer>
+            </section>
+        </div>
+    </main>
+</div>
+<script>
+    const {createApp, ref, computed, onMounted} = Vue;
+    createApp({
+        setup() {
+            const eventId = new URLSearchParams(window.location.search).get('eventId');
+            const detail = ref(null), loading = ref(true), error = ref(''), tab = ref('stats'), incidents = ref([]),
+                incidentsLoading = ref(false), lineup = ref(null), lineupLoading = ref(false);
+            const scoreHome = computed(() => detail.value?.fullTimeHomeGoals ?? 0),
+                scoreAway = computed(() => detail.value?.fullTimeAwayGoals ?? 0);
+            const resultCode = computed(() => scoreHome.value > scoreAway.value ? 'H' : scoreHome.value < scoreAway.value ? 'A' : 'D');
+            const resultLabel = computed(() => resultCode.value === 'H' ? 'Hemmaseger' : resultCode.value === 'A' ? 'Bortaseger' : 'Oavgjort');
+            const stats = computed(() => detail.value ? [{
+                label: 'Skott',
+                home: detail.value.homeShots,
+                away: detail.value.awayShots
+            }, {label: 'Hörnor', home: detail.value.homeCorners, away: detail.value.awayCorners}, {
+                label: 'Gula kort',
+                home: detail.value.homeYellowcards,
+                away: detail.value.awayYellowcards
+            }, {label: 'Röda kort', home: detail.value.homeRedcards, away: detail.value.awayRedcards}, {
+                label: 'xG',
+                home: detail.value.homeXg,
+                away: detail.value.awayXg
+            }, {label: 'Bollinnehav', home: detail.value.homePossesion, away: detail.value.awayPossesion}] : []);
+
+            function pct(a, b) {
+                const x = Number(a) || 0, y = Number(b) || 0;
+                return x + y ? Math.round(100 * x / (x + y)) : 50;
+            }
+
+            function incidentText(i) {
+                return i.player || (i.type === 'goal' ? 'Mål' : i.type === 'card' ? 'Kort' : i.type === 'substitution' ? 'Byte' : 'Händelse');
+            }
+
+            function incidentIcon(i) {
+                if (i.type === 'goal') return '⚽';
+                if (i.type === 'card') return i.cardType === 'red' ? '🟥' : '🟨';
+                if (i.type === 'substitution') return '🔄';
+                return '•';
+            }
+
+            function groupPlayers(players) {
+                const labels = {G: 'Målvakt', D: 'Försvar', M: 'Mittfält', F: 'Anfall'}, groups = {};
+                (players || []).forEach(p => {
+                    const k = p.position || '?';
+                    (groups[k] ??= []).push(p)
+                });
+                return Object.entries(groups).map(([position, players]) => ({
+                    position,
+                    label: labels[position] || position,
+                    players
+                }));
+            }
+
+            async function fetchDetail() {
+                if (!eventId) {
+                    error.value = 'Match-ID saknas.';
+                    loading.value = false;
+                    return;
+                }
+                try {
+                    const r = await fetch(`http://localhost:8080/events/${encodeURIComponent(eventId)}`);
+                    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                    detail.value = await r.json();
+                } catch (e) {
+                    error.value = `Kunde inte hämta matchdetaljer: ${e.message}`;
+                } finally {
+                    loading.value = false;
+                }
+            }
+
+            async function loadTab(name) {
+                tab.value = name;
+                if (name === 'incidents' && !incidents.value.length && !incidentsLoading.value) {
+                    incidentsLoading.value = true;
+                    try {
+                        const r = await fetch(`http://localhost:8080/events/incidents/${encodeURIComponent(eventId)}`);
+                        if (!r.ok) throw new Error();
+                        incidents.value = await r.json();
+                    } finally {
+                        incidentsLoading.value = false;
+                    }
+                }
+                if (name === 'lineups' && !lineup.value && !lineupLoading.value) {
+                    lineupLoading.value = true;
+                    try {
+                        const r = await fetch(`http://localhost:8080/events/lineups/${encodeURIComponent(eventId)}`);
+                        if (!r.ok) throw new Error();
+                        lineup.value = await r.json();
+                    } finally {
+                        lineupLoading.value = false;
+                    }
+                }
+            }
+
+            onMounted(fetchDetail);
+            return {
+                detail,
+                loading,
+                error,
+                tab,
+                incidents,
+                incidentsLoading,
+                lineup,
+                lineupLoading,
+                scoreHome,
+                scoreAway,
+                resultCode,
+                resultLabel,
+                stats,
+                pct,
+                incidentText,
+                incidentIcon,
+                groupPlayers,
+                loadTab
+            };
+        }
+    }).mount('#app');
+</script>
+</body>
+</html>

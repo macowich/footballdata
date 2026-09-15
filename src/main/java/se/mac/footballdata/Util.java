@@ -33,7 +33,9 @@ public class Util {
     static {
         leagues.put(1, new League(1, "Premier League", "2026-08-21"));
         leagues.put(12, new League(12, "Championship", "2026-08-14"));
+        leagues.put(4, new League(4, "Serie A", "2026-08-22"));
         leagues.put(5, new League(5, "Bundesliga", "2026-08-28"));
+        leagues.put(6, new League(6, "Ligue 1", "2026-08-21"));
         leagues.put(26, new League(26, "Allsvenskan", "2026-04-04"));
         leagues.put(55, new League(55, "Finland", "2026-04-04"));
         leagues.put(54, new League(54, "Norge", "2026-03-14"));

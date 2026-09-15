@@ -47,14 +47,18 @@ public class SportsApiLoader {
 
 
             handleFixturesData(database, 1);
+            handleFixturesData(database, 4);
             handleFixturesData(database, 5);
+            handleFixturesData(database, 6);
             handleFixturesData(database, 12);
             handleFixturesData(database, 26);
             handleFixturesData(database, 54);
             handleFixturesData(database, 55);
             handleFixturesData(database, 84);
             handleLeague(database, 1);
+            handleLeague(database, 4);
             handleLeague(database, 5);
+            handleLeague(database, 6);
             handleLeague(database, 12);
             handleLeague(database, 26);
             handleLeague(database, 54);

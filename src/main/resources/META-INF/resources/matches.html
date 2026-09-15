@@ -526,7 +526,7 @@
                 <span class="round-label">Omgång {{ item.round }}</span>
               </td>
             </tr>
-            <tr class="row-hover" @click="openModal(item.eventId)">
+            <tr class="row-hover" @click="openMatchDetails(item.eventId)">
               <td style="white-space: nowrap;">
                 <strong>{{ item.date }}</strong>
                 <span style="color:var(--muted)"> {{ item.time }}</span>
@@ -1074,6 +1074,10 @@ createApp({
       }
     }
 
+    function openMatchDetails(eventId) {
+      window.location.href = `matchdetails.html?eventId=${encodeURIComponent(eventId)}`;
+    }
+
     function closeModal() {
       modalOpen.value = false;
       detail.value = null;
@@ -1106,7 +1110,7 @@ createApp({
     onBeforeMount(fetchLeagues);
     onMounted(fetchMatches);
 
-    return { leagues, matches, loading, error, search, selectedLeague, fetchLeagues, fetchMatches, selectLeague, modalOpen, modalLoading, detail, openModal, closeModal, pct, halfView, scoreHome, scoreAway, currentResult, oddClass, oddModalClass, modalTab, switchModalTab, incidents, incidentsLoading, incidentIcon, incidentsWithScore, lineup, lineupLoading, groupByPosition, positionLabel, matchResult };
+    return { leagues, matches, loading, error, search, selectedLeague, fetchLeagues, fetchMatches, selectLeague, modalOpen, modalLoading, detail, openModal, openMatchDetails, closeModal, pct, halfView, scoreHome, scoreAway, currentResult, oddClass, oddModalClass, modalTab, switchModalTab, incidents, incidentsLoading, incidentIcon, incidentsWithScore, lineup, lineupLoading, groupByPosition, positionLabel, matchResult };
   }
 }).mount('#app');
 </script>
