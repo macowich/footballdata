@@ -587,6 +587,7 @@
             </div>
 
             <div class="pred-bar-section">
+              <!--
               <div class="pred-bar-row">
                 <div class="pred-bar-label-row"><span>🏠 Hemmaseger</span><strong>{{ fixture.matchPrediction.probHome }}%</strong></div>
                 <div class="pred-bar-track"><div class="pred-bar-fill fill-home" :style="{ width: fixture.matchPrediction.probHome + '%' }"></div></div>
@@ -599,9 +600,14 @@
                 <div class="pred-bar-label-row"><span>✈️ Bortaseger</span><strong>{{ fixture.matchPrediction.probAway }}%</strong></div>
                 <div class="pred-bar-track"><div class="pred-bar-fill fill-away" :style="{ width: fixture.matchPrediction.probAway + '%' }"></div></div>
               </div>
+              -->
               <div class="pred-bar-row">
                 <div class="pred-bar-label-row"><span>⚽ Över 2.5 mål</span><strong>{{ fixture.matchPrediction.probOver25 }}%</strong></div>
                 <div class="pred-bar-track"><div class="pred-bar-fill fill-over" :style="{ width: fixture.matchPrediction.probOver25 + '%' }"></div></div>
+              </div>
+              <div class="pred-bar-row">
+                <div class="pred-bar-label-row"><span>⚽ Odds Över 2.5 mål</span><strong>{{impliedPct(fixture.odds.over25Goals)}}%</strong></div>
+                <div class="pred-bar-track"><div class="pred-bar-fill fill-over" :style="{ width: impliedPct(fixture.odds.over25Goals) + '%' }"></div></div>
               </div>
               <div class="pred-bar-row">
                 <div class="pred-bar-label-row"><span>⚽ Över 3.5 mål</span><strong>{{ fixture.matchPrediction.probOver35 }}%</strong></div>

@@ -45,8 +45,8 @@ public class SportsApiLoader {
                     .getDatabase("sportsdb")
                     .withCodecRegistry(pojoCodecRegistry);
 
-
             handleFixturesData(database, 1);
+            handleFixturesData(database, 3);
             handleFixturesData(database, 4);
             handleFixturesData(database, 5);
             handleFixturesData(database, 6);
@@ -55,7 +55,9 @@ public class SportsApiLoader {
             handleFixturesData(database, 54);
             handleFixturesData(database, 55);
             handleFixturesData(database, 84);
+
             handleLeague(database, 1);
+            handleLeague(database, 3);
             handleLeague(database, 4);
             handleLeague(database, 5);
             handleLeague(database, 6);
